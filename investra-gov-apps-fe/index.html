@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://images.unsplash.com; connect-src 'self' http://localhost:5000 ws://localhost:3000 https:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    />
+    <title>INVESTRA — Sistem Analisis Ketimpangan Investasi Indonesia</title>
+    <meta
+      name="description"
+      content="INVESTRA: Dashboard analisis ketimpangan distribusi investasi antar wilayah di Indonesia menggunakan PCA dan K-Means Clustering untuk 34 provinsi."
+    />
+    <meta name="theme-color" content="#002C5F" />
+    <meta name="author" content="Kementerian PPN/Bappenas" />
+
+    <!-- Open Graph -->
+    <meta
+      property="og:title"
+      content="INVESTRA — Sistem Analisis Ketimpangan Investasi"
+    />
+    <meta
+      property="og:description"
+      content="Dashboard monitoring dan analisis ketimpangan distribusi investasi antar wilayah Indonesia."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="id_ID" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
