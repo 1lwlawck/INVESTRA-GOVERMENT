@@ -16,7 +16,7 @@ def listUsers():
     return UserController.listUsers()
 
 
-@users_bp.route("/users/<int:userId>", methods=["GET"])
+@users_bp.route("/users/<string:userId>", methods=["GET"])
 @tokenRequired
 @roleRequired("superadmin")
 def getUser(userId):
@@ -30,14 +30,14 @@ def createUser():
     return UserController.createUser()
 
 
-@users_bp.route("/users/<int:userId>", methods=["PUT"])
+@users_bp.route("/users/<string:userId>", methods=["PUT"])
 @tokenRequired
 @roleRequired("superadmin")
 def updateUser(userId):
     return UserController.updateUser(userId)
 
 
-@users_bp.route("/users/<int:userId>", methods=["DELETE"])
+@users_bp.route("/users/<string:userId>", methods=["DELETE"])
 @tokenRequired
 @roleRequired("superadmin")
 def deleteUser(userId):

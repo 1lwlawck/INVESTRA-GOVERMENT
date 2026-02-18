@@ -54,8 +54,11 @@ export interface ClusterResult {
 }
 
 export interface AnalysisRunResult {
-  id: number;
-  datasetId: number;
+  id: string;
+  code?: string;
+  internalId?: number;
+  datasetId: string | null;
+  datasetCode?: string | null;
   k: number;
   pcaComponents: PCAComponent[];
   pcaLoadings: Record<string, Record<string, number>>;
@@ -163,8 +166,10 @@ export interface PolicyResult {
   clusterPolicies: ClusterPolicy[];
   metadata: {
     k: number;
-    datasetId: number;
-    analysisId: number;
+    datasetId: string | null;
+    datasetCode?: string | null;
+    analysisId: string;
+    analysisCode?: string;
     logTransformed: boolean;
   };
 }

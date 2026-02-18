@@ -25,7 +25,7 @@ export const usersApi = {
     return res.users;
   },
 
-  get: async (id: number): Promise<User> => {
+  get: async (id: string): Promise<User> => {
     const res = await apiFetch<{ user: User }>(`/users/${id}`);
     return res.user;
   },
@@ -38,7 +38,7 @@ export const usersApi = {
     return res.user;
   },
 
-  update: async (id: number, data: UpdateUserRequest): Promise<User> => {
+  update: async (id: string, data: UpdateUserRequest): Promise<User> => {
     const res = await apiFetch<{ user: User; message: string }>(`/users/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
@@ -46,7 +46,7 @@ export const usersApi = {
     return res.user;
   },
 
-  delete: async (id: number): Promise<void> => {
+  delete: async (id: string): Promise<void> => {
     await apiFetch<{ message: string }>(`/users/${id}`, {
       method: 'DELETE',
     });

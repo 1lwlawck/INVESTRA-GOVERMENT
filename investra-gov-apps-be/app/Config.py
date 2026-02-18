@@ -14,6 +14,16 @@ def _envInt(name: str, default: int) -> int:
         return default
 
 
+def _envFloat(name: str, default: float) -> float:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        return default
+
+
 def _envBool(name: str, default: bool) -> bool:
     raw = os.getenv(name)
     if raw is None:
@@ -59,11 +69,53 @@ def _buildDatabaseUrl() -> str | None:
     return direct
 
 
+def _buildEngineOptions(databaseUrl: str | None) -> dict:
+    """Build SQLAlchemy engine options with sensible production defaults."""
+    options: dict = {"pool_pre_ping": True}
+
+    if databaseUrl and databaseUrl.startswith("sqlite"):
+        return options
+
+    poolSize = max(1, _envInt("DB_POOL_SIZE", 10))
+    maxOverflow = max(0, _envInt("DB_MAX_OVERFLOW", 20))
+    poolTimeout = max(1, _envFloat("DB_POOL_TIMEOUT", 30.0))
+    poolRecycle = max(30, _envInt("DB_POOL_RECYCLE", 1800))
+
+    options.update(
+        {
+            "pool_size": poolSize,
+            "max_overflow": maxOverflow,
+            "pool_timeout": poolTimeout,
+            "pool_recycle": poolRecycle,
+        }
+    )
+
+    if databaseUrl and databaseUrl.startswith("postgresql"):
+        statementTimeoutMs = max(1000, _envInt("DB_STATEMENT_TIMEOUT_MS", 30000))
+        lockTimeoutMs = max(100, _envInt("DB_LOCK_TIMEOUT_MS", 5000))
+        idleTxnTimeoutMs = max(
+            1000, _envInt("DB_IDLE_IN_TRANSACTION_TIMEOUT_MS", 15000)
+        )
+        applicationName = (os.getenv("DB_APPLICATION_NAME") or "investra-api").strip()
+        applicationName = applicationName.replace(" ", "_") or "investra-api"
+        options["connect_args"] = {
+            "options": (
+                f"-c statement_timeout={statementTimeoutMs} "
+                f"-c lock_timeout={lockTimeoutMs} "
+                f"-c idle_in_transaction_session_timeout={idleTxnTimeoutMs} "
+                f"-c application_name={applicationName}"
+            )
+        }
+
+    return options
+
+
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY")
-    SQLALCHEMY_DATABASE_URI = _buildDatabaseUrl()
+    _SQLALCHEMY_DATABASE_URI = _buildDatabaseUrl()
+    SQLALCHEMY_DATABASE_URI = _SQLALCHEMY_DATABASE_URI
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True}
+    SQLALCHEMY_ENGINE_OPTIONS = _buildEngineOptions(_SQLALCHEMY_DATABASE_URI)
     JWT_EXPIRES_HOURS = _envInt("JWT_EXPIRES_HOURS", 12)
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000")
     CORS_SUPPORTS_CREDENTIALS = _envBool("CORS_SUPPORTS_CREDENTIALS", False)

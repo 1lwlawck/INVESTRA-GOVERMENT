@@ -11,7 +11,8 @@ export interface DashboardSummary {
 }
 
 export interface ProvinceListItem {
-  id: number;
+  id: string;
+  code?: string;
   provinsi: string;
 }
 

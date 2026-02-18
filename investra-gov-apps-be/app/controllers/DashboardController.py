@@ -72,7 +72,8 @@ class DashboardController:
         return jsonify(
             {
                 "provinces": [
-                    {"id": p.id, "provinsi": p.provinsi} for p in allProvinces
+                    {"id": p.uuid, "code": p.code, "provinsi": p.provinsi}
+                    for p in allProvinces
                 ]
             }
         )

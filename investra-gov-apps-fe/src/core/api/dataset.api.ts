@@ -3,7 +3,9 @@ import { apiFetch, getToken, API_BASE_URL } from '@/core/api/http-client';
 // ── Types ─────────────────────────────────────────────────────
 
 export interface DatasetVersion {
-  id: number;
+  id: string;
+  code?: string;
+  internalId?: number;
   version: number;
   name: string;
   description: string | null;
@@ -14,7 +16,8 @@ export interface DatasetVersion {
   checksum: string | null;
   rowCount: number;
   uploadedBy: {
-    id: number;
+    id: string;
+    code?: string;
     username: string;
     fullName: string;
   } | null;
@@ -83,13 +86,13 @@ export const datasetApi = {
     return apiFetch<VersionListResponse>('/dataset/versions');
   },
 
-  getVersion: async (versionId: number): Promise<DatasetInfo & { data: Record<string, any>[] }> => {
+  getVersion: async (versionId: string): Promise<DatasetInfo & { data: Record<string, any>[] }> => {
     return apiFetch<DatasetInfo & { data: Record<string, any>[] }>(
       `/dataset/versions/${versionId}`
     );
   },
 
-  activateVersion: async (versionId: number): Promise<DatasetVersion & { message: string }> => {
+  activateVersion: async (versionId: string): Promise<DatasetVersion & { message: string }> => {
     return apiFetch<DatasetVersion & { message: string }>(
       `/dataset/versions/${versionId}/activate`,
       { method: 'PUT' }

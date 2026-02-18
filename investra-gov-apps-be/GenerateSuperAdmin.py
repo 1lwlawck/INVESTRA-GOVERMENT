@@ -2,8 +2,8 @@
 Create or update a superadmin account (idempotent).
 
 Examples:
-  python GenerateSuperAdmin.py --password "StrongPass123"
-  python GenerateSuperAdmin.py --username root --email root@investra.go.id --full-name "Root Admin" --password "StrongPass123"
+  python GenerateSuperAdmin.py --password "<YOUR_STRONG_PASSWORD>"
+  python GenerateSuperAdmin.py --username root --email root@investra.go.id --full-name "Root Admin" --password "<YOUR_STRONG_PASSWORD>"
 """
 
 from __future__ import annotations
@@ -115,6 +115,7 @@ def createOrUpdateSuperAdmin(
             role="superadmin",
             is_active=True,
         )
+        user.ensurePublicIdentifiers()
         if not password:
             generatedPassword = _generateStrongPassword()
             password = generatedPassword
@@ -125,6 +126,7 @@ def createOrUpdateSuperAdmin(
         user.full_name = fullName
         user.role = "superadmin"
         user.is_active = True
+        user.ensurePublicIdentifiers()
 
     if password:
         pwError = validatePasswordStrength(password)
@@ -152,7 +154,8 @@ def main() -> int:
         return 2
 
     app = createApp()
-    userId: int | None = None
+    userId: str | None = None
+    userCode: str | None = None
     finalUsername: str | None = None
 
     with app.app_context():
@@ -163,7 +166,8 @@ def main() -> int:
                 fullName=fullName,
                 password=password,
             )
-            userId = user.id
+            userId = user.uuid
+            userCode = user.code
             finalUsername = user.username
         except ValueError as exc:
             print(f"[error] {exc}")
@@ -177,6 +181,7 @@ def main() -> int:
     action = "Created" if created else "Updated"
     print(
         f"[ok] {action} superadmin id={userId if userId is not None else '-'} "
+        f"code={userCode if userCode is not None else '-'} "
         f"username='{finalUsername or username}'"
     )
     if generatedPassword:

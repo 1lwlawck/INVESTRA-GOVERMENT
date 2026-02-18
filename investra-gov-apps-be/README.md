@@ -24,14 +24,10 @@ The API auto-runs migrations and starts Flask on port 5000.
 Create superadmin account (first-time setup):
 
 ```bash
-python GenerateSuperAdmin.py --password "StrongPass123"
+python GenerateSuperAdmin.py --password "<YOUR_STRONG_PASSWORD>"
 ```
 
 ## API Endpoints
-
-Dokumentasi lengkap (role, request body, error code, contoh cURL):
-
-- `ApiDocumentation.md`
 
 | Method | Endpoint | Description |
 | ------ | -------- | ----------- |
@@ -50,6 +46,20 @@ Dokumentasi lengkap (role, request body, error code, contoh cURL):
 | GET | `/api/analysis/evaluate-k` | Elbow method (`?k_min=2&k_max=8`) |
 | GET | `/api/analysis/policy` | Policy recommendations |
 
+## Public ID Format
+
+Semua entitas sekarang memakai public ID:
+
+- `id` = UUID (contoh: `4a7d54a1-63b8-4afe-a2a8-8af94ef4ec31`)
+- `code` = kode representatif:
+  - User: `USR012026`
+  - Dataset: `DTS001`
+  - Province: `PROV0012026`
+  - Analysis: `ANL0012026`
+
+Endpoint path seperti `/users/{id}` dan `/dataset/versions/{id}` menerima `UUID` atau `code`
+(dan tetap kompatibel dengan integer ID lama selama masa transisi).
+
 ## Postman
 
 Import file berikut di Postman:
@@ -61,10 +71,18 @@ Import file berikut di Postman:
 
 | Variable | Default |
 | -------- | ------- |
-| `DATABASE_URL` | `postgresql://investra:investra_secret@localhost:5432/investra_db` |
+| `DATABASE_URL` | empty (recommended build from `POSTGRES_*` vars) |
+| `DB_POOL_SIZE` | `10` |
+| `DB_MAX_OVERFLOW` | `20` |
+| `DB_POOL_TIMEOUT` | `30` |
+| `DB_POOL_RECYCLE` | `1800` |
+| `DB_STATEMENT_TIMEOUT_MS` | `30000` |
+| `DB_LOCK_TIMEOUT_MS` | `5000` |
+| `DB_IDLE_IN_TRANSACTION_TIMEOUT_MS` | `15000` |
+| `DB_APPLICATION_NAME` | `investra-api` |
 | `FLASK_ENV` | `production` |
 | `FLASK_APP` | `Wsgi.py` |
-| `SECRET_KEY` | `dev-secret` |
+| `SECRET_KEY` | empty (generate a random value) |
 | `JWT_EXPIRES_HOURS` | `12` |
 | `CORS_ORIGINS` | `http://localhost:3000` |
 | `CORS_SUPPORTS_CREDENTIALS` | `false` |
@@ -75,11 +93,14 @@ Import file berikut di Postman:
 
 ```bash
 pip install -r requirements.txt
-export DATABASE_URL=postgresql://investra:investra_secret@localhost:5432/investra_db
+export POSTGRES_USER=investra
+export POSTGRES_PASSWORD='<set-your-password>'
+export POSTGRES_DB=investra_db
+export DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}
 export FLASK_APP=Wsgi.py
-export SECRET_KEY=dev-secret
+export SECRET_KEY='<generate-random-secret>'
 
 flask db upgrade
-python GenerateSuperAdmin.py --password "StrongPass123"
+python GenerateSuperAdmin.py --password "<YOUR_STRONG_PASSWORD>"
 flask run --host=0.0.0.0 --port=5000 --reload
 ```

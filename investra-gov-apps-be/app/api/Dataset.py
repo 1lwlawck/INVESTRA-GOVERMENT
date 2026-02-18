@@ -38,7 +38,7 @@ def listVersions():
     return DatasetController.listVersions()
 
 
-@dataset_bp.route("/dataset/versions/<int:versionId>", methods=["GET"])
+@dataset_bp.route("/dataset/versions/<string:versionId>", methods=["GET"])
 @tokenRequired
 @roleRequired("admin")
 def getVersion(versionId):
@@ -46,7 +46,7 @@ def getVersion(versionId):
     return DatasetController.getVersion(versionId)
 
 
-@dataset_bp.route("/dataset/versions/<int:versionId>/activate", methods=["PUT"])
+@dataset_bp.route("/dataset/versions/<string:versionId>/activate", methods=["PUT"])
 @tokenRequired
 @roleRequired("superadmin")
 def activateVersion(versionId):

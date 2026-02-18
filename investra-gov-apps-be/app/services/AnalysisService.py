@@ -47,7 +47,7 @@ def _loadDataframe(datasetId: int | None = None) -> tuple[pd.DataFrame, int]:
     provinces = (
         Province.query
         .filter_by(dataset_id=datasetId)
-        .order_by(Province.id)
+        .order_by(Province.provinsi)
         .all()
     )
     if not provinces:
@@ -372,6 +372,7 @@ def runFullAnalysis(
         log_transformed=logTransform,
         transform_info=transformInfo,
     )
+    result.ensurePublicIdentifiers()
     db.session.add(result)
     db.session.commit()
 

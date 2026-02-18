@@ -620,8 +620,10 @@ def generatePolicyRecommendations() -> dict:
         "cluster_policies": clusterPolicies,
         "metadata": {
             "k": result.k,
-            "dataset_id": result.dataset_id,
-            "analysis_id": result.id,
+            "dataset_id": result.dataset.uuid if result.dataset else None,
+            "dataset_code": result.dataset.code if result.dataset else None,
+            "analysis_id": result.uuid,
+            "analysis_code": result.code,
             "log_transformed": result.log_transformed,
         },
     }

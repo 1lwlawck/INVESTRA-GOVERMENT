@@ -74,7 +74,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"superadmin\",\n  \"password\": \"Investra2026Admin\"\n}",
+              "raw": "{\n  \"username\": \"{{authUsername}}\",\n  \"password\": \"{{authPassword}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -346,7 +346,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"admin1\",\n  \"email\": \"admin1@investra.go.id\",\n  \"password\": \"StrongPass123\",\n  \"fullName\": \"Admin Satu\",\n  \"role\": \"admin\",\n  \"isActive\": true\n}",
+              "raw": "{\n  \"username\": \"admin1\",\n  \"email\": \"admin1@investra.go.id\",\n  \"password\": \"{{newUserPassword}}\",\n  \"fullName\": \"Admin Satu\",\n  \"role\": \"admin\",\n  \"isActive\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -402,13 +402,28 @@
       "type": "string"
     },
     {
+      "key": "authUsername",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "authPassword",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "newUserPassword",
+      "value": "",
+      "type": "string"
+    },
+    {
       "key": "versionId",
-      "value": "1",
+      "value": "DTS001",
       "type": "string"
     },
     {
       "key": "userId",
-      "value": "1",
+      "value": "USR012026",
       "type": "string"
     }
   ]

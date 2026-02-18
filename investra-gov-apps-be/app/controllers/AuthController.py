@@ -7,9 +7,11 @@ import logging
 
 from flask import request, jsonify, g
 
+from app.Extensions import db
 from app.models.User import User
 from app.middleware.Auth import generateToken
 from app.utils.ApiResponse import errorResponse
+from app.utils.RequestParser import parseJsonObject
 
 logger = logging.getLogger(__name__)
 
@@ -33,9 +35,15 @@ class AuthController:
     @staticmethod
     def login():
         """POST /api/auth/login"""
-        data = request.get_json(silent=True) or {}
-        username = data.get("username", "").strip()
-        password = data.get("password", "")
+        data, parseError = parseJsonObject(request, required=True)
+        if parseError:
+            return parseError
+
+        assert data is not None
+        usernameRaw = data.get("username", "")
+        passwordRaw = data.get("password", "")
+        username = usernameRaw.strip() if isinstance(usernameRaw, str) else ""
+        password = passwordRaw if isinstance(passwordRaw, str) else ""
 
         if not username or not password:
             return errorResponse(
@@ -55,6 +63,10 @@ class AuthController:
 
         if not user.is_active:
             return errorResponse("Akun dinonaktifkan", "ACCOUNT_DISABLED", 403)
+
+        if not user.uuid or not user.code:
+            user.ensurePublicIdentifiers()
+            db.session.commit()
 
         token = generateToken(user)
 

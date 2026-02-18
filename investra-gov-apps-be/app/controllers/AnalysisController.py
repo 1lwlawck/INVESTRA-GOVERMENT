@@ -13,6 +13,7 @@ from app.services.AnalysisService import (
 )
 from app.services.PolicyService import generatePolicyRecommendations
 from app.utils.ApiResponse import errorResponse
+from app.utils.RequestParser import parseJsonObject
 
 
 def _parseBool(value, default: bool) -> bool:
@@ -52,7 +53,11 @@ class AnalysisController:
     @staticmethod
     def run():
         """POST /api/analysis/run"""
-        body = request.get_json(silent=True) or {}
+        body, parseError = parseJsonObject(request, required=False)
+        if parseError:
+            return parseError
+
+        assert body is not None
         autoK = _parseBool(body.get("autoK", body.get("auto_k")), True)
         logTransform = _parseBool(body.get("logTransform", body.get("log_transform")), True)
         kRaw = body.get("k")

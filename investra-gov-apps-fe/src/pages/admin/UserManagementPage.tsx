@@ -139,7 +139,7 @@ export function UserManagementView() {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     try {
       setError(null);
       await usersApi.delete(id);

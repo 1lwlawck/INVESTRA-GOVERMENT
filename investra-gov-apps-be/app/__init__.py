@@ -3,8 +3,10 @@
 import json
 import logging
 import os
+import time
+import uuid
 
-from flask import Flask
+from flask import Flask, g, request
 from flask_cors import CORS
 
 from app.Config import config_map
@@ -62,12 +64,41 @@ def createApp() -> Flask:
 
     registerErrorHandlers(app)
 
+    @app.before_request
+    def attachRequestContext():
+        incomingRequestId = request.headers.get("X-Request-ID", "").strip()
+        requestId = incomingRequestId[:128] if incomingRequestId else uuid.uuid4().hex
+        g.request_id = requestId
+        g.request_started_at = time.perf_counter()
+
+    @app.teardown_request
+    def cleanupDbSession(exception):
+        if exception is not None:
+            db.session.rollback()
+        db.session.remove()
+
     @app.after_request
     def hardenAndCamelizeJsonResponse(response):
         if response.content_type and "application/json" in response.content_type:
             data = response.get_json(silent=True)
             if data is not None:
                 response.set_data(json.dumps(camelize(data), ensure_ascii=False))
+
+        requestId = getattr(g, "request_id", None)
+        if requestId:
+            response.headers.setdefault("X-Request-ID", requestId)
+
+        startedAt = getattr(g, "request_started_at", None)
+        if startedAt is not None:
+            durationMs = (time.perf_counter() - startedAt) * 1000
+            app.logger.info(
+                "request_id=%s method=%s path=%s status=%s duration_ms=%.2f",
+                requestId,
+                request.method,
+                request.path,
+                response.status_code,
+                durationMs,
+            )
 
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("X-Frame-Options", "DENY")

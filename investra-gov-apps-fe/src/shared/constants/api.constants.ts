@@ -14,7 +14,7 @@ export const API_ENDPOINTS = {
   DATASET: {
     DEFAULT: '/dataset/default',
     VERSIONS: '/dataset/versions',
-    ACTIVATE: (id: number) => `/dataset/versions/${id}/activate`,
+    ACTIVATE: (id: string) => `/dataset/versions/${id}/activate`,
     UPLOAD: '/dataset/upload',
   },
   ANALYSIS: {
@@ -26,6 +26,6 @@ export const API_ENDPOINTS = {
   },
   USERS: {
     BASE: '/users',
-    BY_ID: (id: number) => `/users/${id}`,
+    BY_ID: (id: string) => `/users/${id}`,
   },
 } as const;

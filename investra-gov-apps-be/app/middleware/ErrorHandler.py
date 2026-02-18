@@ -1,9 +1,10 @@
-"""
-Error-handling middleware – registers global error handlers on the app.
-"""
+"""Error-handling middleware: registers global error handlers on the app."""
 
 import logging
 
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+
+from app.Extensions import db
 from app.utils.ApiResponse import errorResponse
 
 logger = logging.getLogger(__name__)
@@ -40,6 +41,14 @@ def registerErrorHandlers(app):
     def payloadTooLarge(_e):
         return errorResponse("Ukuran request terlalu besar", "PAYLOAD_TOO_LARGE", 413)
 
+    @app.errorhandler(415)
+    def unsupportedMediaType(_e):
+        return errorResponse(
+            "Content-Type tidak didukung",
+            "UNSUPPORTED_MEDIA_TYPE",
+            415,
+        )
+
     @app.errorhandler(422)
     def unprocessable(e):
         return errorResponse(str(e.description), "UNPROCESSABLE", 422)
@@ -54,5 +63,25 @@ def registerErrorHandlers(app):
 
     @app.errorhandler(500)
     def internalError(e):
+        db.session.rollback()
         logger.exception("Internal server error: %s", e)
         return errorResponse("Internal server error", "INTERNAL_ERROR", 500)
+
+    @app.errorhandler(IntegrityError)
+    def databaseIntegrityError(e):
+        db.session.rollback()
+        logger.warning("Database integrity error: %s", e)
+        return errorResponse("Data conflict", "DB_INTEGRITY_ERROR", 409)
+
+    @app.errorhandler(SQLAlchemyError)
+    def databaseError(e):
+        db.session.rollback()
+        logger.exception("Database error: %s", e)
+        return errorResponse("Database error", "DB_ERROR", 500)
+
+    @app.errorhandler(Exception)
+    def unhandledException(e):
+        db.session.rollback()
+        logger.exception("Unhandled exception: %s", e)
+        return errorResponse("Internal server error", "INTERNAL_ERROR", 500)
+

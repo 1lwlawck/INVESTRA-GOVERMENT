@@ -43,7 +43,7 @@ export function DatasetView() {
   const [versions, setVersions] = useState<DatasetVersion[]>([]);
   const [versionsLoading, setVersionsLoading] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  const [activating, setActivating] = useState<number | null>(null);
+  const [activating, setActivating] = useState<string | null>(null);
 
   // Upload state
   const user = useAuthStore((s) => s.user);
@@ -77,7 +77,8 @@ export function DatasetView() {
       if (err instanceof ApiError && err.code === 'NO_ACTIVE_DATASET') {
         setNoActiveDataset(true);
         setDatasetInfo({
-          id: 0,
+          id: '',
+          code: 'DTS000',
           version: 0,
           name: 'Belum ada dataset aktif',
           description: 'Upload file CSV untuk membuat dataset pertama.',
@@ -136,7 +137,7 @@ export function DatasetView() {
     }
   };
 
-  const handleActivate = async (versionId: number) => {
+  const handleActivate = async (versionId: string) => {
     if (activating) return;
     setActivating(versionId);
     try {

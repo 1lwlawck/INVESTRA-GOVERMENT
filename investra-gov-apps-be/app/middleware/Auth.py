@@ -14,6 +14,7 @@ from flask import request, g, current_app
 from app.models.User import User
 from app.Extensions import db
 from app.utils.ApiResponse import errorResponse
+from app.utils.PublicIdentifier import isValidUuid
 
 
 # ─── JWT helpers ──────────────────────────────────────────────────────
@@ -23,13 +24,19 @@ def _decodeToken(token: str) -> dict:
     return jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
 
 
-def _extractUserId(payload: dict) -> int | None:
-    """Return integer user id from JWT payload `sub`, or None if invalid."""
+def _extractUserId(payload: dict) -> str | int | None:
+    """Return UUID (preferred) or legacy int user id from JWT payload `sub`."""
     sub = payload.get("sub")
-    try:
-        return int(sub)
-    except (TypeError, ValueError):
-        return None
+    if isinstance(sub, str):
+        if isValidUuid(sub):
+            return sub
+        try:
+            return int(sub)
+        except ValueError:
+            return None
+    if isinstance(sub, int):
+        return sub
+    return None
 
 
 def generateToken(user: User) -> str:
@@ -44,7 +51,7 @@ def generateToken(user: User) -> str:
     hours = min(max(hours, 1), 168)
 
     payload = {
-        "sub": str(user.id),
+        "sub": str(user.uuid),
         "role": user.role,
         "iat": datetime.now(timezone.utc),
         "exp": datetime.now(timezone.utc) + timedelta(hours=hours),
@@ -81,7 +88,10 @@ def tokenRequired(f):
         if userId is None:
             return errorResponse("Token tidak valid", "INVALID_TOKEN", 401)
 
-        user = db.session.get(User, userId)
+        if isinstance(userId, str):
+            user = User.query.filter_by(uuid=userId).first()
+        else:
+            user = db.session.get(User, userId)
         if user is None:
             return errorResponse("User tidak ditemukan", "USER_NOT_FOUND", 401)
         if not user.is_active:
@@ -139,7 +149,12 @@ def optionalToken(f):
             try:
                 payload = _decodeToken(token)
                 userId = _extractUserId(payload)
-                user = db.session.get(User, userId) if userId is not None else None
+                if userId is None:
+                    user = None
+                elif isinstance(userId, str):
+                    user = User.query.filter_by(uuid=userId).first()
+                else:
+                    user = db.session.get(User, userId)
                 if user and user.is_active:
                     g.current_user = user
             except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
