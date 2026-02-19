@@ -149,7 +149,7 @@ export function ClusteringView() {
         <Card className="bg-white shadow-md border-2 border-gray-100">
           <CardContent className="p-6 text-center">
             <TrendingUp className="h-10 w-10 text-[#059669] mx-auto mb-3" />
-            <div className="text-3xl text-[#002C5F] mb-1">{clusterData.metrics.silhouetteScore.toFixed(3)}</div>
+            <div className="text-3xl text-[#002C5F] mb-1">{clusterData.metrics.silhouette_score.toFixed(3)}</div>
             <p className="text-sm text-gray-600">Silhouette Score</p>
           </CardContent>
         </Card>
@@ -172,17 +172,17 @@ export function ClusteringView() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border border-green-200">
               <p className="text-xs text-gray-600 mb-1">Silhouette Score</p>
-              <p className="text-2xl font-bold text-[#059669] mb-1">{clusterData.metrics.silhouetteScore.toFixed(4)}</p>
+              <p className="text-2xl font-bold text-[#059669] mb-1">{clusterData.metrics.silhouette_score.toFixed(4)}</p>
               <p className="text-xs text-gray-500">Semakin tinggi semakin baik (max: 1)</p>
             </div>
             <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
               <p className="text-xs text-gray-600 mb-1">Davies-Bouldin Index</p>
-              <p className="text-2xl font-bold text-[#002C5F] mb-1">{clusterData.metrics.daviesBouldin.toFixed(4)}</p>
+              <p className="text-2xl font-bold text-[#002C5F] mb-1">{clusterData.metrics.davies_bouldin.toFixed(4)}</p>
               <p className="text-xs text-gray-500">Semakin rendah semakin baik (min: 0)</p>
             </div>
             <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200">
               <p className="text-xs text-gray-600 mb-1">Calinski-Harabasz Score</p>
-              <p className="text-2xl font-bold text-purple-700 mb-1">{clusterData.metrics.calinskiHarabasz.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-purple-700 mb-1">{clusterData.metrics.calinski_harabasz.toFixed(2)}</p>
               <p className="text-xs text-gray-500">Semakin tinggi semakin baik</p>
             </div>
             <div className="p-4 bg-gradient-to-br from-orange-50 to-amber-50 rounded-lg border border-orange-200">
@@ -265,7 +265,7 @@ export function ClusteringView() {
       ))}
 
       {/* Evaluation Matrix (K-Evaluation) */}
-      {clusterData.kEvaluation && clusterData.kEvaluation.length > 0 && (
+      {clusterData.k_evaluation && clusterData.k_evaluation.length > 0 && (
         <Card className="border border-gray-200 shadow-lg">
           <CardHeader className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50">
             <div className="flex items-center gap-3">
@@ -293,7 +293,7 @@ export function ClusteringView() {
                   </tr>
                 </thead>
                 <tbody>
-                  {clusterData.kEvaluation.map((item: EvaluateKItem) => {
+                  {clusterData.k_evaluation.map((item: EvaluateKItem) => {
                     const isSelected = item.k === clusterData.k;
                     return (
                       <tr
@@ -309,22 +309,22 @@ export function ClusteringView() {
                           </div>
                         </td>
                         <td className={`px-4 py-3 text-center ${isSelected ? 'text-[#002C5F]' : 'text-gray-700'}`}>
-                          {item.silhouetteScore.toFixed(4)}
+                          {item.silhouette_score.toFixed(4)}
                         </td>
                         <td className={`px-4 py-3 text-center ${isSelected ? 'text-[#002C5F]' : 'text-gray-700'}`}>
-                          {item.daviesBouldin.toFixed(4)}
+                          {item.davies_bouldin.toFixed(4)}
                         </td>
                         <td className={`px-4 py-3 text-center ${isSelected ? 'text-[#002C5F]' : 'text-gray-700'}`}>
-                          {item.calinskiHarabasz.toFixed(2)}
+                          {item.calinski_harabasz.toFixed(2)}
                         </td>
                         <td className={`px-4 py-3 text-center ${isSelected ? 'text-[#002C5F]' : 'text-gray-700'}`}>
                           {item.inertia.toFixed(2)}
                         </td>
                         <td className={`px-4 py-3 text-center ${isSelected ? 'text-[#002C5F]' : 'text-gray-700'}`}>
-                          {item.minClusterCount ?? 'N/A'}
+                          {item.min_cluster_count ?? 'N/A'}
                         </td>
                         <td className="px-4 py-3 text-center">
-                          {item.validMinCluster ? (
+                          {item.valid_min_cluster ? (
                             <Badge className="bg-[#059669] text-white">✓</Badge>
                           ) : (
                             <Badge variant="outline" className="border-gray-400 text-gray-600">✗</Badge>

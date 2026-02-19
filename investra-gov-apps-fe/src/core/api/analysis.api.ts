@@ -19,10 +19,10 @@ export interface PCAResult {
 }
 
 export interface ClusterMetrics {
-  silhouetteScore: number;
+  silhouette_score: number;
   inertia: number;
-  daviesBouldin: number;
-  calinskiHarabasz: number;
+  davies_bouldin: number;
+  calinski_harabasz: number;
 }
 
 /** Per-variable statistics inside a cluster summary */
@@ -48,42 +48,42 @@ export interface ClusterResult {
   centers: number[][];
   metrics: ClusterMetrics;
   summary: ClusterSummaryItem[];
-  kEvaluation: EvaluateKItem[] | null;
-  logTransformed: boolean;
-  transformInfo: string[] | null;
+  k_evaluation: EvaluateKItem[] | null;
+  log_transformed: boolean;
+  transform_info: string[] | null;
 }
 
 export interface AnalysisRunResult {
   id: string;
   code?: string;
-  internalId?: number;
-  datasetId: string | null;
-  datasetCode?: string | null;
+  internal_id?: number;
+  dataset_id: string | null;
+  dataset_code?: string | null;
   k: number;
-  pcaComponents: PCAComponent[];
-  pcaLoadings: Record<string, Record<string, number>>;
-  pcaExplainedVariance: PCAExplainedVariance[];
-  clusterAssignments: Record<string, number>;
-  clusterCenters: number[][];
-  silhouetteScore: number;
+  pca_components: PCAComponent[];
+  pca_loadings: Record<string, Record<string, number>>;
+  pca_explained_variance: PCAExplainedVariance[];
+  cluster_assignments: Record<string, number>;
+  cluster_centers: number[][];
+  silhouette_score: number;
   inertia: number;
-  daviesBouldin: number;
-  calinskiHarabasz: number;
-  clusterSummary: ClusterSummaryItem[];
-  kEvaluation: EvaluateKItem[] | null;
-  logTransformed: boolean;
-  transformInfo: string[] | null;
-  createdAt: string;
+  davies_bouldin: number;
+  calinski_harabasz: number;
+  cluster_summary: ClusterSummaryItem[];
+  k_evaluation: EvaluateKItem[] | null;
+  log_transformed: boolean;
+  transform_info: string[] | null;
+  created_at: string;
 }
 
 export interface EvaluateKItem {
   k: number;
-  silhouetteScore: number;
+  silhouette_score: number;
   inertia: number;
-  daviesBouldin: number;
-  calinskiHarabasz: number;
-  minClusterCount?: number;
-  validMinCluster?: boolean;
+  davies_bouldin: number;
+  calinski_harabasz: number;
+  min_cluster_count?: number;
+  valid_min_cluster?: boolean;
 }
 
 export interface RunAnalysisOptions {
