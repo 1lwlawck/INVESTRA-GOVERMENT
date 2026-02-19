@@ -3,12 +3,13 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { GitBranch, TrendingUp, MapPin, Play } from 'lucide-react';
+import { GitBranch, TrendingUp, MapPin, Play, BarChart3, CheckCircle } from 'lucide-react';
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   analysisApi,
   type ClusterResult,
   type ClusterSummaryItem,
+  type EvaluateKItem,
   CLUSTER_COLORS,
 } from "@/core/api/analysis.api";
 import { BasicPageSkeleton } from '@/components/organisms/loading/PageSkeleton';
@@ -148,11 +149,50 @@ export function ClusteringView() {
         <Card className="bg-white shadow-md border-2 border-gray-100">
           <CardContent className="p-6 text-center">
             <TrendingUp className="h-10 w-10 text-[#059669] mx-auto mb-3" />
-            <div className="text-3xl text-[#002C5F] mb-1">{clusterData.metrics.silhouetteScore.toFixed(3)}</div>
+            <div className="text-3xl text-[#002C5F] mb-1">{clusterData.metrics.silhouette_score.toFixed(3)}</div>
             <p className="text-sm text-gray-600">Silhouette Score</p>
           </CardContent>
         </Card>
       </div>
+
+      {/* Detailed Metrics Card */}
+      <Card className="border border-gray-200 shadow-lg">
+        <CardHeader className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50">
+          <div className="flex items-center gap-3">
+            <BarChart3 className="h-6 w-6 text-[#002C5F]" />
+            <div>
+              <CardTitle className="text-[#002C5F]">Metrik Evaluasi Clustering</CardTitle>
+              <CardDescription>
+                Ringkasan semua metrik kualitas clustering untuk K = {clusterData.k}
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border border-green-200">
+              <p className="text-xs text-gray-600 mb-1">Silhouette Score</p>
+              <p className="text-2xl font-bold text-[#059669] mb-1">{clusterData.metrics.silhouette_score.toFixed(4)}</p>
+              <p className="text-xs text-gray-500">Semakin tinggi semakin baik (max: 1)</p>
+            </div>
+            <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+              <p className="text-xs text-gray-600 mb-1">Davies-Bouldin Index</p>
+              <p className="text-2xl font-bold text-[#002C5F] mb-1">{clusterData.metrics.davies_bouldin.toFixed(4)}</p>
+              <p className="text-xs text-gray-500">Semakin rendah semakin baik (min: 0)</p>
+            </div>
+            <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+              <p className="text-xs text-gray-600 mb-1">Calinski-Harabasz Score</p>
+              <p className="text-2xl font-bold text-purple-700 mb-1">{clusterData.metrics.calinski_harabasz.toFixed(2)}</p>
+              <p className="text-xs text-gray-500">Semakin tinggi semakin baik</p>
+            </div>
+            <div className="p-4 bg-gradient-to-br from-orange-50 to-amber-50 rounded-lg border border-orange-200">
+              <p className="text-xs text-gray-600 mb-1">Inertia</p>
+              <p className="text-2xl font-bold text-[#F9B233] mb-1">{clusterData.metrics.inertia.toFixed(2)}</p>
+              <p className="text-xs text-gray-500">Semakin rendah semakin baik</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Cluster Details */}
       {clusters.map((cluster) => (
@@ -223,6 +263,93 @@ export function ClusteringView() {
           </CardContent>
         </Card>
       ))}
+
+      {/* Evaluation Matrix (K-Evaluation) */}
+      {clusterData.k_evaluation && clusterData.k_evaluation.length > 0 && (
+        <Card className="border border-gray-200 shadow-lg">
+          <CardHeader className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50">
+            <div className="flex items-center gap-3">
+              <BarChart3 className="h-6 w-6 text-[#002C5F]" />
+              <div>
+                <CardTitle className="text-[#002C5F]">Matriks Evaluasi Clustering</CardTitle>
+                <CardDescription>
+                  Perbandingan metrik evaluasi untuk berbagai nilai K
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b-2 border-gray-300">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-[#002C5F]">K</th>
+                    <th className="px-4 py-3 text-center text-sm font-semibold text-[#002C5F]">Silhouette Score</th>
+                    <th className="px-4 py-3 text-center text-sm font-semibold text-[#002C5F]">Davies-Bouldin</th>
+                    <th className="px-4 py-3 text-center text-sm font-semibold text-[#002C5F]">Calinski-Harabasz</th>
+                    <th className="px-4 py-3 text-center text-sm font-semibold text-[#002C5F]">Inertia</th>
+                    <th className="px-4 py-3 text-center text-sm font-semibold text-[#002C5F]">Min Cluster Size</th>
+                    <th className="px-4 py-3 text-center text-sm font-semibold text-[#002C5F]">Valid</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {clusterData.k_evaluation.map((item: EvaluateKItem) => {
+                    const isSelected = item.k === clusterData.k;
+                    return (
+                      <tr
+                        key={item.k}
+                        className={`border-b border-gray-200 ${isSelected ? 'bg-blue-50 font-semibold' : 'hover:bg-gray-50'}`}
+                      >
+                        <td className="px-4 py-3 text-left">
+                          <div className="flex items-center gap-2">
+                            <span className={isSelected ? 'text-[#002C5F]' : 'text-gray-700'}>{item.k}</span>
+                            {isSelected && (
+                              <CheckCircle className="h-4 w-4 text-[#059669]" />
+                            )}
+                          </div>
+                        </td>
+                        <td className={`px-4 py-3 text-center ${isSelected ? 'text-[#002C5F]' : 'text-gray-700'}`}>
+                          {item.silhouette_score.toFixed(4)}
+                        </td>
+                        <td className={`px-4 py-3 text-center ${isSelected ? 'text-[#002C5F]' : 'text-gray-700'}`}>
+                          {item.davies_bouldin.toFixed(4)}
+                        </td>
+                        <td className={`px-4 py-3 text-center ${isSelected ? 'text-[#002C5F]' : 'text-gray-700'}`}>
+                          {item.calinski_harabasz.toFixed(2)}
+                        </td>
+                        <td className={`px-4 py-3 text-center ${isSelected ? 'text-[#002C5F]' : 'text-gray-700'}`}>
+                          {item.inertia.toFixed(2)}
+                        </td>
+                        <td className={`px-4 py-3 text-center ${isSelected ? 'text-[#002C5F]' : 'text-gray-700'}`}>
+                          {item.min_cluster_count ?? 'N/A'}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          {item.valid_min_cluster ? (
+                            <Badge className="bg-[#059669] text-white">✓</Badge>
+                          ) : (
+                            <Badge variant="outline" className="border-gray-400 text-gray-600">✗</Badge>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h4 className="text-sm font-semibold text-[#002C5F] mb-2">Penjelasan Metrik:</h4>
+              <ul className="text-xs text-gray-700 space-y-1">
+                <li><strong>Silhouette Score:</strong> Mengukur seberapa mirip objek dengan klasternya sendiri dibanding klaster lain (rentang: -1 hingga 1, semakin tinggi semakin baik)</li>
+                <li><strong>Davies-Bouldin Index:</strong> Mengukur rata-rata kesamaan antar klaster (semakin rendah semakin baik)</li>
+                <li><strong>Calinski-Harabasz Score:</strong> Rasio dispersi antar-klaster dan dalam-klaster (semakin tinggi semakin baik)</li>
+                <li><strong>Inertia:</strong> Jumlah jarak kuadrat sampel ke pusat klaster terdekat (semakin rendah semakin baik)</li>
+                <li><strong>Min Cluster Size:</strong> Ukuran klaster terkecil untuk nilai K ini</li>
+                <li><strong>Valid:</strong> Apakah semua klaster memenuhi ukuran minimum yang ditetapkan</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

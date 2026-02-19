@@ -129,10 +129,10 @@ export function DashboardView() {
 
   const evaluationMetrics = clusters
     ? [
-        { title: 'Silhouette Score', value: clusters.metrics.silhouetteScore.toFixed(4), description: 'Kualitas clustering (0-1, semakin tinggi semakin baik)', icon: Activity, color: '#002C5F' },
+        { title: 'Silhouette Score', value: clusters.metrics.silhouette_score.toFixed(4), description: 'Kualitas clustering (0-1, semakin tinggi semakin baik)', icon: Activity, color: '#002C5F' },
         { title: 'Inertia', value: clusters.metrics.inertia.toLocaleString('id-ID', { maximumFractionDigits: 2 }), description: 'Jumlah kuadrat jarak sampai centroid terdekat', icon: Target, color: '#F9B233' },
-        { title: 'Davies-Bouldin Index', value: clusters.metrics.daviesBouldin.toFixed(4), description: 'Rasio pemisahan cluster (semakin rendah semakin baik)', icon: BarChart3, color: '#DC2626' },
-        { title: 'Calinski-Harabasz Index', value: clusters.metrics.calinskiHarabasz.toLocaleString('id-ID', { maximumFractionDigits: 2 }), description: 'Rasio dispersi antar dan dalam cluster (semakin tinggi semakin baik)', icon: TrendingUp, color: '#059669' },
+        { title: 'Davies-Bouldin Index', value: clusters.metrics.davies_bouldin.toFixed(4), description: 'Rasio pemisahan cluster (semakin rendah semakin baik)', icon: BarChart3, color: '#DC2626' },
+        { title: 'Calinski-Harabasz Index', value: clusters.metrics.calinski_harabasz.toLocaleString('id-ID', { maximumFractionDigits: 2 }), description: 'Rasio dispersi antar dan dalam cluster (semakin tinggi semakin baik)', icon: TrendingUp, color: '#059669' },
       ]
     : [];
 
