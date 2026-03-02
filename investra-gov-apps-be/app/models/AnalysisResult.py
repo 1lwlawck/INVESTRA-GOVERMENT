@@ -29,11 +29,10 @@ class AnalysisResult(db.Model):
         ),
     )
 
-    id = db.Column(db.Integer, primary_key=True)
-    uuid = db.Column(db.String(36), unique=True, nullable=False, index=True, default=generateUuid)
+    id = db.Column(db.String(36), primary_key=True, default=generateUuid)
     code = db.Column(db.String(32), unique=True, nullable=False, index=True)
     dataset_id = db.Column(
-        db.Integer,
+        db.String(36),
         db.ForeignKey("datasets.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
@@ -73,33 +72,26 @@ class AnalysisResult(db.Model):
         )
 
     @classmethod
-    def getByPublicId(cls, publicId: str | int) -> "AnalysisResult | None":
-        if publicId is None:
+    def getByPublicId(cls, publicId: str) -> "AnalysisResult | None":
+        if not publicId:
             return None
-        if isinstance(publicId, int):
-            return db.session.get(cls, publicId)
         publicId = str(publicId).strip()
         if not publicId:
             return None
-        if publicId.isdigit():
-            legacy = db.session.get(cls, int(publicId))
-            if legacy is not None:
-                return legacy
-        return cls.query.filter(or_(cls.uuid == publicId, cls.code == publicId)).first()
+        return cls.query.filter(or_(cls.id == publicId, cls.code == publicId)).first()
 
     def ensurePublicIdentifiers(self) -> None:
-        if not self.uuid:
-            self.uuid = generateUuid()
+        if not self.id:
+            self.id = generateUuid()
         if not self.code:
             self.code = self.nextCode()
 
     def toDict(self) -> dict:
-        datasetPublicId = self.dataset.uuid if self.dataset else None
+        datasetPublicId = self.dataset.id if self.dataset else None
         datasetCode = self.dataset.code if self.dataset else None
         return {
-            "id": self.uuid,
+            "id": self.id,
             "code": self.code,
-            "internal_id": self.id,
             "dataset_id": datasetPublicId,
             "dataset_code": datasetCode,
             "created_at": self.created_at.isoformat(),

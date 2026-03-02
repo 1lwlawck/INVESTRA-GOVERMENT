@@ -305,6 +305,7 @@ export function DatasetView() {
                     <AlertTitle className="text-[#002C5F] text-sm">Kolom Wajib</AlertTitle>
                     <AlertDescription className="text-xs">
                       <code>provinsi, pmdn_rp, fdi_rp, pdrb_per_kapita, ipm, kemiskinan, akses_listrik, tpt</code>
+                      <span className="ml-1">(opsional: <code>year</code> / <code>tahun</code>)</span>
                     </AlertDescription>
                   </Alert>
 
@@ -331,7 +332,7 @@ export function DatasetView() {
 
                   {/* Year input */}
                   <div className="space-y-2">
-                    <Label htmlFor="year">Tahun Data</Label>
+                    <Label htmlFor="year">Tahun Default</Label>
                     <Input
                       id="year"
                       type="number"
@@ -341,6 +342,9 @@ export function DatasetView() {
                       onChange={(e) => setUploadYear(Number(e.target.value))}
                       className="w-32"
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Dipakai jika CSV tidak memiliki kolom <code>year</code>.
+                    </p>
                   </div>
 
                   {/* Error */}

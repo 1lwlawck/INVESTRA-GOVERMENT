@@ -6,7 +6,6 @@ export type UserRole = 'user' | 'admin' | 'superadmin';
 export interface User {
   id: string;
   code?: string;
-  internalId?: number;
   username: string;
   email: string;
   fullName: string;
@@ -17,9 +16,11 @@ export interface User {
 }
 
 interface AuthState {
+  isHydrated: boolean;
   isAuthenticated: boolean;
   user: User | null;
   token: string | null;
+  setHydrated: (hydrated: boolean) => void;
   login: (user: User, token: string) => void;
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
@@ -29,9 +30,11 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
+      isHydrated: false,
       isAuthenticated: false,
       user: null,
       token: null,
+      setHydrated: (isHydrated: boolean) => set({ isHydrated }),
       login: (user: User, token: string) =>
         set({ isAuthenticated: true, user, token }),
       setUser: (user: User | null) =>
@@ -49,6 +52,9 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         token: state.token,
       }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated(true);
+      },
     }
   )
 );

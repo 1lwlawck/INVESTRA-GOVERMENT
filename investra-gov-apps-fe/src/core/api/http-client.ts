@@ -16,7 +16,8 @@ function parseJwtPayload(token: string): Record<string, unknown> | null {
     const [, payload] = token.split('.');
     if (!payload) return null;
     const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
-    const decoded = atob(normalized);
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+    const decoded = atob(padded);
     return JSON.parse(decoded) as Record<string, unknown>;
   } catch {
     return null;
@@ -153,11 +154,20 @@ async function apiFetch<T>(
     headers.Authorization = `Bearer ${tokenToUse}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-    signal: options?.signal,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+      signal: options?.signal,
+    });
+  } catch {
+    throw new ApiError(
+      'Tidak dapat terhubung ke server. Periksa koneksi atau status backend.',
+      0,
+      'NETWORK_ERROR',
+    );
+  }
 
   if (response.status === 401) {
     const error = await readApiError(response);

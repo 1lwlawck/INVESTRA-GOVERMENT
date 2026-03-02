@@ -6,6 +6,7 @@ import { TrendingUp, Info, Play } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { analysisApi, type PCAResult, FEATURE_LABELS } from "@/core/api/analysis.api";
+import { ApiError } from '@/core/api/http-client';
 import { CHART_PALETTE } from '@/shared/constants';
 import { Skeleton } from "@/components/ui/skeleton";
 import { BasicPageSkeleton } from '@/components/organisms/loading/PageSkeleton';
@@ -27,9 +28,19 @@ export function PCAAnalysisView() {
     try {
       const data = await analysisApi.getPCA();
       setPcaData(data);
-    } catch {
-      // Analysis may not have been run yet
+    } catch (err) {
       setPcaData(null);
+      if (err instanceof ApiError) {
+        if (err.code === 'NO_ACTIVE_DATASET') {
+          setError('Belum ada dataset aktif. Upload CSV terlebih dahulu di halaman Dataset.');
+          return;
+        }
+        if (err.code === 'ANALYSIS_NOT_FOUND') {
+          setError('Belum ada hasil analisis. Jalankan analisis terlebih dahulu.');
+          return;
+        }
+      }
+      setError(err instanceof Error ? err.message : 'Gagal memuat data PCA');
     } finally {
       setLoading(false);
     }
@@ -40,14 +51,16 @@ export function PCAAnalysisView() {
     setError(null);
     try {
       await analysisApi.run({
-        autoK: true,
-        kMin: 2,
-        kMax: 8,
-        minClusterSize: 3,
+        autoK: false,
+        k: 4,
       });
       await loadPCA();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal menjalankan analisis');
+      if (err instanceof ApiError && err.code === 'NO_ACTIVE_DATASET') {
+        setError('Belum ada dataset aktif. Upload CSV terlebih dahulu di halaman Dataset.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Gagal menjalankan analisis');
+      }
     } finally {
       setRunningAnalysis(false);
     }

@@ -5,7 +5,6 @@ import { apiFetch, getToken, API_BASE_URL } from '@/core/api/http-client';
 export interface DatasetVersion {
   id: string;
   code?: string;
-  internalId?: number;
   version: number;
   name: string;
   description: string | null;
@@ -45,8 +44,10 @@ export interface VersionListResponse {
 export interface UploadResult {
   message: string;
   dataset: DatasetVersion;
+  recordCount?: number;
   rowCount: number;
   year: number;
+  yearRange?: { min: number; max: number };
   version: number;
   columns: string[];
 }
@@ -123,12 +124,12 @@ export const datasetApi = {
       body: formData,
     });
 
-    const body = await res.json();
+    const body = await res.json().catch(() => null);
 
     if (!res.ok) {
-      const err = body as UploadError;
+      const err = (body || {}) as UploadError;
       throw new Error(
-        err.detail
+        Array.isArray(err.detail)
           ? `${err.error}\n${err.detail.join('\n')}`
           : err.error || `HTTP ${res.status}`
       );

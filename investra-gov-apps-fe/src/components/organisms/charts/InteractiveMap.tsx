@@ -229,18 +229,22 @@ export const InteractiveMap = memo(() => {
         for (const [name, clusterId] of Object.entries(clusterData.assignments)) {
           const pos = resolveProvincePosition(name);
           if (!pos) continue; // skip unknown provinces instead of stacking
-          const pData = dsData?.data?.find(
-            (p: Record<string, unknown>) => p.provinsi === name,
-          );
+          const pData = dsData?.data?.find((p: Record<string, unknown>) => {
+            const provinceName = p.provinsi ?? p.province;
+            return String(provinceName ?? "") === name;
+          });
+          const pmdn = Number(pData?.pmdnRp ?? pData?.pmdn_rp) || 0;
+          const fdi = Number(pData?.fdiRp ?? pData?.fdi_rp) || 0;
+          const pdrb = Number(pData?.pdrbPerKapita ?? pData?.pdrb_per_kapita) || 0;
           const investasi = pData
-            ? (Number(pData.pmdnRp) || 0) + (Number(pData.fdiRp) || 0)
+            ? pmdn + fdi
             : 0;
           items.push({
             name,
             cluster: clusterId,
             x: pos.x,
             y: pos.y,
-            pdrb: pData ? Number(pData.pdrbPerKapita) || 0 : 0,
+            pdrb,
             ipm: pData ? Number(pData.ipm) || 0 : 0,
             investasi,
           });

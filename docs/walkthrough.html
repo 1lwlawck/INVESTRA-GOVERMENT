@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INVESTRA GOVERMENT — Dokumentasi UML</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+:root{--primary:#1a1a2e;--accent:#e94560;--bg:#fff;--text:#1a1a2e;--muted:#64748b;--border:#e2e8f0;--card:#f8fafc}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);line-height:1.7;padding:40px;max-width:1100px;margin:0 auto}
+h1{font-size:2rem;font-weight:800;text-align:center;margin-bottom:8px;padding-bottom:16px;border-bottom:3px solid var(--accent)}
+.subtitle{text-align:center;color:var(--muted);font-size:.95rem;margin-bottom:40px;font-style:italic}
+h2{font-size:1.5rem;font-weight:700;margin:48px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--accent);page-break-after:avoid}
+h3{font-size:1.15rem;font-weight:600;color:#334155;margin:32px 0 8px;page-break-after:avoid}
+.ref{font-size:.85rem;color:var(--muted);font-style:italic;margin-bottom:8px}
+.desc{background:#f0f7ff;border-left:4px solid #3b82f6;padding:14px 18px;margin:8px 0 20px;border-radius:0 8px 8px 0;font-size:.9rem;color:#1e3a5f;line-height:1.65;text-align:justify}
+.dc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin:16px 0 32px;text-align:center;overflow-x:auto;page-break-inside:avoid}
+.dc .mermaid{display:inline-block}
+.sn{display:inline-block;background:var(--accent);color:#fff;width:32px;height:32px;line-height:32px;text-align:center;border-radius:50%;font-weight:700;font-size:.85rem;margin-right:8px;vertical-align:middle}
+.pb{page-break-before:always}
+.footer{text-align:center;padding:24px 0;color:var(--muted);font-size:.85rem;border-top:1px solid var(--border);margin-top:48px}
+.btn{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;border:none;padding:14px 28px;border-radius:50px;font-family:'Inter',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(233,69,96,.4);z-index:1000}
+.btn:hover{transform:translateY(-2px)}
+@media print{body{padding:20px}.btn{display:none}.dc{box-shadow:none;border:1px solid #ddd}.pb{page-break-before:always}}
+</style>
+</head>
+<body>
+<button class="btn" onclick="window.print()">📄 Save as PDF</button>
+
+<h1>📊 INVESTRA GOVERMENT</h1>
+<p class="subtitle">Dokumentasi UML — Analisis Ketimpangan Investasi 38 Provinsi Indonesia</p>
+
+<!-- ===== 1. ARSITEKTUR ===== -->
+<h2><span class="sn">1</span> Arsitektur Sistem</h2>
+<div class="desc">Arsitektur terdiri dari 4 layer: <b>Client</b> (Browser), <b>Frontend</b> React SPA (port 3000) dengan React Router v7, Zustand, Radix UI, Recharts, <b>Backend</b> Flask API (port 5000) dengan middleware (JWT, RBAC, Rate Limiter, CORS), 5 controller, 2 service, dan <b>Data Layer</b> berupa PostgreSQL 16 + Redis 7.</div>
+<div class="dc"><pre class="mermaid">
+graph LR
+    subgraph CLIENT["🌐 Client"]
+        BR["Browser"]
+    end
+    subgraph FE["Frontend — React :3000"]
+        direction TB
+        ROUTER["React Router v7"]
+        UI["Radix UI + Recharts"]
+        ZUSTAND["Zustand Store"]
+    end
+    subgraph BE["Backend — Flask :5000"]
+        direction TB
+        MW["Middleware\nJWT | RBAC | Rate Limiter"]
+        CTRL["Controllers\nAuth | Dataset | Analysis\nDashboard | Users"]
+        SVC["Services\nAnalysisService | PolicyService"]
+        MDL["Models\nUser | Dataset | Province\nAnalysisResult"]
+    end
+    subgraph DATA["💾 Data"]
+        direction TB
+        PG["PostgreSQL 16"]
+        RD["Redis 7"]
+    end
+    BR -->|HTTPS| FE
+    FE -->|"REST + JWT"| MW
+    MW --> CTRL --> SVC --> MDL
+    MDL --> PG
+    MW -.-> RD
+    style CLIENT fill:#1a1a2e,color:#fff
+    style FE fill:#0f3460,color:#fff
+    style BE fill:#16213e,color:#fff
+    style DATA fill:#533483,color:#fff
+</pre></div>
+
+<!-- ===== 2. USE CASE ===== -->
+<div class="pb"></div>
+<h2><span class="sn">2</span> Use Case Diagram</h2>
+<div class="desc">3 aktor: <b>User</b> (landing page, login), <b>Admin</b> (mewarisi User, akses fitur analisis dan dataset), <b>Superadmin</b> (manajemen sistem). Relasi <code>&lt;&lt;include&gt;&gt;</code> = wajib dijalankan (contoh: K-Means include PCA include Preprocessing). Relasi <code>&lt;&lt;extend&gt;&gt;</code> = fitur opsional (contoh: Tentukan Jumlah Cluster memperluas K-Means).</div>
+<div class="dc"><pre class="mermaid">
+flowchart TB
+    actor_u(["👤 User"])
+    actor_a(["👤 Admin"])
+    actor_s(["👤 Superadmin"])
+
+    actor_a -.->|inherits| actor_u
+    actor_s -.->|inherits| actor_a
+
+    subgraph SYSTEM["Investment Inequality Dashboard System"]
+        UC_LOGIN(["Login"])
+        UC_LANDING(["Akses Landing Page"])
+        UC_LOGOUT(["Logout"])
+        UC_UPLOAD(["Upload Dataset"])
+        UC_VALIDASI(["Validasi Dataset"])
+        UC_PREPROCESS(["Preprocessing Data"])
+        UC_PCA(["Jalankan PCA"])
+        UC_KMEANS(["Jalankan K-Means"])
+        UC_CLUSTER(["Tentukan Jumlah Cluster"])
+        UC_HASIL(["Lihat Hasil Analisis"])
+        UC_VIS(["Lihat Visualisasi"])
+        UC_PANDUAN(["Lihat Panduan Dataset"])
+        UC_EKSPOR(["Ekspor Hasil"])
+        UC_ABOUT(["Lihat About dan Metodologi"])
+        UC_POLICY(["Lihat Rekomendasi Kebijakan"])
+        UC_MANSYS(["Manajemen Sistem"])
+        UC_MANUSER(["Manajemen User"])
+    end
+
+    actor_u --- UC_LOGIN
+    actor_u --- UC_LANDING
+
+    actor_a --- UC_LOGOUT
+    actor_a --- UC_UPLOAD
+    actor_a --- UC_HASIL
+    actor_a --- UC_VIS
+    actor_a --- UC_PANDUAN
+    actor_a --- UC_EKSPOR
+    actor_a --- UC_ABOUT
+    actor_a --- UC_POLICY
+
+    actor_s --- UC_MANSYS
+
+    UC_UPLOAD -.->|"≪include≫"| UC_VALIDASI
+    UC_VALIDASI -.->|"≪include≫"| UC_LOGIN
+    UC_HASIL -.->|"≪include≫"| UC_KMEANS
+    UC_KMEANS -.->|"≪include≫"| UC_PCA
+    UC_PCA -.->|"≪include≫"| UC_PREPROCESS
+    UC_MANSYS -.->|"≪include≫"| UC_MANUSER
+
+    UC_CLUSTER -.->|"≪extend≫"| UC_KMEANS
+    UC_VIS -.->|"≪extend≫"| UC_HASIL
+    UC_EKSPOR -.->|"≪extend≫"| UC_PANDUAN
+    UC_LOGOUT -.->|"≪extend≫"| UC_LOGIN
+
+    style actor_u fill:#3498db,color:#fff,stroke:#2980b9
+    style actor_a fill:#f39c12,color:#fff,stroke:#e67e22
+    style actor_s fill:#e74c3c,color:#fff,stroke:#c0392b
+    style SYSTEM fill:#f8f9fa,color:#000,stroke:#adb5bd
+</pre></div>
+
+<!-- ===== 3. ACTIVITY (5) ===== -->
+<div class="pb"></div>
+<h2><span class="sn">3</span> Activity Diagram</h2>
+
+<h3>3.1 Login</h3>
+<p class="ref">Ref: Use Case — Login</p>
+<div class="desc">User input kredensial → validasi → cek akun aktif → generate JWT (HS256, 12 jam) → simpan ke Zustand + sessionStorage → redirect. 2 titik kegagalan: kredensial salah (loop) dan akun nonaktif (stop).</div>
+<div class="dc"><pre class="mermaid">
+flowchart TD
+    S((●)) --> A["Input username\ndan password"]
+    A --> B["POST /api/auth/login"]
+    B --> C{"Kredensial\nvalid?"}
+    C -- Tidak --> A
+    C -- Ya --> D{"Akun aktif?"}
+    D -- Tidak --> E1((✕))
+    D -- Ya --> F["Generate JWT\nHS256 exp 12 jam"]
+    F --> G["Simpan ke Zustand\n+ sessionStorage"]
+    G --> H["Redirect /dashboard"]
+    H --> E2((●))
+    style S fill:#27ae60,color:#fff
+    style E1 fill:#e74c3c,color:#fff
+    style E2 fill:#27ae60,color:#fff
+    style C fill:#f39c12,color:#000
+    style D fill:#f39c12,color:#000
+</pre></div>
+
+<h3>3.2 Upload Dataset</h3>
+<p class="ref">Ref: Use Case — Upload Dataset ≪include≫ Validasi Dataset</p>
+<div class="desc">Admin memilih file CSV. Proses <b>Validasi Dataset</b> (include) melalui 3 tahap: auth JWT + role, kolom wajib lengkap, dan checksum SHA-256 tidak duplikat. Jika valid, buat versi baru → insert provinsi → aktifkan.</div>
+<div class="dc"><pre class="mermaid">
+flowchart TD
+    S((●)) --> A["Admin pilih file CSV"]
+    A --> B["POST /api/dataset/upload"]
+    B --> C{"Auth + role\nvalid?"}
+    C -- Tidak --> E1((✕))
+    C -- Ya --> VAL["≪include≫\nValidasi Dataset"]
+
+    subgraph VALIDASI["Validasi Dataset"]
+        direction TB
+        V1{"Kolom wajib\nlengkap?"}
+        V1 -- Tidak --> V_ERR((✕))
+        V1 -- Ya --> V2["Hitung SHA-256"]
+        V2 --> V3{"Checksum\nduplikat?"}
+        V3 -- Ya --> V_DUP((✕))
+    end
+
+    VAL --> V1
+    V3 -- Tidak --> H["Buat Dataset\nversi baru"]
+    H --> I["Insert baris\nProvince"]
+    I --> J["Aktifkan\ndataset baru"]
+    J --> E2((●))
+
+    style S fill:#27ae60,color:#fff
+    style E1 fill:#e74c3c,color:#fff
+    style V_ERR fill:#e74c3c,color:#fff
+    style V_DUP fill:#e74c3c,color:#fff
+    style E2 fill:#27ae60,color:#fff
+    style C fill:#f39c12,color:#000
+    style V1 fill:#f39c12,color:#000
+    style V3 fill:#f39c12,color:#000
+    style VAL fill:#fff3cd,color:#000,stroke:#ffc107
+</pre></div>
+
+<div class="pb"></div>
+<h3>3.3 Lihat Hasil Analisis</h3>
+<p class="ref">Ref: Use Case — Lihat Hasil Analisis ≪include≫ K-Means ≪include≫ PCA ≪include≫ Preprocessing</p>
+<div class="desc">Pipeline lengkap: set parameter → load data → <b>Preprocessing</b> (log-transform + StandardScaler) → <b>PCA</b> (reduksi dimensi) → <b>K-Means</b> (Consensus 25 runs × n_init=50) → hitung 4 metrik evaluasi → simpan → tampilkan.</div>
+<div class="dc"><pre class="mermaid">
+flowchart TD
+    S((●)) --> A["Set parameter\nk, mode, tahun"]
+    A --> B{"Auth valid?"}
+    B -- Tidak --> E1((✕))
+    B -- Ya --> C{"Dataset\naktif ada?"}
+    C -- Tidak --> E2((✕))
+    C -- Ya --> D["Load data provinsi"]
+
+    subgraph PREP["≪include≫ Preprocessing Data"]
+        P1["Log-transform"]
+        P2["StandardScaler"]
+        P1 --> P2
+    end
+
+    subgraph PCA_S["≪include≫ Jalankan PCA"]
+        PC1["PCA fit"]
+        PC2["Extract komponen\n+ loadings"]
+        PC1 --> PC2
+    end
+
+    subgraph KM_S["≪include≫ Jalankan K-Means"]
+        KM1["Consensus K-Means\n25 runs × n_init=50"]
+        KM2["Hitung 4 metrik\nevaluasi"]
+        KM1 --> KM2
+    end
+
+    D --> P1
+    P2 --> PC1
+    PC2 --> KM1
+
+    KM2 --> SAVE["Simpan\nAnalysisResult"]
+    SAVE --> SHOW["Tampilkan\nhasil analisis"]
+    SHOW --> E3((●))
+
+    style S fill:#27ae60,color:#fff
+    style E1 fill:#e74c3c,color:#fff
+    style E2 fill:#e74c3c,color:#fff
+    style E3 fill:#27ae60,color:#fff
+    style B fill:#f39c12,color:#000
+    style C fill:#f39c12,color:#000
+    style PREP fill:#e8f5e9,color:#000,stroke:#4caf50
+    style PCA_S fill:#e3f2fd,color:#000,stroke:#2196f3
+    style KM_S fill:#fff3e0,color:#000,stroke:#ff9800
+</pre></div>
+
+<h3>3.4 Lihat Rekomendasi Kebijakan</h3>
+<p class="ref">Ref: Use Case — Lihat Rekomendasi Kebijakan</p>
+<div class="desc">Ambil hasil analisis terakhir → hitung rata-rata nasional → rasio cluster vs nasional → klasifikasi 5 level → interpretasi PCA loadings → rule engine → kebijakan per cluster.</div>
+<div class="dc"><pre class="mermaid">
+flowchart TD
+    S((●)) --> A["GET /api/analysis/policy"]
+    A --> B{"Auth valid?"}
+    B -- Tidak --> E1((✕))
+    B -- Ya --> C{"Ada hasil\nanalisis?"}
+    C -- Tidak --> E2((✕))
+    C -- Ya --> D["Hitung rata-rata\nnasional"]
+    D --> F["Rasio cluster\nvs nasional"]
+    F --> G["Klasifikasi\nkondisi 5 level"]
+    G --> H["Interpretasi\nPCA loadings"]
+    H --> I["Generate kebijakan\nper cluster"]
+    I --> E3((●))
+    style S fill:#27ae60,color:#fff
+    style E1 fill:#e74c3c,color:#fff
+    style E2 fill:#e74c3c,color:#fff
+    style E3 fill:#27ae60,color:#fff
+    style B fill:#f39c12,color:#000
+    style C fill:#f39c12,color:#000
+</pre></div>
+
+<div class="pb"></div>
+<h3>3.5 Manajemen User</h3>
+<p class="ref">Ref: Use Case — Manajemen Sistem ≪include≫ Manajemen User</p>
+<div class="desc">Superadmin memilih aksi: <b>Create</b> (validasi password, cek duplikat, hash, simpan), <b>Update</b> (cari user, proteksi last superadmin), atau <b>Delete</b> (cari user, proteksi last superadmin, hapus).</div>
+<div class="dc"><pre class="mermaid">
+flowchart TD
+    S((●)) --> AUTH{"Auth valid?\nRole superadmin?"}
+    AUTH -- Tidak --> E1((✕))
+    AUTH -- Ya --> ACTION{"Pilih aksi"}
+
+    ACTION -- Create --> CR1["Isi data user"]
+    CR1 --> CR2{"Password kuat?\nData valid?"}
+    CR2 -- Tidak --> E2((✕))
+    CR2 -- Ya --> CR3["Hash password\nSimpan user"]
+    CR3 --> E3((●))
+
+    ACTION -- Update --> UP1["Cari user"]
+    UP1 --> UP2{"Ditemukan?"}
+    UP2 -- Tidak --> E4((✕))
+    UP2 -- Ya --> UP3{"Last\nsuperadmin?"}
+    UP3 -- Ya, downgrade --> E5((✕))
+    UP3 -- Tidak --> UP4["Update fields"]
+    UP4 --> E6((●))
+
+    ACTION -- Delete --> DL1["Cari user"]
+    DL1 --> DL2{"Last active\nsuperadmin?"}
+    DL2 -- Ya --> E7((✕))
+    DL2 -- Tidak --> DL3["Hapus user"]
+    DL3 --> E8((●))
+
+    style S fill:#27ae60,color:#fff
+    style AUTH fill:#f39c12,color:#000
+    style ACTION fill:#3498db,color:#fff
+    style CR2 fill:#f39c12,color:#000
+    style UP2 fill:#f39c12,color:#000
+    style UP3 fill:#f39c12,color:#000
+    style DL2 fill:#f39c12,color:#000
+    style E1 fill:#e74c3c,color:#fff
+    style E2 fill:#e74c3c,color:#fff
+    style E3 fill:#27ae60,color:#fff
+    style E4 fill:#e74c3c,color:#fff
+    style E5 fill:#e74c3c,color:#fff
+    style E6 fill:#27ae60,color:#fff
+    style E7 fill:#e74c3c,color:#fff
+    style E8 fill:#27ae60,color:#fff
+</pre></div>
+
+<!-- ===== 4. SEQUENCE (5) ===== -->
+<div class="pb"></div>
+<h2><span class="sn">4</span> Sequence Diagram</h2>
+
+<h3>4.1 Login</h3>
+<p class="ref">Ref: Use Case — Login</p>
+<div class="desc"><b>Login:</b> User → Frontend → API → DB → verify hash → JWT → Zustand + sessionStorage. <b>Protected Request:</b> Bearer token → Middleware decode JWT → validasi user + role → controller → response.</div>
+<div class="dc"><pre class="mermaid">
+sequenceDiagram
+    actor User
+    participant FE as Frontend
+    participant ZS as Zustand Store
+    participant MW as JWT Middleware
+    participant API as Flask API
+    participant DB as PostgreSQL
+
+    rect rgb(40, 40, 60)
+    Note over User,DB: Login Flow
+    User->>FE: Input username & password
+    FE->>API: POST /api/auth/login
+    API->>DB: Query user by username
+    DB-->>API: User row
+    API->>API: Verify password hash
+    API->>API: Generate JWT HS256
+    API-->>FE: {user, token}
+    FE->>ZS: setAuth(user, token)
+    ZS->>ZS: Persist ke sessionStorage
+    FE-->>User: Redirect /dashboard
+    end
+
+    rect rgb(40, 60, 40)
+    Note over User,DB: Protected Request
+    User->>FE: Akses halaman terproteksi
+    FE->>ZS: getToken()
+    ZS-->>FE: JWT token
+    FE->>MW: Request + Bearer token
+    MW->>MW: Decode & validate JWT
+    MW->>DB: Lookup user by id
+    DB-->>MW: User row
+    MW->>MW: Check is_active & role
+    MW->>API: Forward request
+    API->>DB: Query data
+    DB-->>API: Results
+    API-->>FE: JSON response
+    FE-->>User: Render halaman
+    end
+</pre></div>
+
+<h3>4.2 Upload Dataset</h3>
+<p class="ref">Ref: Use Case — Upload Dataset ≪include≫ Validasi Dataset</p>
+<div class="desc">Frontend kirim file CSV multipart → DatasetController → <b>≪include≫ Validasi Dataset</b> (parse, validate columns, checksum SHA-256, cek duplikat) → buat versi baru → deaktivasi lama → loop insert provinsi → aktifkan baru.</div>
+<div class="dc"><pre class="mermaid">
+sequenceDiagram
+    actor Admin
+    participant FE as Frontend
+    participant CTRL as DatasetController
+    participant DB as PostgreSQL
+
+    Admin->>FE: Pilih file CSV
+    FE->>CTRL: POST /api/dataset/upload (multipart)
+
+    rect rgb(60, 50, 40)
+    Note over CTRL: ≪include≫ Validasi Dataset
+    CTRL->>CTRL: Parse CSV content
+    CTRL->>CTRL: Validate required columns
+    CTRL->>CTRL: Compute SHA-256 checksum
+    CTRL->>DB: Check duplicate checksum
+    DB-->>CTRL: Not found
+    end
+
+    CTRL->>DB: INSERT new dataset (version+1)
+    CTRL->>DB: Deactivate old dataset
+
+    loop Setiap baris CSV
+        CTRL->>DB: INSERT INTO provinces
+    end
+
+    CTRL->>DB: Activate new dataset
+    CTRL-->>FE: {metadata, row_count}
+    FE-->>Admin: Notifikasi sukses
+</pre></div>
+
+<div class="pb"></div>
+<h3>4.3 Lihat Hasil Analisis</h3>
+<p class="ref">Ref: Use Case — Lihat Hasil Analisis ≪include≫ K-Means ≪include≫ PCA ≪include≫ Preprocessing</p>
+<div class="desc">4 fase include berurutan: (1) Data Loading, (2) ≪include≫ Preprocessing, (3) ≪include≫ PCA, (4) ≪include≫ K-Means Consensus. Hasil disimpan ke analysis_results dan dikembalikan untuk divisualisasikan.</div>
+<div class="dc"><pre class="mermaid">
+sequenceDiagram
+    actor Admin
+    participant FE as Frontend
+    participant CTRL as AnalysisController
+    participant SVC as AnalysisService
+    participant DB as PostgreSQL
+
+    Admin->>FE: Set parameter k=3, mode, tahun
+    FE->>CTRL: POST /api/analysis/run
+
+    rect rgb(40, 40, 60)
+    Note over CTRL,DB: Data Loading
+    CTRL->>SVC: loadDataframe(mode, years)
+    SVC->>DB: SELECT provinces WHERE dataset=active
+    DB-->>SVC: Dataset rows
+    end
+
+    rect rgb(60, 50, 40)
+    Note over SVC: ≪include≫ Preprocessing Data
+    SVC->>SVC: Log-transform skewed features
+    SVC->>SVC: StandardScaler normalization
+    end
+
+    rect rgb(40, 60, 40)
+    Note over SVC: ≪include≫ Jalankan PCA
+    SVC->>SVC: PCA fit(X_scaled)
+    SVC->>SVC: Extract components + loadings
+    end
+
+    rect rgb(60, 60, 40)
+    Note over SVC: ≪include≫ Jalankan K-Means
+    SVC->>SVC: Consensus 25 runs × n_init=50
+    SVC->>SVC: Align labels + majority voting
+    SVC->>SVC: Calculate 4 evaluation metrics
+    end
+
+    SVC->>DB: INSERT INTO analysis_results
+    SVC-->>CTRL: PCA + clusters + metrics
+    CTRL-->>FE: JSON response
+    FE-->>Admin: Render charts (Recharts)
+</pre></div>
+
+<h3>4.4 Lihat Rekomendasi Kebijakan</h3>
+<p class="ref">Ref: Use Case — Lihat Rekomendasi Kebijakan</p>
+<div class="desc">PolicyService ambil AnalysisResult terakhir → hitung rata-rata nasional → rasio cluster → klasifikasi 5 level → interpretasi PCA → rule engine → kebijakan per cluster.</div>
+<div class="dc"><pre class="mermaid">
+sequenceDiagram
+    actor Admin
+    participant FE as Frontend
+    participant CTRL as AnalysisController
+    participant POL as PolicyService
+    participant DB as PostgreSQL
+
+    Admin->>FE: Buka halaman kebijakan
+    FE->>CTRL: GET /api/analysis/policy
+    CTRL->>POL: generateRecommendations()
+    POL->>DB: Get latest AnalysisResult
+    DB-->>POL: Analysis data + provinces
+    POL->>POL: Calculate national averages
+    POL->>POL: Compute cluster vs national ratios
+    POL->>POL: Classify conditions (5 levels)
+    POL->>POL: Interpret PCA loadings
+    POL->>POL: Generate policy directions
+    POL-->>CTRL: Recommendations per cluster
+    CTRL-->>FE: JSON response
+    FE-->>Admin: Render kartu kebijakan
+</pre></div>
+
+<div class="pb"></div>
+<h3>4.5 Manajemen User</h3>
+<p class="ref">Ref: Use Case — Manajemen Sistem ≪include≫ Manajemen User</p>
+<div class="desc">Superadmin CRUD user via UserController. <b>Create:</b> validate + hash + insert. <b>Update:</b> find + proteksi last superadmin + update. <b>Delete:</b> find + proteksi last superadmin + delete.</div>
+<div class="dc"><pre class="mermaid">
+sequenceDiagram
+    actor SA as Superadmin
+    participant FE as Frontend
+    participant CTRL as UserController
+    participant DB as PostgreSQL
+
+    SA->>FE: Kelola user
+
+    rect rgb(40, 40, 60)
+    Note over SA,DB: Create User
+    SA->>FE: Isi form user baru
+    FE->>CTRL: POST /api/users
+    CTRL->>CTRL: Validate + check duplicate
+    CTRL->>CTRL: Hash password
+    CTRL->>DB: INSERT INTO users
+    DB-->>CTRL: User created
+    CTRL-->>FE: 201 Created
+    end
+
+    rect rgb(40, 60, 40)
+    Note over SA,DB: Update User
+    SA->>FE: Edit data user
+    FE->>CTRL: PUT /api/users/:id
+    CTRL->>DB: Find user by id
+    DB-->>CTRL: User row
+    CTRL->>CTRL: Check last superadmin protection
+    CTRL->>DB: UPDATE user
+    CTRL-->>FE: 200 Updated
+    end
+
+    rect rgb(60, 40, 40)
+    Note over SA,DB: Delete User
+    SA->>FE: Hapus user
+    FE->>CTRL: DELETE /api/users/:id
+    CTRL->>DB: Find user by id
+    DB-->>CTRL: User row
+    CTRL->>CTRL: Check last superadmin protection
+    CTRL->>DB: DELETE FROM users
+    CTRL-->>FE: 200 Deleted
+    end
+</pre></div>
+
+<!-- ===== 5. CLASS ===== -->
+<div class="pb"></div>
+<h2><span class="sn">5</span> Class Diagram</h2>
+<div class="desc"><b>4 model</b> ORM: User (auth + role hierarchy), Dataset (versioning + checksum), Province (7 indikator), AnalysisResult (JSON output). <b>2 service</b>: AnalysisService (pipeline analisis), PolicyService (generator rekomendasi). Relasi: User uploads Dataset, Dataset contains Province dan produces AnalysisResult.</div>
+<div class="dc"><pre class="mermaid">
+classDiagram
+    direction LR
+    class User {
+        +id UUID PK
+        +username Unique
+        +email Unique
+        +password_hash
+        +role user|admin|superadmin
+        +is_active Boolean
+        +checkPassword() Boolean
+        +hasRole() Boolean
+    }
+    class Dataset {
+        +id UUID PK
+        +code Unique
+        +version Integer
+        +is_active Boolean
+        +checksum SHA256
+        +row_count Integer
+        +getActive() Dataset
+    }
+    class Province {
+        +id UUID PK
+        +dataset_id FK
+        +provinsi String
+        +pmdn_rp Float
+        +fdi_rp Float
+        +ipm Float
+        +kemiskinan Float
+        +pdrb_per_kapita Float
+        +tpt Float
+        +akses_listrik Float
+        +year Integer
+    }
+    class AnalysisResult {
+        +id UUID PK
+        +dataset_id FK
+        +k Integer
+        +pca_components JSON
+        +pca_loadings JSON
+        +cluster_assignments JSON
+        +silhouette_score Float
+        +davies_bouldin Float
+        +calinski_harabasz Float
+    }
+    class AnalysisService {
+        +runFullAnalysis()
+        +evaluateKRange()
+    }
+    class PolicyService {
+        +generateRecommendations()
+    }
+    User "1" --> "*" Dataset : uploads
+    Dataset "1" --> "*" Province : contains
+    Dataset "1" --> "*" AnalysisResult : produces
+    AnalysisService ..> Province
+    AnalysisService ..> AnalysisResult
+    PolicyService ..> AnalysisResult
+</pre></div>
+
+<!-- ===== 6. ERD ===== -->
+<div class="pb"></div>
+<h2><span class="sn">6</span> Database Diagram (ERD)</h2>
+<div class="desc">4 tabel PostgreSQL 16. <b>users</b>: autentikasi, 4 UNIQUE, role CHECK. <b>datasets</b>: versioning + checksum, FK→users (SET NULL). <b>provinces</b>: 7 indikator, 6 CHECK, FK→datasets (CASCADE). <b>analysis_results</b>: PCA + K-Means dalam JSON, FK→datasets (CASCADE).</div>
+<div class="dc"><pre class="mermaid">
+erDiagram
+    users {
+        varchar36 id PK "UUID"
+        varchar32 code UK
+        varchar80 username UK
+        varchar150 email UK
+        varchar256 password_hash
+        varchar150 full_name
+        varchar20 role "user|admin|superadmin"
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+    datasets {
+        varchar36 id PK "UUID"
+        varchar32 code UK
+        integer version UK
+        varchar200 name
+        text description
+        integer year
+        boolean is_active
+        varchar36 uploaded_by FK
+        datetime created_at
+        varchar64 checksum UK "SHA-256"
+        integer row_count
+    }
+    provinces {
+        varchar36 id PK "UUID"
+        varchar32 code UK
+        varchar36 dataset_id FK "CASCADE"
+        varchar100 provinsi
+        float pmdn_rp
+        float fdi_rp
+        float pdrb_per_kapita
+        float ipm "0-100"
+        float kemiskinan "0-100"
+        float akses_listrik "0-100"
+        float tpt "0-100"
+        integer year
+    }
+    analysis_results {
+        varchar36 id PK "UUID"
+        varchar32 code UK
+        varchar36 dataset_id FK "CASCADE"
+        datetime created_at
+        integer k "2-10"
+        json pca_components
+        json pca_loadings
+        json pca_explained_variance
+        json cluster_assignments
+        json cluster_centers
+        float silhouette_score
+        float inertia
+        float davies_bouldin
+        float calinski_harabasz
+        json cluster_summary
+    }
+    users ||--o{ datasets : "uploads"
+    datasets ||--o{ provinces : "contains"
+    datasets ||--o{ analysis_results : "produces"
+</pre></div>
+
+<div class="footer">
+<p>📊 INVESTRA GOVERMENT — Dokumentasi UML</p>
+<p>Generated 23 Februari 2026</p>
+</div>
+<script>
+mermaid.initialize({startOnLoad:true,theme:'default',securityLevel:'loose',flowchart:{useMaxWidth:true,htmlLabels:true,curve:'basis'},sequence:{useMaxWidth:true,mirrorActors:false},er:{useMaxWidth:true}});
+</script>
+</body>
+</html>

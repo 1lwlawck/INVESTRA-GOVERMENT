@@ -1,0 +1,137 @@
+@startuml Investra Gov Apps — Use Case Diagram
+
+!theme plain
+skinparam backgroundColor #FAFAFA
+skinparam actorStyle awesome
+
+skinparam usecase {
+  BackgroundColor #EEF4FF
+  BorderColor #4A6FBF
+  FontSize 12
+}
+
+skinparam actor {
+  BackgroundColor #DDEEFF
+  BorderColor #336699
+  FontSize 13
+}
+
+skinparam package {
+  BackgroundColor #F5F8FF
+  BorderColor #B0C4DE
+  FontSize 13
+  FontStyle bold
+}
+
+skinparam ArrowColor #5577AA
+skinparam ArrowThickness 1.2
+
+' ─── ACTORS ──────────────────────────────────────────────────────────────────
+
+actor "Pengunjung\n(Public)" as Visitor #LightCyan
+actor "Admin" as Admin #LightYellow
+actor "Superadmin" as Superadmin #LightGoldenRodYellow
+
+' Role inheritance
+Admin -up-|> Visitor : <<extends>>
+Superadmin -up-|> Admin : <<extends>>
+
+' ─── SYSTEM BOUNDARY ─────────────────────────────────────────────────────────
+
+rectangle "Investra Gov Apps\n(Sistem Analisis Investasi Provinsi)" {
+
+  ' ── AUTENTIKASI ──────────────────────────────────────────────────────────
+  package "Autentikasi" {
+    usecase "Melihat Landing Page" as UC_Landing
+    usecase "Login" as UC_Login
+    usecase "Refresh Token Akses" as UC_Refresh
+    usecase "Melihat Profil Sendiri" as UC_Me
+    usecase "Logout" as UC_Logout
+  }
+
+  ' ── DATASET ──────────────────────────────────────────────────────────────
+  package "Manajemen Dataset" {
+    usecase "Melihat Metadata\nDataset Aktif" as UC_DatasetMeta
+    usecase "Melihat Data Provinsi\n(Paginasi)" as UC_DatasetData
+    usecase "Melihat Sampel Data\nProvinsi" as UC_DatasetSample
+    usecase "Melihat Daftar\nProvinsi" as UC_Provinces
+  }
+
+  ' ── DASHBOARD ────────────────────────────────────────────────────────────
+  package "Dashboard" {
+    usecase "Melihat Ringkasan\nStatistik Agregat" as UC_Summary
+  }
+
+  ' ── ANALISIS ML ──────────────────────────────────────────────────────────
+  package "Analisis ML (PCA + K-Means)" {
+    usecase "Menjalankan Analisis\nPCA + K-Means" as UC_RunAnalysis
+    usecase "Melihat Hasil\nPCA" as UC_PCA
+    usecase "Melihat Hasil\nClustering Provinsi" as UC_Clusters
+    usecase "Evaluasi Rentang K\n(Elbow Method)" as UC_EvaluateK
+
+    usecase "Log-transform\nFitur Skewed" as UC_LogTransform
+    usecase "Standarisasi\nFitur (StandardScaler)" as UC_Scale
+    usecase "Consensus K-Means\n(25 Runs)" as UC_Consensus
+    usecase "Auto Pilih K\nOptimal (Silhouette)" as UC_AutoK
+    usecase "Relabel Cluster\n(Investasi Tertinggi = 0)" as UC_Relabel
+  }
+
+  ' ── VISUALISASI ──────────────────────────────────────────────────────────
+  package "Visualisasi" {
+    usecase "Melihat Peta\nInteraktif Provinsi" as UC_Map
+  }
+
+  ' ── KEBIJAKAN ────────────────────────────────────────────────────────────
+  package "Rekomendasi Kebijakan" {
+    usecase "Melihat Rekomendasi\nKebijakan per Cluster" as UC_Policy
+  }
+
+  ' ── MANAJEMEN USER ───────────────────────────────────────────────────────
+  package "Manajemen User\n(Superadmin Only)" {
+    usecase "Melihat Daftar User" as UC_ListUsers
+    usecase "Membuat User Baru" as UC_CreateUser
+    usecase "Mengubah Data User" as UC_EditUser
+    usecase "Mengaktifkan /\nMenonaktifkan User" as UC_ToggleUser
+  }
+
+}
+
+' ─── VISITOR ASSOCIATIONS ────────────────────────────────────────────────────
+Visitor --> UC_Landing
+Visitor --> UC_Login
+
+' ─── ADMIN ASSOCIATIONS ──────────────────────────────────────────────────────
+Admin --> UC_Me
+Admin --> UC_Refresh
+Admin --> UC_Logout
+Admin --> UC_DatasetMeta
+Admin --> UC_DatasetData
+Admin --> UC_DatasetSample
+Admin --> UC_Provinces
+Admin --> UC_Summary
+Admin --> UC_RunAnalysis
+Admin --> UC_PCA
+Admin --> UC_Clusters
+Admin --> UC_EvaluateK
+Admin --> UC_Map
+Admin --> UC_Policy
+
+' ─── SUPERADMIN ASSOCIATIONS ─────────────────────────────────────────────────
+Superadmin --> UC_ListUsers
+Superadmin --> UC_CreateUser
+Superadmin --> UC_EditUser
+Superadmin --> UC_ToggleUser
+
+' ─── INCLUDE RELATIONS (sub-proses internal UC_RunAnalysis) ──────────────────
+UC_RunAnalysis .> UC_LogTransform   : <<include>>
+UC_RunAnalysis .> UC_Scale          : <<include>>
+UC_RunAnalysis .> UC_AutoK          : <<include>>
+UC_RunAnalysis .> UC_Consensus      : <<include>>
+UC_RunAnalysis .> UC_Relabel        : <<include>>
+
+' ─── EXTEND RELATIONS ────────────────────────────────────────────────────────
+UC_EvaluateK .> UC_RunAnalysis      : <<extend>>
+UC_Policy    .> UC_Clusters         : <<extend>>
+UC_Map       .> UC_Clusters         : <<extend>>
+
+@enduml

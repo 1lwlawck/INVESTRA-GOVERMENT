@@ -91,10 +91,12 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: withSuspense(LandingPage),
+    errorElement: <RouteErrorView />,
   },
   {
     path: '/login',
     element: withSuspense(LoginView),
+    errorElement: <RouteErrorView />,
   },
   {
     path: '/dashboard',

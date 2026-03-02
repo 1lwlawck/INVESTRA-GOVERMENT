@@ -166,7 +166,7 @@ def main() -> int:
                 fullName=fullName,
                 password=password,
             )
-            userId = user.uuid
+            userId = user.id
             userCode = user.code
             finalUsername = user.username
         except ValueError as exc:

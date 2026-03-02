@@ -13,12 +13,13 @@ from app.models.Dataset import Dataset
 from app.models.Province import Province
 from app.utils.ApiResponse import errorResponse
 
-COLUMNS = ["provinsi", *Province.NUMERIC_COLUMNS]
+COLUMNS = ["provinsi", "year", *Province.NUMERIC_COLUMNS]
 
 CSV_COLUMN_ALIASES: dict[str, str] = {
     "pdrb_perkapita": "pdrb_per_kapita",
     "pdrb": "pdrb_per_kapita",
     "listrik": "akses_listrik",
+    "tahun": "year",
 }
 
 logger = logging.getLogger(__name__)
@@ -56,7 +57,11 @@ class DatasetController:
         page = max(page, 1)
         pageSize = min(max(pageSize, 1), 100)
 
-        query = Province.query.filter_by(dataset_id=ds.id).order_by(Province.provinsi)
+        query = (
+            Province.query
+            .filter_by(dataset_id=ds.id)
+            .order_by(Province.year.desc(), Province.provinsi)
+        )
         total = query.count()
         provinces = query.offset((page - 1) * pageSize).limit(pageSize).all()
 
@@ -79,7 +84,11 @@ class DatasetController:
 
         n = request.args.get("n", 5, type=int)
 
-        query = Province.query.filter_by(dataset_id=ds.id).order_by(Province.provinsi)
+        query = (
+            Province.query
+            .filter_by(dataset_id=ds.id)
+            .order_by(Province.year.desc(), Province.provinsi)
+        )
         total = query.count()
         n = min(max(1, n), total) if total > 0 else 0
         provinces = query.limit(n).all() if n > 0 else []
@@ -107,7 +116,10 @@ class DatasetController:
             return errorResponse("Dataset version tidak ditemukan", "DATASET_VERSION_NOT_FOUND", 404)
 
         provinces = (
-            Province.query.filter_by(dataset_id=ds.id).order_by(Province.provinsi).all()
+            Province.query
+            .filter_by(dataset_id=ds.id)
+            .order_by(Province.year.desc(), Province.provinsi)
+            .all()
         )
 
         return jsonify(
@@ -156,9 +168,15 @@ class DatasetController:
 
         yearRaw = request.form.get("year", "2023")
         try:
-            year = int(yearRaw)
+            defaultYear = int(yearRaw)
         except ValueError:
             return errorResponse("Parameter 'year' harus berupa angka", "INVALID_YEAR", 400)
+        if defaultYear < 1900 or defaultYear > 2100:
+            return errorResponse(
+                "Parameter 'year' harus di rentang 1900-2100",
+                "INVALID_YEAR",
+                400,
+            )
 
         name = request.form.get("name", "Investasi Per Provinsi Indonesia")
         description = request.form.get(
@@ -189,6 +207,7 @@ class DatasetController:
         headersMapped = [CSV_COLUMN_ALIASES.get(h, h) for h in headersRaw]
         headers = set(headersMapped)
         reader.fieldnames = headersMapped
+        hasYearColumn = "year" in headers
 
         missing = DatasetController.REQUIRED_COLUMNS - headers
         if missing:
@@ -201,8 +220,10 @@ class DatasetController:
             )
 
         rows: list[dict] = []
+        seenProvinceYears: set[tuple[str, int]] = set()
         seenProvinces: set[str] = set()
         errors: list[str] = []
+        yearsSeen: set[int] = set()
 
         for i, rawRow in enumerate(reader, start=2):
             row = {k.strip(): v.strip() if v else "" for k, v in rawRow.items()}
@@ -212,12 +233,40 @@ class DatasetController:
                 errors.append(f"Baris {i}: kolom 'provinsi' kosong")
                 continue
 
-            if provinsi in seenProvinces:
-                errors.append(f"Baris {i}: duplikat provinsi '{provinsi}'")
-                continue
-            seenProvinces.add(provinsi)
+            if hasYearColumn:
+                yearStr = row.get("year", "").strip()
+                if not yearStr:
+                    errors.append(
+                        f"Baris {i}: kolom 'year' kosong untuk {provinsi}"
+                    )
+                    continue
+                try:
+                    rowYear = int(yearStr)
+                except ValueError:
+                    errors.append(
+                        f"Baris {i}: nilai 'year' bukan angka ('{yearStr}') untuk {provinsi}"
+                    )
+                    continue
+            else:
+                rowYear = defaultYear
 
-            parsed: dict = {"provinsi": provinsi, "year": year}
+            if rowYear < 1900 or rowYear > 2100:
+                errors.append(
+                    f"Baris {i}: nilai 'year' di luar rentang 1900-2100 ({rowYear}) untuk {provinsi}"
+                )
+                continue
+
+            key = (provinsi, rowYear)
+            if key in seenProvinceYears:
+                errors.append(
+                    f"Baris {i}: duplikat provinsi-year '{provinsi}' ({rowYear})"
+                )
+                continue
+            seenProvinceYears.add(key)
+            seenProvinces.add(provinsi)
+            yearsSeen.add(rowYear)
+
+            parsed: dict = {"provinsi": provinsi, "year": rowYear}
             for col in Province.NUMERIC_COLUMNS:
                 valStr = row.get(col, "").strip()
                 if not valStr:
@@ -244,6 +293,10 @@ class DatasetController:
         if len(rows) == 0:
             return errorResponse("CSV tidak memiliki baris data", "CSV_NO_ROWS", 400)
 
+        minYear = min(yearsSeen)
+        maxYear = max(yearsSeen)
+        uniqueProvinceCount = len(seenProvinces)
+
         checksum = Dataset.computeChecksum(rawBytes)
         existing = Dataset.query.filter_by(checksum=checksum).first()
         if existing:
@@ -266,22 +319,27 @@ class DatasetController:
                 version=newVersion,
                 name=name,
                 description=description,
-                year=year,
+                year=maxYear,
                 is_active=False,
                 uploaded_by=uploaderId,
                 original_filename=file.filename,
                 checksum=checksum,
-                row_count=len(rows),
+                row_count=uniqueProvinceCount,
             )
             ds.ensurePublicIdentifiers()
             db.session.add(ds)
             db.session.flush()
 
-            seq = Province.nextSequenceForYear(year)
-            for offset, r in enumerate(rows):
+            yearSeqCursor = {
+                y: Province.nextSequenceForYear(y) for y in sorted(yearsSeen)
+            }
+            for r in rows:
+                rowYear = int(r["year"])
+                seq = yearSeqCursor[rowYear]
+                yearSeqCursor[rowYear] = seq + 1
                 province = Province(
                     dataset_id=ds.id,
-                    code=Province.buildCode(seq + offset, year),
+                    code=Province.buildCode(seq, rowYear),
                     **r,
                 )
                 province.ensurePublicIdentifiers()
@@ -300,16 +358,17 @@ class DatasetController:
             jsonify(
                 {
                     "message": (
-                        f"Berhasil mengupload {len(rows)} provinsi "
-                        f"(v{newVersion}, tahun {year})"
+                        f"Berhasil mengupload {len(rows)} baris "
+                        f"({uniqueProvinceCount} provinsi, v{newVersion}, periode {minYear}-{maxYear})"
                     ),
                     "dataset": ds.toDict(),
-                    "row_count": len(rows),
-                    "year": year,
+                    "record_count": len(rows),
+                    "row_count": uniqueProvinceCount,
+                    "year": maxYear,
+                    "year_range": {"min": minYear, "max": maxYear},
                     "version": newVersion,
-                    "columns": sorted(DatasetController.REQUIRED_COLUMNS),
+                    "columns": sorted(DatasetController.REQUIRED_COLUMNS | {"year"}),
                 }
             ),
             201,
         )
-

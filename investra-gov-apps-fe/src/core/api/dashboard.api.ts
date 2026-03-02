@@ -8,6 +8,10 @@ export interface DashboardSummary {
   averagePdrbPerKapita: number;
   averageTpt: number;
   averageAksesListrik: number;
+  datasetVersion: number;
+  datasetYear: number;
+  datasetYearMin: number;
+  datasetYearMax: number;
 }
 
 export interface ProvinceListItem {

@@ -11,7 +11,12 @@ from app.utils.PublicIdentifier import generateUuid, nextCode
 class Province(db.Model):
     __tablename__ = "provinces"
     __table_args__ = (
-        db.UniqueConstraint("dataset_id", "provinsi", name="uq_province_per_dataset"),
+        db.UniqueConstraint(
+            "dataset_id",
+            "provinsi",
+            "year",
+            name="uq_province_per_dataset_year",
+        ),
         db.CheckConstraint("pmdn_rp >= 0", name="ck_provinces_pmdn_non_negative"),
         db.CheckConstraint("fdi_rp >= 0", name="ck_provinces_fdi_non_negative"),
         db.CheckConstraint("pdrb_per_kapita >= 0", name="ck_provinces_pdrb_non_negative"),
@@ -22,11 +27,10 @@ class Province(db.Model):
         db.CheckConstraint("year BETWEEN 1900 AND 2100", name="ck_provinces_year_range"),
     )
 
-    id = db.Column(db.Integer, primary_key=True)
-    uuid = db.Column(db.String(36), unique=True, nullable=False, index=True, default=generateUuid)
+    id = db.Column(db.String(36), primary_key=True, default=generateUuid)
     code = db.Column(db.String(32), unique=True, nullable=False, index=True)
     dataset_id = db.Column(
-        db.Integer,
+        db.String(36),
         db.ForeignKey("datasets.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
@@ -52,19 +56,13 @@ class Province(db.Model):
     ]
 
     @classmethod
-    def getByPublicId(cls, publicId: str | int) -> "Province | None":
-        if publicId is None:
+    def getByPublicId(cls, publicId: str) -> "Province | None":
+        if not publicId:
             return None
-        if isinstance(publicId, int):
-            return db.session.get(cls, publicId)
         publicId = str(publicId).strip()
         if not publicId:
             return None
-        if publicId.isdigit():
-            legacy = db.session.get(cls, int(publicId))
-            if legacy is not None:
-                return legacy
-        return cls.query.filter(or_(cls.uuid == publicId, cls.code == publicId)).first()
+        return cls.query.filter(or_(cls.id == publicId, cls.code == publicId)).first()
 
     @classmethod
     def nextSequenceForYear(cls, year: int) -> int:
@@ -94,16 +92,15 @@ class Province(db.Model):
         )
 
     def ensurePublicIdentifiers(self) -> None:
-        if not self.uuid:
-            self.uuid = generateUuid()
+        if not self.id:
+            self.id = generateUuid()
         if not self.code:
             self.code = self.nextCode(self.year)
 
     def toDict(self) -> dict:
         return {
-            "id": self.uuid,
+            "id": self.id,
             "code": self.code,
-            "internal_id": self.id,
             "provinsi": self.provinsi,
             "pmdn_rp": self.pmdn_rp,
             "fdi_rp": self.fdi_rp,

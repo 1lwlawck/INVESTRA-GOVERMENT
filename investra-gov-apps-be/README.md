@@ -57,8 +57,7 @@ Semua entitas sekarang memakai public ID:
   - Province: `PROV0012026`
   - Analysis: `ANL0012026`
 
-Endpoint path seperti `/users/{id}` dan `/dataset/versions/{id}` menerima `UUID` atau `code`
-(dan tetap kompatibel dengan integer ID lama selama masa transisi).
+Endpoint path seperti `/users/{id}` dan `/dataset/versions/{id}` menerima `UUID` atau `code`.
 
 ## Postman
 

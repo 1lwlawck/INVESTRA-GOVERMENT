@@ -11,6 +11,7 @@ import {
   type PolicyResult,
   CLUSTER_COLORS,
 } from "@/core/api/analysis.api";
+import { ApiError } from '@/core/api/http-client';
 import { BasicPageSkeleton } from "@/components/organisms/loading/PageSkeleton";
 
 export function PolicyView() {
@@ -30,11 +31,21 @@ export function PolicyView() {
       const data = await analysisApi.getPolicy();
       setPolicy(data);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Gagal memuat rekomendasi. Pastikan analisis sudah dijalankan."
-      );
+      if (err instanceof ApiError) {
+        if (err.code === 'NO_ACTIVE_DATASET') {
+          setError('Belum ada dataset aktif. Upload CSV terlebih dahulu di halaman Dataset.');
+        } else if (err.code === 'POLICY_NOT_FOUND' || err.code === 'ANALYSIS_NOT_FOUND') {
+          setError('Belum ada hasil analisis. Jalankan analisis terlebih dahulu untuk menghasilkan rekomendasi.');
+        } else {
+          setError(err.message);
+        }
+      } else {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Gagal memuat rekomendasi. Pastikan analisis sudah dijalankan."
+        );
+      }
     } finally {
       setLoading(false);
     }

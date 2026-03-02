@@ -5,11 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GitBranch, TrendingUp, MapPin, Play } from 'lucide-react';
 import { Skeleton } from "@/components/ui/skeleton";
+import { ApiError } from '@/core/api/http-client';
 import {
   analysisApi,
   type ClusterResult,
   type ClusterSummaryItem,
   CLUSTER_COLORS,
+  DEFAULT_PANEL_YEAR_START,
+  DEFAULT_PANEL_YEAR_END,
 } from "@/core/api/analysis.api";
 import { BasicPageSkeleton } from '@/components/organisms/loading/PageSkeleton';
 
@@ -18,6 +21,9 @@ interface ClusterCard {
   name: string;
   color: string;
   count: number;
+  observationCount?: number;
+  yearMin?: number;
+  yearMax?: number;
   avgPDRB: number;
   avgIPM: number;
   avgInvestment: number;
@@ -31,6 +37,8 @@ export function ClusteringView() {
   const [loading, setLoading] = useState(true);
   const [runningAnalysis, setRunningAnalysis] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [panelYearStart, setPanelYearStart] = useState<number>(DEFAULT_PANEL_YEAR_START);
+  const [panelYearEnd, setPanelYearEnd] = useState<number>(DEFAULT_PANEL_YEAR_END);
 
   useEffect(() => {
     loadClusters();
@@ -42,9 +50,24 @@ export function ClusteringView() {
     try {
       const data = await analysisApi.getClusters();
       setClusterData(data);
+      if (data.yearRange) {
+        setPanelYearStart(data.yearRange.start);
+        setPanelYearEnd(data.yearRange.end);
+      }
       buildClustersFromSummary(data);
-    } catch {
+    } catch (err) {
       setClusterData(null);
+      if (err instanceof ApiError) {
+        if (err.code === 'NO_ACTIVE_DATASET') {
+          setError('Belum ada dataset aktif. Upload CSV terlebih dahulu di halaman Dataset.');
+          return;
+        }
+        if (err.code === 'ANALYSIS_NOT_FOUND') {
+          setError('Belum ada hasil analisis. Jalankan analisis terlebih dahulu.');
+          return;
+        }
+      }
+      setError(err instanceof Error ? err.message : 'Gagal memuat data clustering');
     } finally {
       setLoading(false);
     }
@@ -59,6 +82,9 @@ export function ClusteringView() {
       name: `Klaster ${s.cluster + 1} - ${s.label}`,
       color: CLUSTER_COLORS[s.cluster] || '#6B7280',
       count: s.count,
+      observationCount: s.observationCount,
+      yearMin: s.yearMin,
+      yearMax: s.yearMax,
       avgPDRB: s.statistics?.pdrbPerKapita?.mean ?? 0,
       avgIPM: s.statistics?.ipm?.mean ?? 0,
       avgInvestment: (s.statistics?.pmdnRp?.mean ?? 0) + (s.statistics?.fdiRp?.mean ?? 0),
@@ -73,14 +99,20 @@ export function ClusteringView() {
     setError(null);
     try {
       await analysisApi.run({
-        autoK: true,
-        kMin: 2,
-        kMax: 8,
-        minClusterSize: 3,
+        autoK: false,
+        k: 4,
+        dataMode: 'panel',
+        panelYearStart,
+        panelYearEnd,
+        normaliseByYear: true,
       });
       await loadClusters();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal menjalankan analisis');
+      if (err instanceof ApiError && err.code === 'NO_ACTIVE_DATASET') {
+        setError('Belum ada dataset aktif. Upload CSV terlebih dahulu di halaman Dataset.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Gagal menjalankan analisis');
+      }
     } finally {
       setRunningAnalysis(false);
     }
@@ -113,7 +145,23 @@ export function ClusteringView() {
     );
   }
 
-  const totalProvinces = Object.keys(clusterData.assignments).length;
+  const modeFromResult = clusterData.dataMode || 'panel';
+  const uniqueProvinces = new Set(
+    clusterData.summary.flatMap((item) => item.provinces)
+  );
+  const totalProvinces = uniqueProvinces.size;
+  const totalObservations = Object.keys(clusterData.assignments).length;
+  const observationLabel =
+    modeFromResult === 'panel' ? 'Observasi Terklasifikasi' : 'Provinsi Terklasifikasi';
+  const observationValue =
+    modeFromResult === 'panel' ? totalObservations : totalProvinces;
+  const yearRangeLabel = clusterData.yearRange
+    ? `${clusterData.yearRange.start}-${clusterData.yearRange.end}`
+    : `${panelYearStart}-${panelYearEnd}`;
+  const panelStability = clusterData.panelStability;
+  const panelStabilityPercent = panelStability
+    ? `${(panelStability.stabilityRatio * 100).toFixed(1)}%`
+    : '-';
 
   return (
     <div className="space-y-6">
@@ -126,6 +174,39 @@ export function ClusteringView() {
           Pengelompokan provinsi berdasarkan kesamaan karakteristik investasi dan pembangunan
         </p>
       </div>
+
+      <Card className="border border-gray-200 bg-white">
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline">Mode: {modeFromResult}</Badge>
+              <Badge variant="secondary">k = {clusterData.k}</Badge>
+              {modeFromResult === 'panel' && (
+                <Badge variant="outline">Tahun: {yearRangeLabel}</Badge>
+              )}
+              {modeFromResult === 'panel' && panelStability && (
+                <Badge variant="secondary">
+                  Stabilitas Provinsi: {panelStabilityPercent}
+                </Badge>
+              )}
+            </div>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button
+                onClick={handleRunAnalysis}
+                disabled={runningAnalysis}
+                className="bg-[#002C5F] hover:bg-[#003D7A]"
+              >
+                {runningAnalysis ? (
+                  <Skeleton className="h-4 w-4 mr-2 rounded-sm" />
+                ) : (
+                  <Play className="h-4 w-4 mr-2" />
+                )}
+                Jalankan Ulang
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Clustering Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -140,16 +221,20 @@ export function ClusteringView() {
         <Card className="bg-white shadow-md border-2 border-gray-100">
           <CardContent className="p-6 text-center">
             <MapPin className="h-10 w-10 text-[#F9B233] mx-auto mb-3" />
-            <div className="text-3xl text-[#002C5F] mb-1">{totalProvinces}</div>
-            <p className="text-sm text-gray-600">Provinsi Terklasifikasi</p>
+            <div className="text-3xl text-[#002C5F] mb-1">{observationValue}</div>
+            <p className="text-sm text-gray-600">{observationLabel}</p>
           </CardContent>
         </Card>
 
         <Card className="bg-white shadow-md border-2 border-gray-100">
           <CardContent className="p-6 text-center">
             <TrendingUp className="h-10 w-10 text-[#059669] mx-auto mb-3" />
-            <div className="text-3xl text-[#002C5F] mb-1">{clusterData.metrics.silhouetteScore.toFixed(3)}</div>
-            <p className="text-sm text-gray-600">Silhouette Score</p>
+            <div className="text-3xl text-[#002C5F] mb-1">
+              {modeFromResult === 'panel' ? panelStabilityPercent : clusterData.metrics.silhouetteScore.toFixed(3)}
+            </div>
+            <p className="text-sm text-gray-600">
+              {modeFromResult === 'panel' ? 'Stabilitas Provinsi' : 'Silhouette Score'}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -171,7 +256,11 @@ export function ClusteringView() {
                 <div>
                   <CardTitle className="text-[#002C5F]">{cluster.name}</CardTitle>
                   <CardDescription className="mt-1">
-                    {cluster.count} Provinsi dalam klaster ini
+                    {modeFromResult === 'panel'
+                      ? `${cluster.observationCount ?? cluster.count} Observasi (${cluster.count} Provinsi${
+                          cluster.yearMin && cluster.yearMax ? `, ${cluster.yearMin}-${cluster.yearMax}` : ''
+                        })`
+                      : `${cluster.count} Provinsi dalam klaster ini`}
                   </CardDescription>
                 </div>
               </div>

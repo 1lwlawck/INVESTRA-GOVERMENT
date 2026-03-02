@@ -4,6 +4,7 @@ Scoped to the currently active dataset version.
 """
 
 from flask import jsonify
+from sqlalchemy import and_
 
 from app.Extensions import db
 from app.models.Dataset import Dataset
@@ -20,27 +21,48 @@ class DashboardController:
         if ds is None:
             return errorResponse("Tidak ada dataset aktif", "NO_ACTIVE_DATASET", 404)
 
-        base = Province.query.filter_by(dataset_id=ds.id)
-        totalProvinces = base.count()
+        perProvince = (
+            db.session.query(
+                Province.provinsi.label("provinsi"),
+                db.func.avg(Province.pmdn_rp).label("pmdn_rp"),
+                db.func.avg(Province.fdi_rp).label("fdi_rp"),
+                db.func.avg(Province.ipm).label("ipm"),
+                db.func.avg(Province.kemiskinan).label("kemiskinan"),
+                db.func.avg(Province.pdrb_per_kapita).label("pdrb_per_kapita"),
+                db.func.avg(Province.tpt).label("tpt"),
+                db.func.avg(Province.akses_listrik).label("akses_listrik"),
+            )
+            .filter(Province.dataset_id == ds.id)
+            .group_by(Province.provinsi)
+            .subquery()
+        )
 
         agg = db.session.query(
-            db.func.sum(Province.pmdn_rp),
-            db.func.sum(Province.fdi_rp),
-            db.func.avg(Province.ipm),
-            db.func.avg(Province.kemiskinan),
-            db.func.avg(Province.pdrb_per_kapita),
-            db.func.avg(Province.tpt),
-            db.func.avg(Province.akses_listrik),
+            db.func.count(perProvince.c.provinsi),
+            db.func.sum(perProvince.c.pmdn_rp),
+            db.func.sum(perProvince.c.fdi_rp),
+            db.func.avg(perProvince.c.ipm),
+            db.func.avg(perProvince.c.kemiskinan),
+            db.func.avg(perProvince.c.pdrb_per_kapita),
+            db.func.avg(perProvince.c.tpt),
+            db.func.avg(perProvince.c.akses_listrik),
+        ).first()
+        yearAgg = db.session.query(
+            db.func.min(Province.year),
+            db.func.max(Province.year),
         ).filter(Province.dataset_id == ds.id).first()
 
-        totalPmdn = float(agg[0]) if agg[0] else 0
-        totalFdi = float(agg[1]) if agg[1] else 0
+        totalProvinces = int(agg[0]) if agg and agg[0] else 0
+        totalPmdn = float(agg[1]) if agg and agg[1] else 0
+        totalFdi = float(agg[2]) if agg and agg[2] else 0
         totalInvestment = totalPmdn + totalFdi
-        avgIpm = float(agg[2]) if agg[2] else 0
-        avgKemiskinan = float(agg[3]) if agg[3] else 0
-        avgPdrb = float(agg[4]) if agg[4] else 0
-        avgTpt = float(agg[5]) if agg[5] else 0
-        avgAksesListrik = float(agg[6]) if agg[6] else 0
+        avgIpm = float(agg[3]) if agg and agg[3] else 0
+        avgKemiskinan = float(agg[4]) if agg and agg[4] else 0
+        avgPdrb = float(agg[5]) if agg and agg[5] else 0
+        avgTpt = float(agg[6]) if agg and agg[6] else 0
+        avgAksesListrik = float(agg[7]) if agg and agg[7] else 0
+        datasetYearMin = int(yearAgg[0]) if yearAgg and yearAgg[0] else ds.year
+        datasetYearMax = int(yearAgg[1]) if yearAgg and yearAgg[1] else ds.year
 
         return jsonify(
             {
@@ -53,6 +75,8 @@ class DashboardController:
                 "average_akses_listrik": round(avgAksesListrik, 2),
                 "dataset_version": ds.version,
                 "dataset_year": ds.year,
+                "dataset_year_min": datasetYearMin,
+                "dataset_year_max": datasetYearMax,
             }
         )
 
@@ -63,16 +87,33 @@ class DashboardController:
         if ds is None:
             return errorResponse("Tidak ada dataset aktif", "NO_ACTIVE_DATASET", 404)
 
+        latestYearSubquery = (
+            db.session.query(
+                Province.provinsi.label("provinsi"),
+                db.func.max(Province.year).label("latest_year"),
+            )
+            .filter(Province.dataset_id == ds.id)
+            .group_by(Province.provinsi)
+            .subquery()
+        )
+
         allProvinces = (
-            Province.query
-            .filter_by(dataset_id=ds.id)
-            .order_by(Province.provinsi)
+            db.session.query(Province)
+            .join(
+                latestYearSubquery,
+                and_(
+                    Province.provinsi == latestYearSubquery.c.provinsi,
+                    Province.year == latestYearSubquery.c.latest_year,
+                ),
+            )
+            .filter(Province.dataset_id == ds.id)
+            .order_by(Province.provinsi.asc())
             .all()
         )
         return jsonify(
             {
                 "provinces": [
-                    {"id": p.uuid, "code": p.code, "provinsi": p.provinsi}
+                    {"id": p.id, "code": p.code, "provinsi": p.provinsi}
                     for p in allProvinces
                 ]
             }

@@ -1,5 +1,35 @@
 import { apiFetch } from '@/core/api/http-client';
 
+export type AnalysisDataMode = 'panel';
+export const DEFAULT_PANEL_YEAR_START = 2022;
+export const DEFAULT_PANEL_YEAR_END = 2024;
+
+export interface AnalysisYearRange {
+  start: number;
+  end: number;
+}
+
+export interface ProvincePanelStability {
+  province: string;
+  observationCount: number;
+  dominantCluster: number;
+  dominantCount: number;
+  consistencyRatio: number;
+  isStable: boolean;
+  isStrictStable: boolean;
+}
+
+export interface PanelStabilitySummary {
+  provinceCount: number;
+  stableProvinceCount: number;
+  stabilityRatio: number;
+  thresholdRatio: number;
+  strictStableProvinceCount: number;
+  strictStabilityRatio: number;
+  strictThresholdRatio: number;
+  provinces: ProvincePanelStability[];
+}
+
 export interface PCAComponent {
   component: number;
   explainedVarianceRatio: number;
@@ -38,6 +68,9 @@ export interface ClusterSummaryItem {
   cluster: number;
   label: string;
   count: number;
+  observationCount?: number;
+  yearMin?: number;
+  yearMax?: number;
   provinces: string[];
   statistics: Record<string, ClusterVariableStats>;
 }
@@ -51,14 +84,17 @@ export interface ClusterResult {
   kEvaluation: EvaluateKItem[] | null;
   logTransformed: boolean;
   transformInfo: string[] | null;
+  dataMode?: AnalysisDataMode;
+  yearRange?: AnalysisYearRange | null;
+  panelStability?: PanelStabilitySummary | null;
 }
 
 export interface AnalysisRunResult {
   id: string;
   code?: string;
-  internalId?: number;
   datasetId: string | null;
   datasetCode?: string | null;
+  dataMode?: AnalysisDataMode;
   k: number;
   pcaComponents: PCAComponent[];
   pcaLoadings: Record<string, Record<string, number>>;
@@ -73,6 +109,8 @@ export interface AnalysisRunResult {
   kEvaluation: EvaluateKItem[] | null;
   logTransformed: boolean;
   transformInfo: string[] | null;
+  yearRange?: AnalysisYearRange | null;
+  panelStability?: PanelStabilitySummary | null;
   createdAt: string;
 }
 
@@ -84,15 +122,23 @@ export interface EvaluateKItem {
   calinskiHarabasz: number;
   minClusterCount?: number;
   validMinCluster?: boolean;
+  consensusStrength?: number;
 }
 
 export interface RunAnalysisOptions {
   k?: number;
   autoK?: boolean;
   logTransform?: boolean;
+  dataMode?: AnalysisDataMode;
+  panelYearStart?: number;
+  panelYearEnd?: number;
+  normaliseByYear?: boolean;
   kMin?: number;
   kMax?: number;
   minClusterSize?: number;
+  consensusRuns?: number;
+  kmeansNInit?: number;
+  enforceMinClusterSize?: boolean;
 }
 
 /** Cluster label & color constants (0 = highest investment -> 3 = lowest) */
@@ -179,10 +225,17 @@ export const analysisApi = {
   run: async (
     optionsOrK: RunAnalysisOptions | number = { autoK: true }
   ): Promise<AnalysisRunResult> => {
-    const payload: RunAnalysisOptions =
+    const requestedPayload: RunAnalysisOptions =
       typeof optionsOrK === 'number'
         ? { k: optionsOrK, autoK: false }
         : optionsOrK;
+    const payload: RunAnalysisOptions = {
+      ...requestedPayload,
+      dataMode: 'panel',
+      panelYearStart: DEFAULT_PANEL_YEAR_START,
+      panelYearEnd: DEFAULT_PANEL_YEAR_END,
+      normaliseByYear: true,
+    };
 
     return apiFetch<AnalysisRunResult>('/analysis/run', {
       method: 'POST',
@@ -198,9 +251,41 @@ export const analysisApi = {
     return apiFetch<ClusterResult>('/analysis/clusters');
   },
 
-  evaluateK: async (kMin = 2, kMax = 8): Promise<EvaluateKItem[]> => {
+  evaluateK: async (
+    kMin = 2,
+    kMax = 8,
+    options: {
+      panelYearStart?: number;
+      panelYearEnd?: number;
+      normaliseByYear?: boolean;
+      logTransform?: boolean;
+      minClusterSize?: number;
+      consensusRuns?: number;
+      kmeansNInit?: number;
+    } = {}
+  ): Promise<EvaluateKItem[]> => {
+    const searchParams = new URLSearchParams({
+      kMin: String(kMin),
+      kMax: String(kMax),
+      dataMode: 'panel',
+      panelYearStart: String(DEFAULT_PANEL_YEAR_START),
+      panelYearEnd: String(DEFAULT_PANEL_YEAR_END),
+      normaliseByYear: 'true',
+    });
+    if (typeof options.logTransform === 'boolean') {
+      searchParams.set('logTransform', String(options.logTransform));
+    }
+    if (typeof options.minClusterSize === 'number') {
+      searchParams.set('minClusterSize', String(options.minClusterSize));
+    }
+    if (typeof options.consensusRuns === 'number') {
+      searchParams.set('consensusRuns', String(options.consensusRuns));
+    }
+    if (typeof options.kmeansNInit === 'number') {
+      searchParams.set('kmeansNInit', String(options.kmeansNInit));
+    }
     const res = await apiFetch<{ evaluations: EvaluateKItem[] }>(
-      `/analysis/evaluate-k?kMin=${kMin}&kMax=${kMax}`
+      `/analysis/evaluate-k?${searchParams.toString()}`
     );
     return res.evaluations;
   },

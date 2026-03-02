@@ -64,7 +64,7 @@ class AuthController:
         if not user.is_active:
             return errorResponse("Akun dinonaktifkan", "ACCOUNT_DISABLED", 403)
 
-        if not user.uuid or not user.code:
+        if not user.id or not user.code:
             user.ensurePublicIdentifiers()
             db.session.commit()
 

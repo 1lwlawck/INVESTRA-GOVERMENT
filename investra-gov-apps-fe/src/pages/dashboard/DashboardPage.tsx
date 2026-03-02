@@ -105,10 +105,8 @@ export function DashboardView() {
     setError(null);
     try {
       await analysisApi.run({
-        autoK: true,
-        kMin: 2,
-        kMax: 8,
-        minClusterSize: 3,
+        autoK: false,
+        k: 4,
       });
       await loadData();
     } catch (err) {
@@ -126,6 +124,11 @@ export function DashboardView() {
         { title: 'Rata-rata PDRB/Kapita', value: `Rp ${summary.averagePdrbPerKapita.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`, icon: Calendar, color: 'bg-[#059669]' },
       ]
     : [];
+  const periodLabel = summary
+    ? (summary.datasetYearMin === summary.datasetYearMax
+      ? String(summary.datasetYearMax)
+      : `${summary.datasetYearMin}-${summary.datasetYearMax}`)
+    : '-';
 
   const evaluationMetrics = clusters
     ? [
@@ -135,6 +138,13 @@ export function DashboardView() {
         { title: 'Calinski-Harabasz Index', value: clusters.metrics.calinskiHarabasz.toLocaleString('id-ID', { maximumFractionDigits: 2 }), description: 'Rasio dispersi antar dan dalam cluster (semakin tinggi semakin baik)', icon: TrendingUp, color: '#059669' },
       ]
     : [];
+  const panelStability = clusters?.panelStability ?? null;
+  const strictStabilityText = panelStability
+    ? `${panelStability.strictStableProvinceCount}/${panelStability.provinceCount} provinsi`
+    : null;
+  const strictStabilityPercent = panelStability
+    ? `${(panelStability.strictStabilityRatio * 100).toFixed(1)}%`
+    : null;
 
   const POLICY_DESCRIPTIONS: Record<number, string> = {
     0: 'Kelola desentralisasi investasi dari kawasan terkonsentrasi untuk mendukung pemerataan pembangunan nasional.',
@@ -200,7 +210,7 @@ export function DashboardView() {
            <Calendar className="w-5 h-5 text-[#F9B233]" />
            <div>
              <p className="text-xs text-gray-500">Periode Data</p>
-             <p className="text-sm font-semibold text-[#002C5F]">Rata-rata 2022–2024</p>
+             <p className="text-sm font-semibold text-[#002C5F]">{periodLabel}</p>
            </div>
         </div>
       </div>
@@ -237,7 +247,14 @@ export function DashboardView() {
             <p className="text-sm text-gray-600 mt-1">Kualitas dan performa algoritma K-Means</p>
           </div>
           {clusters ? (
-            <Badge className="bg-[#059669] text-white">K-Means (k={clusters.k})</Badge>
+            <div className="flex items-center gap-2">
+              <Badge className="bg-[#059669] text-white">K-Means (k={clusters.k})</Badge>
+              {strictStabilityText && (
+                <Badge variant="secondary">
+                  Stabilitas Ketat 3/3: {strictStabilityText} ({strictStabilityPercent})
+                </Badge>
+              )}
+            </div>
           ) : (
             <Button onClick={handleRunAnalysis} disabled={analysisLoading} className="bg-[#002C5F] hover:bg-[#003D7A]">
               {analysisLoading ? <Skeleton className="h-4 w-4 mr-2 rounded-sm" /> : <Play className="h-4 w-4 mr-2" />}

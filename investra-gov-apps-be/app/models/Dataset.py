@@ -20,8 +20,7 @@ class Dataset(db.Model):
         db.CheckConstraint("year BETWEEN 1900 AND 2100", name="ck_datasets_year_range"),
     )
 
-    id = db.Column(db.Integer, primary_key=True)
-    uuid = db.Column(db.String(36), unique=True, nullable=False, index=True, default=generateUuid)
+    id = db.Column(db.String(36), primary_key=True, default=generateUuid)
     code = db.Column(db.String(32), unique=True, nullable=False, index=True)
     version = db.Column(db.Integer, nullable=False, default=1)
     name = db.Column(
@@ -40,7 +39,7 @@ class Dataset(db.Model):
     )
 
     uploaded_by = db.Column(
-        db.Integer,
+        db.String(36),
         db.ForeignKey("users.id", ondelete="SET NULL"),
         nullable=True,
     )
@@ -86,35 +85,28 @@ class Dataset(db.Model):
         return nextCode([row[0] for row in existing], prefix="DTS", sequenceWidth=3)
 
     @classmethod
-    def getByPublicId(cls, publicId: str | int) -> "Dataset | None":
-        if publicId is None:
+    def getByPublicId(cls, publicId: str) -> "Dataset | None":
+        if not publicId:
             return None
-        if isinstance(publicId, int):
-            return db.session.get(cls, publicId)
         publicId = str(publicId).strip()
         if not publicId:
             return None
-        if publicId.isdigit():
-            legacy = db.session.get(cls, int(publicId))
-            if legacy is not None:
-                return legacy
-        return cls.query.filter(or_(cls.uuid == publicId, cls.code == publicId)).first()
+        return cls.query.filter(or_(cls.id == publicId, cls.code == publicId)).first()
 
     @staticmethod
     def computeChecksum(content: bytes) -> str:
         return hashlib.sha256(content).hexdigest()
 
     def ensurePublicIdentifiers(self) -> None:
-        if not self.uuid:
-            self.uuid = generateUuid()
+        if not self.id:
+            self.id = generateUuid()
         if not self.code:
             self.code = self.nextCode()
 
     def toDict(self, includeUploader: bool = True) -> dict:
         data = {
-            "id": self.uuid,
+            "id": self.id,
             "code": self.code,
-            "internal_id": self.id,
             "version": self.version,
             "name": self.name,
             "description": self.description,
@@ -128,7 +120,7 @@ class Dataset(db.Model):
 
         if includeUploader and self.uploader:
             data["uploaded_by"] = {
-                "id": self.uploader.uuid,
+                "id": self.uploader.id,
                 "code": self.uploader.code,
                 "username": self.uploader.username,
                 "full_name": self.uploader.full_name,

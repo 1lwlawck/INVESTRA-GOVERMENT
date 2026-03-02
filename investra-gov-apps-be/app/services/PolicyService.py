@@ -16,7 +16,9 @@ Thresholding uses ratio = cluster_mean / national_mean:
 
 For INVERSE indicators (kemiskinan, tpt) where lower is better:
   - A high ratio means BAD condition, so interpretation is flipped.
+  
 """
+
 
 from __future__ import annotations
 
@@ -620,9 +622,9 @@ def generatePolicyRecommendations() -> dict:
         "cluster_policies": clusterPolicies,
         "metadata": {
             "k": result.k,
-            "dataset_id": result.dataset.uuid if result.dataset else None,
+            "dataset_id": result.dataset.id if result.dataset else None,
             "dataset_code": result.dataset.code if result.dataset else None,
-            "analysis_id": result.uuid,
+            "analysis_id": result.id,
             "analysis_code": result.code,
             "log_transformed": result.log_transformed,
         },
