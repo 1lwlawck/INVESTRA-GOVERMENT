@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class DatasetController:
-    REQUIRED_COLUMNS: ClassVar[set[str]] = {"provinsi", *Province.NUMERIC_COLUMNS}
+    REQUIRED_COLUMNS: ClassVar[set[str]] = {"provinsi", "year", *Province.NUMERIC_COLUMNS}
 
 def get_info():
     ds = Dataset.get_active()
