@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import os
+import secrets
 
 import pytest
 
 # Ensure required env vars are set before the app factory runs
-os.environ.setdefault("SECRET_KEY", "test-secret-key-for-pytest")
+os.environ.setdefault("SECRET_KEY", secrets.token_urlsafe(32))
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 os.environ.setdefault("FLASK_ENV", "development")
 os.environ.setdefault("CORS_ORIGINS", "*")
@@ -17,8 +18,16 @@ from app import create_app
 from app.extensions import db
 from app.models.user import User
 
-SUPERADMIN_PASSWORD = "Sup3rAdmin!"
-ADMIN_PASSWORD = "Admin123!"
+
+def _generate_test_password() -> str:
+    """Generate a per-session strong password meeting the policy
+    (1 lower, 1 upper, 1 digit, min 8). Avoids hardcoded literals so
+    secret scanners don't flag the test fixtures."""
+    return f"T{secrets.token_hex(6)}A1"
+
+
+SUPERADMIN_PASSWORD = _generate_test_password()
+ADMIN_PASSWORD = _generate_test_password()
 
 
 @pytest.fixture(scope="session")

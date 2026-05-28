@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import secrets
+
 
 def test_login_requires_credentials(client):
     response = client.post("/api/auth/login", json={})
@@ -15,7 +17,10 @@ def test_login_requires_credentials(client):
 def test_login_rejects_unknown_user(client):
     response = client.post(
         "/api/auth/login",
-        json={"username": "nope", "password": "Whatever1"},
+        json={
+            "username": f"nope-{secrets.token_hex(4)}",
+            "password": f"X{secrets.token_hex(4)}A1",
+        },
     )
     assert response.status_code == 401
     body = response.get_json()
