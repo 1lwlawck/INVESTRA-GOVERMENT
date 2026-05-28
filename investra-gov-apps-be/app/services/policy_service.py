@@ -16,15 +16,13 @@ Thresholding uses ratio = cluster_mean / national_mean:
 
 For INVERSE indicators (kemiskinan, tpt) where lower is better:
   - A high ratio means BAD condition, so interpretation is flipped.
-  
 """
 
 
 from __future__ import annotations
 
-from app.models.Province import Province
-from app.models.AnalysisResult import AnalysisResult
-from app.services.AnalysisService import getLatestResult, _loadDataframe
+from app.models.province import Province
+from app.services.analysis_service import _load_dataframe, get_latest_result
 
 # ─── Constants ────────────────────────────────────────────────────────
 
@@ -51,10 +49,10 @@ THRESHOLDS = {
 }
 
 
-def _classifyRatio(ratio: float, isInverse: bool = False) -> str:
+def _classify_ratio(ratio: float, is_inverse: bool = False) -> str:
     """Classify a ratio into a category.
     For inverse indicators, a high ratio means bad performance."""
-    if isInverse:
+    if is_inverse:
         # Flip: high ratio = bad → "VERY_HIGH" means very bad (kemiskinan tinggi)
         if ratio >= 1.50:
             return "VERY_HIGH"
@@ -80,12 +78,12 @@ def _classifyRatio(ratio: float, isInverse: bool = False) -> str:
             return "VERY_LOW"
 
 
-def _classifyCondition(ratio: float, isInverse: bool = False) -> str:
+def _classify_condition(ratio: float, is_inverse: bool = False) -> str:
     """Return a human-readable condition label relative to national avg.
     For inverse indicators, HIGHER ratio = WORSE condition."""
-    cat = _classifyRatio(ratio, isInverse)
+    cat = _classify_ratio(ratio, is_inverse)
 
-    if isInverse:
+    if is_inverse:
         # kemiskinan/tpt: higher ratio means worse
         mapping = {
             "VERY_HIGH": "Sangat Buruk",
@@ -107,27 +105,27 @@ def _classifyCondition(ratio: float, isInverse: bool = False) -> str:
 
 # ─── PCA Interpretation ──────────────────────────────────────────────
 
-def _interpretPcaLoadings(
+def _interpret_pca_loadings(
     loadings: dict[str, dict[str, float]],
 ) -> list[dict]:
     """Interpret dominant factors from PCA loadings for PC1 and PC2."""
     interpretations = []
 
-    for pcName in ["PC1", "PC2"]:
-        if pcName not in loadings:
+    for pc_name in ["PC1", "PC2"]:
+        if pc_name not in loadings:
             continue
-        pcLoadings = loadings[pcName]
+        pc_loadings = loadings[pc_name]
         # Sort by absolute value (descending)
-        sortedVars = sorted(
-            pcLoadings.items(), key=lambda x: abs(x[1]), reverse=True
+        sorted_vars = sorted(
+            pc_loadings.items(), key=lambda x: abs(x[1]), reverse=True
         )
 
-        topVars = sortedVars[:3]  # top 3 dominant variables
-        dominantVars = []
-        for var, loading in topVars:
+        top_vars = sorted_vars[:3]  # top 3 dominant variables
+        dominant_vars = []
+        for var, loading in top_vars:
             sign = "positif" if loading > 0 else "negatif"
             label = VARIABLE_LABELS.get(var, var)
-            dominantVars.append({
+            dominant_vars.append({
                 "variable": var,
                 "label": label,
                 "loading": round(loading, 4),
@@ -135,27 +133,27 @@ def _interpretPcaLoadings(
             })
 
         # Determine dimension interpretation
-        varNames = [v["variable"] for v in dominantVars]
-        investVars = {"pmdn_rp", "fdi_rp"}
-        welfareVars = {"ipm", "kemiskinan"}
-        infraVars = {"akses_listrik"}
-        laborVars = {"tpt"}
+        var_names = [v["variable"] for v in dominant_vars]
+        invest_vars = {"pmdn_rp", "fdi_rp"}
+        welfare_vars = {"ipm", "kemiskinan"}
+        infra_vars = {"akses_listrik"}
+        labor_vars = {"tpt"}
 
-        if investVars & set(varNames):
+        if invest_vars & set(var_names):
             dimension = "Dimensi Investasi"
-        elif welfareVars & set(varNames):
+        elif welfare_vars & set(var_names):
             dimension = "Dimensi Kesejahteraan"
-        elif infraVars & set(varNames):
+        elif infra_vars & set(var_names):
             dimension = "Dimensi Infrastruktur"
-        elif laborVars & set(varNames):
+        elif labor_vars & set(var_names):
             dimension = "Dimensi Ketenagakerjaan"
         else:
             dimension = "Dimensi Ekonomi"
 
         interpretations.append({
-            "component": pcName,
+            "component": pc_name,
             "dimension": dimension,
-            "dominant_variables": dominantVars,
+            "dominant_variables": dominant_vars,
         })
 
     return interpretations
@@ -163,7 +161,7 @@ def _interpretPcaLoadings(
 
 # ─── Policy Rule Engine ──────────────────────────────────────────────
 
-def _generatePolicyDirections(
+def _generate_policy_directions(
     characteristics: dict[str, dict],
 ) -> tuple[list[dict], str]:
     """Apply rule-based mapping to generate policy directions.
@@ -173,26 +171,26 @@ def _generatePolicyDirections(
     cats = {var: info["category"] for var, info in characteristics.items()}
 
     # Derived aggregates
-    investCats = [cats.get("pmdn_rp", "MEDIUM"), cats.get("fdi_rp", "MEDIUM")]
-    investLevel = (
-        "HIGH" if any(c in ("HIGH", "VERY_HIGH") for c in investCats)
-        else "LOW" if any(c in ("LOW", "VERY_LOW") for c in investCats)
+    invest_cats = [cats.get("pmdn_rp", "MEDIUM"), cats.get("fdi_rp", "MEDIUM")]
+    invest_level = (
+        "HIGH" if any(c in ("HIGH", "VERY_HIGH") for c in invest_cats)
+        else "LOW" if any(c in ("LOW", "VERY_LOW") for c in invest_cats)
         else "MEDIUM"
     )
 
-    ipmCat = cats.get("ipm", "MEDIUM")
-    kemiskinanCat = cats.get("kemiskinan", "MEDIUM")
-    listrikCat = cats.get("akses_listrik", "MEDIUM")
-    tptCat = cats.get("tpt", "MEDIUM")
+    ipm_cat = cats.get("ipm", "MEDIUM")
+    kemiskinan_cat = cats.get("kemiskinan", "MEDIUM")
+    listrik_cat = cats.get("akses_listrik", "MEDIUM")
+    tpt_cat = cats.get("tpt", "MEDIUM")
 
     policies: list[dict] = []
-    dominantFactor = "Pertumbuhan Berimbang"
+    dominant_factor = "Pertumbuhan Berimbang"
 
     # ── Rule 1: Investment LOW + IPM LOW + Kemiskinan HIGH ──
-    if investLevel in ("LOW", "VERY_LOW") and \
-       ipmCat in ("LOW", "VERY_LOW") and \
-       kemiskinanCat in ("HIGH", "VERY_HIGH"):
-        dominantFactor = "Pembangunan Dasar & Pengentasan Kemiskinan"
+    if invest_level in ("LOW", "VERY_LOW") and \
+       ipm_cat in ("LOW", "VERY_LOW") and \
+       kemiskinan_cat in ("HIGH", "VERY_HIGH"):
+        dominant_factor = "Pembangunan Dasar & Pengentasan Kemiskinan"
         policies.extend([
             {
                 "direction": "Pengembangan Infrastruktur Dasar",
@@ -224,10 +222,10 @@ def _generatePolicyDirections(
         ])
 
     # ── Rule 2: Investment HIGH + IPM HIGH + TPT HIGH ──
-    elif investLevel in ("HIGH", "VERY_HIGH") and \
-         ipmCat in ("HIGH", "VERY_HIGH") and \
-         tptCat in ("HIGH", "VERY_HIGH"):
-        dominantFactor = "Penyelarasan Pasar Tenaga Kerja"
+    elif invest_level in ("HIGH", "VERY_HIGH") and \
+         ipm_cat in ("HIGH", "VERY_HIGH") and \
+         tpt_cat in ("HIGH", "VERY_HIGH"):
+        dominant_factor = "Penyelarasan Pasar Tenaga Kerja"
         policies.extend([
             {
                 "direction": "Penyelarasan Pasar Tenaga Kerja",
@@ -259,9 +257,9 @@ def _generatePolicyDirections(
         ])
 
     # ── Rule 3: Investment HIGH + IPM LOW ──
-    elif investLevel in ("HIGH", "VERY_HIGH") and \
-         ipmCat in ("LOW", "VERY_LOW"):
-        dominantFactor = "Pertumbuhan Inklusif"
+    elif invest_level in ("HIGH", "VERY_HIGH") and \
+         ipm_cat in ("LOW", "VERY_LOW"):
+        dominant_factor = "Pertumbuhan Inklusif"
         policies.extend([
             {
                 "direction": "Strategi Pertumbuhan Inklusif",
@@ -284,10 +282,10 @@ def _generatePolicyDirections(
         ])
 
     # ── Rule 4: Investment LOW + IPM MEDIUM + Infrastructure LOW ──
-    elif investLevel in ("LOW", "VERY_LOW") and \
-         ipmCat in ("MEDIUM", "HIGH") and \
-         listrikCat in ("LOW", "VERY_LOW"):
-        dominantFactor = "Pengembangan Infrastruktur & Konektivitas"
+    elif invest_level in ("LOW", "VERY_LOW") and \
+         ipm_cat in ("MEDIUM", "HIGH") and \
+         listrik_cat in ("LOW", "VERY_LOW"):
+        dominant_factor = "Pengembangan Infrastruktur & Konektivitas"
         policies.extend([
             {
                 "direction": "Perluasan Infrastruktur",
@@ -310,10 +308,10 @@ def _generatePolicyDirections(
         ])
 
     # ── Rule 5: Investment HIGH + stable welfare ──
-    elif investLevel in ("HIGH", "VERY_HIGH") and \
-         ipmCat in ("MEDIUM", "HIGH", "VERY_HIGH") and \
-         kemiskinanCat in ("LOW", "VERY_LOW", "MEDIUM"):
-        dominantFactor = "Akselerasi & Keberlanjutan"
+    elif invest_level in ("HIGH", "VERY_HIGH") and \
+         ipm_cat in ("MEDIUM", "HIGH", "VERY_HIGH") and \
+         kemiskinan_cat in ("LOW", "VERY_LOW", "MEDIUM"):
+        dominant_factor = "Akselerasi & Keberlanjutan"
         policies.extend([
             {
                 "direction": "Hilirisasi & Peningkatan Nilai Tambah",
@@ -345,10 +343,10 @@ def _generatePolicyDirections(
         ])
 
     # ── Rule 6: Very Low IPM + Very High Kemiskinan + Very Low Listrik ──
-    elif ipmCat in ("VERY_LOW",) and \
-         kemiskinanCat in ("VERY_HIGH",) and \
-         listrikCat in ("LOW", "VERY_LOW"):
-        dominantFactor = "Intervensi Darurat Layanan Dasar"
+    elif ipm_cat in ("VERY_LOW",) and \
+         kemiskinan_cat in ("VERY_HIGH",) and \
+         listrik_cat in ("LOW", "VERY_LOW"):
+        dominant_factor = "Intervensi Darurat Layanan Dasar"
         policies.extend([
             {
                 "direction": "Layanan Dasar Darurat",
@@ -381,9 +379,9 @@ def _generatePolicyDirections(
 
     # ── Rule 7: Investment LOW + Kemiskinan HIGH (any IPM) ──
     # Covers clusters with low investment AND high poverty but IPM not necessarily low
-    elif investLevel in ("LOW", "VERY_LOW") and \
-         kemiskinanCat in ("HIGH", "VERY_HIGH"):
-        dominantFactor = "Pengentasan Kemiskinan & Stimulus Investasi"
+    elif invest_level in ("LOW", "VERY_LOW") and \
+         kemiskinan_cat in ("HIGH", "VERY_HIGH"):
+        dominant_factor = "Pengentasan Kemiskinan & Stimulus Investasi"
         policies.extend([
             {
                 "direction": "Program Pengentasan Kemiskinan Terintegrasi",
@@ -416,10 +414,10 @@ def _generatePolicyDirections(
 
     # ── Rule 8: Investment LOW + IPM MEDIUM+ + Kemiskinan reasonable ──
     # Covers clusters with low investment but decent human development and welfare
-    elif investLevel in ("LOW", "VERY_LOW") and \
-         ipmCat in ("MEDIUM", "HIGH", "VERY_HIGH") and \
-         kemiskinanCat in ("LOW", "VERY_LOW", "MEDIUM"):
-        dominantFactor = "Peningkatan Iklim & Daya Tarik Investasi"
+    elif invest_level in ("LOW", "VERY_LOW") and \
+         ipm_cat in ("MEDIUM", "HIGH", "VERY_HIGH") and \
+         kemiskinan_cat in ("LOW", "VERY_LOW", "MEDIUM"):
+        dominant_factor = "Peningkatan Iklim & Daya Tarik Investasi"
         policies.extend([
             {
                 "direction": "Reformasi Iklim Investasi",
@@ -452,23 +450,23 @@ def _generatePolicyDirections(
 
     # ── Fallback: Identify worst variable and target it ──
     if not policies:
-        dominantFactor = "Intervensi Defisit Terbesar"
+        dominant_factor = "Intervensi Defisit Terbesar"
         # Find variable with worst ratio
-        worstVar = None
-        worstScore = float("-inf")
+        worst_var = None
+        worst_score = float("-inf")
         for var, info in characteristics.items():
             is_inv = var in INVERSE_INDICATORS
             ratio = info["ratio"]
             # Normalize: for inverse, high ratio = bad, for normal low ratio = bad
             score = ratio if is_inv else (1.0 / ratio if ratio > 0 else float("inf"))
-            if score > worstScore or worstVar is None:
-                worstScore = score
-                worstVar = var
+            if score > worst_score or worst_var is None:
+                worst_score = score
+                worst_var = var
 
-        if worstVar is None:
-            worstVar = "pmdn_rp"
+        if worst_var is None:
+            worst_var = "pmdn_rp"
 
-        label = VARIABLE_LABELS.get(worstVar, worstVar)
+        label = VARIABLE_LABELS.get(worst_var, worst_var)
         policies.append({
             "direction": f"Intervensi Prioritas: {label}",
             "rationale": f"Variabel '{label}' menunjukkan deviasi terbesar dari rata-rata nasional dan memerlukan intervensi prioritas.",
@@ -480,9 +478,9 @@ def _generatePolicyDirections(
         })
 
     # ── Additional policy for investment composition ──
-    pmdnCat = cats.get("pmdn_rp", "MEDIUM")
-    fdiCat = cats.get("fdi_rp", "MEDIUM")
-    if pmdnCat in ("HIGH", "VERY_HIGH") and fdiCat in ("LOW", "VERY_LOW"):
+    pmdn_cat = cats.get("pmdn_rp", "MEDIUM")
+    fdi_cat = cats.get("fdi_rp", "MEDIUM")
+    if pmdn_cat in ("HIGH", "VERY_HIGH") and fdi_cat in ("LOW", "VERY_LOW"):
         policies.append({
             "direction": "Peningkatan Daya Tarik Investasi Asing",
             "rationale": "PMDN tinggi namun PMA rendah mengindikasikan hambatan bagi investor asing yang perlu diatasi.",
@@ -492,7 +490,7 @@ def _generatePolicyDirections(
                 "Peningkatan infrastruktur pendukung standar internasional",
             ],
         })
-    elif fdiCat in ("HIGH", "VERY_HIGH") and pmdnCat in ("LOW", "VERY_LOW"):
+    elif fdi_cat in ("HIGH", "VERY_HIGH") and pmdn_cat in ("LOW", "VERY_LOW"):
         policies.append({
             "direction": "Penguatan Investasi Domestik",
             "rationale": "PMA tinggi namun PMDN rendah menunjukkan perlunya penguatan kapasitas investor lokal.",
@@ -503,12 +501,12 @@ def _generatePolicyDirections(
             ],
         })
 
-    return policies, dominantFactor
+    return policies, dominant_factor
 
 
 # ─── Main Function ────────────────────────────────────────────────────
 
-def generatePolicyRecommendations() -> dict:
+def generate_policy_recommendations() -> dict:
     """Generate data-driven policy recommendations from the latest analysis.
 
     Returns a dict with:
@@ -516,96 +514,96 @@ def generatePolicyRecommendations() -> dict:
         - pca_interpretation: dominant PCA factors
         - cluster_policies: list of per-cluster policy objects
     """
-    result = getLatestResult()
+    result = get_latest_result()
     if result is None:
         raise ValueError("Belum ada analisis yang dijalankan. Jalankan analisis terlebih dahulu.")
 
-    df, _ = _loadDataframe(result.dataset_id)
-    numericCols = Province.NUMERIC_COLUMNS
+    df, _ = _load_dataframe(result.dataset_id)
+    numeric_cols = Province.NUMERIC_COLUMNS
 
     # ── National averages ──
-    nationalAvg = {col: float(df[col].mean()) for col in numericCols}
+    national_avg = {col: float(df[col].mean()) for col in numeric_cols}
 
     # ── PCA interpretation ──
-    pcaInterpretation = _interpretPcaLoadings(result.pca_loadings or {})
+    pca_interpretation = _interpret_pca_loadings(result.pca_loadings or {})
 
     # ── Cluster policies ──
-    clusterPolicies = []
-    clusterSummary = result.cluster_summary or []
+    cluster_policies = []
+    cluster_summary = result.cluster_summary or []
 
-    for clusterItem in clusterSummary:
-        clusterId = clusterItem["cluster"]
-        label = clusterItem.get("label", f"Klaster {clusterId}")
-        provinces = clusterItem.get("provinces", [])
-        stats = clusterItem.get("statistics", {})
+    for cluster_item in cluster_summary:
+        cluster_id = cluster_item["cluster"]
+        label = cluster_item.get("label", f"Klaster {cluster_id}")
+        provinces = cluster_item.get("provinces", [])
+        stats = cluster_item.get("statistics", {})
 
         # Step 1: Classify each variable relative to national average
         characteristics = {}
-        for var in numericCols:
-            clusterMean = stats.get(var, {}).get("mean", 0.0)
-            natMean = nationalAvg.get(var, 1.0)
-            if natMean == 0:
-                natMean = 1e-10  # avoid division by zero
+        for var in numeric_cols:
+            cluster_mean = stats.get(var, {}).get("mean", 0.0)
+            nat_mean = national_avg.get(var, 1.0)
+            if nat_mean == 0:
+                nat_mean = 1e-10  # avoid division by zero
 
-            ratio = clusterMean / natMean
-            isInverse = var in INVERSE_INDICATORS
-            category = _classifyRatio(ratio, isInverse)
-            condition = _classifyCondition(ratio, isInverse)
+            ratio = cluster_mean / nat_mean
+            is_inverse = var in INVERSE_INDICATORS
+            category = _classify_ratio(ratio, is_inverse)
+            condition = _classify_condition(ratio, is_inverse)
 
             characteristics[var] = {
                 "label": VARIABLE_LABELS.get(var, var),
-                "cluster_mean": round(clusterMean, 2),
-                "national_mean": round(natMean, 2),
+                "cluster_mean": round(cluster_mean, 2),
+                "national_mean": round(nat_mean, 2),
                 "ratio": round(ratio, 4),
                 "category": category,
                 "condition": condition,
             }
 
         # Step 3: Generate policy directions
-        policies, dominantFactor = _generatePolicyDirections(characteristics)
+        policies, dominant_factor = _generate_policy_directions(characteristics)
 
         # Step 4: Build policy rationale
-        highVars = [
+        high_vars = [
             characteristics[v]["label"]
-            for v in numericCols
+            for v in numeric_cols
             if characteristics[v]["category"] in ("HIGH", "VERY_HIGH")
             and v not in INVERSE_INDICATORS
         ]
-        lowVars = [
+        low_vars = [
             characteristics[v]["label"]
-            for v in numericCols
+            for v in numeric_cols
             if characteristics[v]["category"] in ("LOW", "VERY_LOW")
             and v not in INVERSE_INDICATORS
         ]
-        badInverse = [
+        bad_inverse = [
             characteristics[v]["label"]
-            for v in numericCols
+            for v in numeric_cols
             if v in INVERSE_INDICATORS
             and characteristics[v]["category"] in ("HIGH", "VERY_HIGH")
         ]
 
-        summaryParts = []
-        if highVars:
-            summaryParts.append(f"di atas rata-rata nasional pada {', '.join(highVars)}")
-        if lowVars:
-            summaryParts.append(f"di bawah rata-rata nasional pada {', '.join(lowVars)}")
-        if badInverse:
-            summaryParts.append(f"memiliki {', '.join(badInverse)} yang relatif tinggi")
+        summary_parts = []
+        if high_vars:
+            summary_parts.append(f"di atas rata-rata nasional pada {', '.join(high_vars)}")
+        if low_vars:
+            summary_parts.append(f"di bawah rata-rata nasional pada {', '.join(low_vars)}")
+        if bad_inverse:
+            summary_parts.append(f"memiliki {', '.join(bad_inverse)} yang relatif tinggi")
 
         rationale = (
             f"Klaster '{label}' ({len(provinces)} provinsi) "
-            + ("; ".join(summaryParts) if summaryParts else "berada di sekitar rata-rata nasional")
+            + ("; ".join(summary_parts) if summary_parts else "berada di sekitar rata-rata nasional")
             + ". "
-            + f"Faktor dominan: {dominantFactor}."
+            + f"Faktor dominan: {dominant_factor}."
         )
 
-        clusterPolicies.append({
-            "cluster_id": clusterId,
+        cluster_policies.append({
+            "cluster_id": cluster_id,
             "label": label,
             "count": len(provinces),
             "provinces": provinces,
             "characteristics": characteristics,
-            "dominant_factor": dominantFactor,
+            "dominant_factor": dominant_factor,
             "policy_directions": policies,
             "policy_rationale": rationale,
         })
@@ -614,12 +612,12 @@ def generatePolicyRecommendations() -> dict:
         "national_average": {
             var: {
                 "label": VARIABLE_LABELS.get(var, var),
-                "value": round(nationalAvg[var], 2),
+                "value": round(national_avg[var], 2),
             }
-            for var in numericCols
+            for var in numeric_cols
         },
-        "pca_interpretation": pcaInterpretation,
-        "cluster_policies": clusterPolicies,
+        "pca_interpretation": pca_interpretation,
+        "cluster_policies": cluster_policies,
         "metadata": {
             "k": result.k,
             "dataset_id": result.dataset.id if result.dataset else None,

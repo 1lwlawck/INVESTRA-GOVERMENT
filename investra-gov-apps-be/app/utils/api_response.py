@@ -2,10 +2,10 @@
 
 from typing import Any
 
-from flask import jsonify, g
+from flask import g, jsonify
 
 
-def errorResponse(
+def error_response(
     error: str,
     code: str,
     status: int,
@@ -16,9 +16,9 @@ def errorResponse(
     """Build a consistent error response body with HTTP status."""
     payload: dict[str, Any] = {"error": error, "code": code}
     try:
-        requestId = getattr(g, "request_id", None)
-        if requestId:
-            payload["request_id"] = requestId
+        request_id = getattr(g, "request_id", None)
+        if request_id:
+            payload["request_id"] = request_id
     except RuntimeError:
         # Outside request context
         pass

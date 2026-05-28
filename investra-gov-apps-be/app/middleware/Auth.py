@@ -6,34 +6,34 @@ Provides two decorators:
   @roleRequired(minRole)  – checks user's role against hierarchy
 """
 
+from datetime import UTC
 from functools import wraps
 
 import jwt
-from flask import request, g, current_app
+from flask import current_app, g, request
 
-from app.models.User import User
-from app.utils.ApiResponse import errorResponse
-from app.utils.PublicIdentifier import isValidUuid
-
+from app.models.user import User
+from app.utils.api_response import error_response
+from app.utils.public_identifier import is_valid_uuid
 
 # ─── JWT helpers ──────────────────────────────────────────────────────
 
-def _decodeToken(token: str) -> dict:
+def _decode_token(token: str) -> dict:
     """Decode and validate a JWT token."""
     return jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
 
 
-def _extractUserId(payload: dict) -> str | None:
+def _extract_user_id(payload: dict) -> str | None:
     """Return UUID user id from JWT payload `sub`."""
     sub = payload.get("sub")
-    if isinstance(sub, str) and isValidUuid(sub):
+    if isinstance(sub, str) and is_valid_uuid(sub):
         return sub
     return None
 
 
-def generateToken(user: User) -> str:
+def generate_token(user: User) -> str:
     """Create a signed JWT containing user id/role."""
-    from datetime import datetime, timedelta, timezone
+    from datetime import datetime, timedelta
 
     hours = current_app.config.get("JWT_EXPIRES_HOURS", 12)
     try:
@@ -45,15 +45,15 @@ def generateToken(user: User) -> str:
     payload = {
         "sub": str(user.id),
         "role": user.role,
-        "iat": datetime.now(timezone.utc),
-        "exp": datetime.now(timezone.utc) + timedelta(hours=hours),
+        "iat": datetime.now(UTC),
+        "exp": datetime.now(UTC) + timedelta(hours=hours),
     }
     return jwt.encode(payload, current_app.config["SECRET_KEY"], algorithm="HS256")
 
 
 # ─── Decorators ───────────────────────────────────────────────────────
 
-def tokenRequired(f):
+def token_required(f):
     """
     Decorator that enforces authentication.
     Extracts 'Authorization: Bearer <token>' header, validates the JWT,
@@ -62,29 +62,29 @@ def tokenRequired(f):
 
     @wraps(f)
     def decorated(*args, **kwargs):
-        authHeader = request.headers.get("Authorization", "")
+        auth_header = request.headers.get("Authorization", "")
 
-        if not authHeader.startswith("Bearer "):
-            return errorResponse("Token tidak ditemukan", "NO_TOKEN", 401)
+        if not auth_header.startswith("Bearer "):
+            return error_response("Token tidak ditemukan", "NO_TOKEN", 401)
 
-        token = authHeader.split(" ", 1)[1]
+        token = auth_header.split(" ", 1)[1]
 
         try:
-            payload = _decodeToken(token)
+            payload = _decode_token(token)
         except jwt.ExpiredSignatureError:
-            return errorResponse("Token sudah kedaluwarsa", "TOKEN_EXPIRED", 401)
+            return error_response("Token sudah kedaluwarsa", "TOKEN_EXPIRED", 401)
         except jwt.InvalidTokenError:
-            return errorResponse("Token tidak valid", "INVALID_TOKEN", 401)
+            return error_response("Token tidak valid", "INVALID_TOKEN", 401)
 
-        userId = _extractUserId(payload)
-        if userId is None:
-            return errorResponse("Token tidak valid", "INVALID_TOKEN", 401)
+        user_id = _extract_user_id(payload)
+        if user_id is None:
+            return error_response("Token tidak valid", "INVALID_TOKEN", 401)
 
-        user = User.query.filter_by(id=userId).first()
+        user = User.query.filter_by(id=user_id).first()
         if user is None:
-            return errorResponse("User tidak ditemukan", "USER_NOT_FOUND", 401)
+            return error_response("User tidak ditemukan", "USER_NOT_FOUND", 401)
         if not user.is_active:
-            return errorResponse("Akun dinonaktifkan", "ACCOUNT_DISABLED", 403)
+            return error_response("Akun dinonaktifkan", "ACCOUNT_DISABLED", 403)
 
         g.current_user = user
         return f(*args, **kwargs)
@@ -92,7 +92,7 @@ def tokenRequired(f):
     return decorated
 
 
-def roleRequired(minRole: str):
+def role_required(min_role: str):
     """
     Decorator factory that enforces a minimum role.
     Must be placed **after** @tokenRequired so that `g.current_user` exists.
@@ -109,9 +109,9 @@ def roleRequired(minRole: str):
         @wraps(f)
         def decorated(*args, **kwargs):
             user: User = g.current_user
-            if not user.hasRole(minRole):
-                return errorResponse(
-                    f"Akses ditolak. Minimal role: {minRole}",
+            if not user.has_role(min_role):
+                return error_response(
+                    f"Akses ditolak. Minimal role: {min_role}",
                     "FORBIDDEN",
                     403,
                 )
@@ -122,7 +122,7 @@ def roleRequired(minRole: str):
     return decorator
 
 
-def optionalToken(f):
+def optional_token(f):
     """
     Like @tokenRequired but does NOT reject unauthenticated requests.
     Sets `g.current_user = None` if no valid token is present.
@@ -131,14 +131,14 @@ def optionalToken(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         g.current_user = None
-        authHeader = request.headers.get("Authorization", "")
+        auth_header = request.headers.get("Authorization", "")
 
-        if authHeader.startswith("Bearer "):
-            token = authHeader.split(" ", 1)[1]
+        if auth_header.startswith("Bearer "):
+            token = auth_header.split(" ", 1)[1]
             try:
-                payload = _decodeToken(token)
-                userId = _extractUserId(payload)
-                user = User.query.filter_by(id=userId).first() if userId else None
+                payload = _decode_token(token)
+                user_id = _extract_user_id(payload)
+                user = User.query.filter_by(id=user_id).first() if user_id else None
                 if user and user.is_active:
                     g.current_user = user
             except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):

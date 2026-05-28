@@ -4,7 +4,7 @@ import os
 from urllib.parse import quote_plus, urlparse
 
 
-def _envInt(name: str, default: int) -> int:
+def _env_int(name: str, default: int) -> int:
     raw = os.getenv(name)
     if raw is None:
         return default
@@ -14,7 +14,7 @@ def _envInt(name: str, default: int) -> int:
         return default
 
 
-def _envFloat(name: str, default: float) -> float:
+def _env_float(name: str, default: float) -> float:
     raw = os.getenv(name)
     if raw is None:
         return default
@@ -24,34 +24,34 @@ def _envFloat(name: str, default: float) -> float:
         return default
 
 
-def _envBool(name: str, default: bool) -> bool:
+def _env_bool(name: str, default: bool) -> bool:
     raw = os.getenv(name)
     if raw is None:
         return default
     return raw.strip().lower() in {"1", "true", "yes", "on"}
 
 
-def _buildDatabaseUrl() -> str | None:
+def _build_database_url() -> str | None:
     """Resolve DATABASE_URL with Docker-aware fallback."""
     direct = (os.getenv("DATABASE_URL") or "").strip()
     host = (os.getenv("POSTGRES_HOST") or "").strip()
     port = (os.getenv("POSTGRES_PORT") or "5432").strip() or "5432"
     user = (os.getenv("POSTGRES_USER") or "").strip()
     password = os.getenv("POSTGRES_PASSWORD") or ""
-    dbName = (os.getenv("POSTGRES_DB") or "").strip()
+    db_name = (os.getenv("POSTGRES_DB") or "").strip()
 
-    canBuildFromParts = bool(host and user and dbName)
-    if not canBuildFromParts:
+    can_build_from_parts = bool(host and user and db_name)
+    if not can_build_from_parts:
         return direct or None
 
     # If host parts are present (e.g. in Docker), build a canonical URL.
-    fromParts = (
+    from_parts = (
         f"postgresql://{quote_plus(user)}:{quote_plus(password)}"
-        f"@{host}:{port}/{quote_plus(dbName)}"
+        f"@{host}:{port}/{quote_plus(db_name)}"
     )
 
     if not direct:
-        return fromParts
+        return from_parts
 
     try:
         parsed = urlparse(direct)
@@ -61,49 +61,49 @@ def _buildDatabaseUrl() -> str | None:
             "localhost",
             "127.0.0.1",
         }:
-            return fromParts
+            return from_parts
     except Exception:
         # If direct URL is malformed, fallback to composed URL.
-        return fromParts
+        return from_parts
 
     return direct
 
 
-def _buildEngineOptions(databaseUrl: str | None) -> dict:
+def _build_engine_options(database_url: str | None) -> dict:
     """Build SQLAlchemy engine options with sensible production defaults."""
     options: dict = {"pool_pre_ping": True}
 
-    if databaseUrl and databaseUrl.startswith("sqlite"):
+    if database_url and database_url.startswith("sqlite"):
         return options
 
-    poolSize = max(1, _envInt("DB_POOL_SIZE", 10))
-    maxOverflow = max(0, _envInt("DB_MAX_OVERFLOW", 20))
-    poolTimeout = max(1, _envFloat("DB_POOL_TIMEOUT", 30.0))
-    poolRecycle = max(30, _envInt("DB_POOL_RECYCLE", 1800))
+    pool_size = max(1, _env_int("DB_POOL_SIZE", 10))
+    max_overflow = max(0, _env_int("DB_MAX_OVERFLOW", 20))
+    pool_timeout = max(1, _env_float("DB_POOL_TIMEOUT", 30.0))
+    pool_recycle = max(30, _env_int("DB_POOL_RECYCLE", 1800))
 
     options.update(
         {
-            "pool_size": poolSize,
-            "max_overflow": maxOverflow,
-            "pool_timeout": poolTimeout,
-            "pool_recycle": poolRecycle,
+            "pool_size": pool_size,
+            "max_overflow": max_overflow,
+            "pool_timeout": pool_timeout,
+            "pool_recycle": pool_recycle,
         }
     )
 
-    if databaseUrl and databaseUrl.startswith("postgresql"):
-        statementTimeoutMs = max(1000, _envInt("DB_STATEMENT_TIMEOUT_MS", 30000))
-        lockTimeoutMs = max(100, _envInt("DB_LOCK_TIMEOUT_MS", 5000))
-        idleTxnTimeoutMs = max(
-            1000, _envInt("DB_IDLE_IN_TRANSACTION_TIMEOUT_MS", 15000)
+    if database_url and database_url.startswith("postgresql"):
+        statement_timeout_ms = max(1000, _env_int("DB_STATEMENT_TIMEOUT_MS", 30000))
+        lock_timeout_ms = max(100, _env_int("DB_LOCK_TIMEOUT_MS", 5000))
+        idle_txn_timeout_ms = max(
+            1000, _env_int("DB_IDLE_IN_TRANSACTION_TIMEOUT_MS", 15000)
         )
-        applicationName = (os.getenv("DB_APPLICATION_NAME") or "investra-api").strip()
-        applicationName = applicationName.replace(" ", "_") or "investra-api"
+        application_name = (os.getenv("DB_APPLICATION_NAME") or "investra-api").strip()
+        application_name = application_name.replace(" ", "_") or "investra-api"
         options["connect_args"] = {
             "options": (
-                f"-c statement_timeout={statementTimeoutMs} "
-                f"-c lock_timeout={lockTimeoutMs} "
-                f"-c idle_in_transaction_session_timeout={idleTxnTimeoutMs} "
-                f"-c application_name={applicationName}"
+                f"-c statement_timeout={statement_timeout_ms} "
+                f"-c lock_timeout={lock_timeout_ms} "
+                f"-c idle_in_transaction_session_timeout={idle_txn_timeout_ms} "
+                f"-c application_name={application_name}"
             )
         }
 
@@ -112,15 +112,15 @@ def _buildEngineOptions(databaseUrl: str | None) -> dict:
 
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY")
-    _SQLALCHEMY_DATABASE_URI = _buildDatabaseUrl()
+    _SQLALCHEMY_DATABASE_URI = _build_database_url()
     SQLALCHEMY_DATABASE_URI = _SQLALCHEMY_DATABASE_URI
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ENGINE_OPTIONS = _buildEngineOptions(_SQLALCHEMY_DATABASE_URI)
-    JWT_EXPIRES_HOURS = _envInt("JWT_EXPIRES_HOURS", 12)
+    SQLALCHEMY_ENGINE_OPTIONS = _build_engine_options(_SQLALCHEMY_DATABASE_URI)
+    JWT_EXPIRES_HOURS = _env_int("JWT_EXPIRES_HOURS", 12)
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000")
-    CORS_SUPPORTS_CREDENTIALS = _envBool("CORS_SUPPORTS_CREDENTIALS", False)
-    MAX_CONTENT_LENGTH = max(1024 * 1024, _envInt("MAX_CONTENT_LENGTH", 10 * 1024 * 1024))
-    HSTS_SECONDS = max(0, _envInt("HSTS_SECONDS", 31536000))
+    CORS_SUPPORTS_CREDENTIALS = _env_bool("CORS_SUPPORTS_CREDENTIALS", False)
+    MAX_CONTENT_LENGTH = max(1024 * 1024, _env_int("MAX_CONTENT_LENGTH", 10 * 1024 * 1024))
+    HSTS_SECONDS = max(0, _env_int("HSTS_SECONDS", 31536000))
 
 
 class DevelopmentConfig(Config):

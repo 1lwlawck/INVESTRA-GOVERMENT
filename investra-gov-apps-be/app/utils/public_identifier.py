@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Iterable
+from collections.abc import Iterable
 from uuid import UUID, uuid4
 
 
-def generateUuid() -> str:
+def generate_uuid() -> str:
     return str(uuid4())
 
 
-def isValidUuid(value: object) -> bool:
+def is_valid_uuid(value: object) -> bool:
     if not isinstance(value, str):
         return False
     try:
@@ -20,11 +20,11 @@ def isValidUuid(value: object) -> bool:
         return False
 
 
-def nextCode(
-    existingCodes: Iterable[str | None],
+def next_code(
+    existing_codes: Iterable[str | None],
     *,
     prefix: str,
-    sequenceWidth: int,
+    sequence_width: int,
     suffix: str = "",
 ) -> str:
     """
@@ -34,8 +34,8 @@ def nextCode(
       prefix=USR, width=2, suffix=2026 -> USR012026
       prefix=DTS, width=3, suffix=""   -> DTS001
     """
-    maxSeq = 0
-    for code in existingCodes:
+    max_seq = 0
+    for code in existing_codes:
         if not code or not isinstance(code, str):
             continue
         if not code.startswith(prefix):
@@ -48,9 +48,9 @@ def nextCode(
         if not body.isdigit():
             continue
         seq = int(body)
-        if seq > maxSeq:
-            maxSeq = seq
+        if seq > max_seq:
+            max_seq = seq
 
-    nextSeq = maxSeq + 1
-    return f"{prefix}{nextSeq:0{sequenceWidth}d}{suffix}"
+    next_seq = max_seq + 1
+    return f"{prefix}{next_seq:0{sequence_width}d}{suffix}"
 

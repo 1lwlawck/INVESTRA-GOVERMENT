@@ -1,0 +1,94 @@
+[project]
+name = "investra-gov-api"
+version = "0.1.0"
+description = "INVESTRA – Investment Inequality Analysis API"
+requires-python = ">=3.11"
+readme = "README.md"
+dependencies = [
+    "Flask~=3.1",
+    "Flask-SQLAlchemy~=3.1",
+    "Flask-Migrate~=4.1",
+    "Flask-CORS~=5.0",
+    "Flask-Limiter~=3.8",
+    "redis~=5.2",
+    "psycopg2-binary~=2.9",
+    "scikit-learn~=1.6",
+    "numpy~=2.2",
+    "pandas~=2.2",
+    "python-dotenv~=1.1",
+    "gunicorn~=23.0",
+    "PyJWT~=2.9",
+    "Werkzeug>=3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-flask>=1.3",
+    "ruff>=0.7.0",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["app"]
+
+# ---------------------------------------------------------------------------
+# Ruff – linter + formatter
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+extend-exclude = [
+    ".venv",
+    "migrations/versions",
+    "build",
+    "dist",
+    "__pycache__",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "SIM", # flake8-simplify
+    "RUF", # ruff-specific rules
+]
+# Temporarily ignored (some rules don't fit our context):
+ignore = [
+    "B008",   # do not perform function call in argument defaults (Flask uses this pattern)
+    "SIM108", # ternary instead of if-else (sometimes harder to read)
+    "RUF002", # ambiguous unicode in docstring (Indonesian uses en-dash, em-dash)
+    "RUF003", # ambiguous unicode in comment (same reason)
+    "E501",   # line too long (handled by formatter; some Indonesian strings exceed limit)
+    "N815",   # mixedCase classvar – API contract (camelize layer handles JSON keys)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"app/__init__.py" = ["E402"]              # late imports inside factory are intentional
+"app/services/analysis_service.py" = ["N803", "N806"]  # sklearn convention: X / X_scaled / X_pca
+"app/controllers/analysis_controller.py" = ["N806"]   # X_scaled passed from service
+"tests/*" = ["S101"]                       # asserts allowed in tests
+"migrations/env.py" = ["E402", "F401"]
+"scripts/*" = ["N806"]                     # ad-hoc tooling
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+# ---------------------------------------------------------------------------
+# pytest
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --tb=short --strict-markers"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]

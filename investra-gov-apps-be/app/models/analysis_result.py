@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import or_
 
-from app.Extensions import db
-from app.utils.PublicIdentifier import generateUuid, nextCode
+from app.extensions import db
+from app.utils.public_identifier import generate_uuid, next_code
 
 
 class AnalysisResult(db.Model):
@@ -29,7 +29,7 @@ class AnalysisResult(db.Model):
         ),
     )
 
-    id = db.Column(db.String(36), primary_key=True, default=generateUuid)
+    id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     code = db.Column(db.String(32), unique=True, nullable=False, index=True)
     dataset_id = db.Column(
         db.String(36),
@@ -41,7 +41,7 @@ class AnalysisResult(db.Model):
         db.DateTime,
         nullable=False,
         index=True,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
     )
     k = db.Column(db.Integer, nullable=False)
 
@@ -60,40 +60,40 @@ class AnalysisResult(db.Model):
     transform_info = db.Column(db.JSON, nullable=True)
 
     @classmethod
-    def nextCode(cls, year: int | None = None) -> str:
-        nowYear = year or datetime.now(timezone.utc).year
-        suffix = f"{nowYear}"
+    def next_code(cls, year: int | None = None) -> str:
+        now_year = year or datetime.now(UTC).year
+        suffix = f"{now_year}"
         existing = db.session.query(cls.code).filter(cls.code.like(f"ANL%{suffix}")).all()
-        return nextCode(
+        return next_code(
             [row[0] for row in existing],
             prefix="ANL",
-            sequenceWidth=3,
+            sequence_width=3,
             suffix=suffix,
         )
 
     @classmethod
-    def getByPublicId(cls, publicId: str) -> "AnalysisResult | None":
-        if not publicId:
+    def get_by_public_id(cls, public_id: str) -> AnalysisResult | None:
+        if not public_id:
             return None
-        publicId = str(publicId).strip()
-        if not publicId:
+        public_id = str(public_id).strip()
+        if not public_id:
             return None
-        return cls.query.filter(or_(cls.id == publicId, cls.code == publicId)).first()
+        return cls.query.filter(or_(cls.id == public_id, cls.code == public_id)).first()
 
-    def ensurePublicIdentifiers(self) -> None:
+    def ensure_public_identifiers(self) -> None:
         if not self.id:
-            self.id = generateUuid()
+            self.id = generate_uuid()
         if not self.code:
-            self.code = self.nextCode()
+            self.code = self.next_code()
 
-    def toDict(self) -> dict:
-        datasetPublicId = self.dataset.id if self.dataset else None
-        datasetCode = self.dataset.code if self.dataset else None
+    def to_dict(self) -> dict:
+        dataset_public_id = self.dataset.id if self.dataset else None
+        dataset_code = self.dataset.code if self.dataset else None
         return {
             "id": self.id,
             "code": self.code,
-            "dataset_id": datasetPublicId,
-            "dataset_code": datasetCode,
+            "dataset_id": dataset_public_id,
+            "dataset_code": dataset_code,
             "created_at": self.created_at.isoformat(),
             "k": self.k,
             "pca_components": self.pca_components,

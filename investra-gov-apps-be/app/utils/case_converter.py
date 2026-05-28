@@ -9,7 +9,7 @@ import re
 _SNAKE_RE = re.compile(r"_([a-z0-9])")
 
 
-def snakeToCamel(name: str) -> str:
+def snake_to_camel(name: str) -> str:
     """Convert a snake_case string to camelCase.
 
     Examples:
@@ -31,7 +31,7 @@ def camelize(obj: object) -> object:
     - Other types: returned as-is.
     """
     if isinstance(obj, dict):
-        return {snakeToCamel(k): camelize(v) for k, v in obj.items()}
+        return {snake_to_camel(k): camelize(v) for k, v in obj.items()}
     if isinstance(obj, (list, tuple)):
         return [camelize(item) for item in obj]
     return obj

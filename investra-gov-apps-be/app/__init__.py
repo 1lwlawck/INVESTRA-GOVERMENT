@@ -1,145 +1,65 @@
 """Flask Application Factory."""
 
-import json
-import logging
+from __future__ import annotations
+
 import os
-import time
-import uuid
 
-from flask import Flask, g, request
-from flask_cors import CORS
+from flask import Flask
 
-from app.Config import config_map
-from app.Extensions import db, limiter, migrate
-from app.utils.CaseConverter import camelize
+from app.config import config_map
+from app.extensions import db, limiter, migrate
 
 
-def createApp() -> Flask:
-    app = Flask(__name__)
-
-    env = os.getenv("FLASK_ENV", "development")
-    app.config.from_object(config_map.get(env, config_map["development"]))
-
+def _ensure_required_config(app: Flask) -> None:
     missing = [
         key
         for key in ("SECRET_KEY", "SQLALCHEMY_DATABASE_URI")
         if not app.config.get(key)
     ]
     if missing:
-        envNames = ["DATABASE_URL" if k == "SQLALCHEMY_DATABASE_URI" else k for k in missing]
+        env_names = ["DATABASE_URL" if k == "SQLALCHEMY_DATABASE_URI" else k for k in missing]
         raise RuntimeError(
-            "Missing required environment variables: " + ", ".join(envNames)
+            "Missing required environment variables: " + ", ".join(env_names)
         )
 
-    logging.basicConfig(
-        level=logging.DEBUG if app.config.get("DEBUG") else logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    )
 
+def _init_extensions(app: Flask) -> None:
     db.init_app(app)
     migrate.init_app(app, db)
     limiter.init_app(app)
 
-    corsOriginsRaw = str(app.config.get("CORS_ORIGINS", "")).strip()
-    allowCredentials = bool(app.config.get("CORS_SUPPORTS_CREDENTIALS", False))
 
-    if corsOriginsRaw == "*":
-        if allowCredentials:
-            raise RuntimeError(
-                "Invalid CORS configuration: wildcard origin cannot be used "
-                "when CORS_SUPPORTS_CREDENTIALS=true."
-            )
-        origins = "*"
-    else:
-        origins = [o.strip() for o in corsOriginsRaw.split(",") if o.strip()]
-        if not origins:
-            raise RuntimeError(
-                "Invalid CORS configuration: set CORS_ORIGINS to '*' or "
-                "a comma-separated list of origins."
-            )
+def create_app() -> Flask:
+    app = Flask(__name__)
 
-    CORS(app, origins=origins, supports_credentials=allowCredentials)
+    env = os.getenv("FLASK_ENV", "development")
+    app.config.from_object(config_map.get(env, config_map["development"]))
+    _ensure_required_config(app)
 
-    from app.middleware.ErrorHandler import registerErrorHandlers
+    from app.setup.logging import configure_logging
 
-    registerErrorHandlers(app)
+    configure_logging(app)
 
-    @app.before_request
-    def attachRequestContext():
-        incomingRequestId = request.headers.get("X-Request-ID", "").strip()
-        requestId = incomingRequestId[:128] if incomingRequestId else uuid.uuid4().hex
-        g.request_id = requestId
-        g.request_started_at = time.perf_counter()
+    _init_extensions(app)
 
-    @app.teardown_request
-    def cleanupDbSession(exception):
-        if exception is not None:
-            db.session.rollback()
-        db.session.remove()
+    from app.setup.cors import configure_cors
 
-    @app.after_request
-    def hardenAndCamelizeJsonResponse(response):
-        if response.content_type and "application/json" in response.content_type:
-            data = response.get_json(silent=True)
-            if data is not None:
-                response.set_data(json.dumps(camelize(data), ensure_ascii=False))
+    configure_cors(app)
 
-        requestId = getattr(g, "request_id", None)
-        if requestId:
-            response.headers.setdefault("X-Request-ID", requestId)
+    from app.middleware.error_handler import register_error_handlers
+    from app.setup.request_context import register_request_hooks
+    from app.setup.security_headers import register_response_hooks
 
-        startedAt = getattr(g, "request_started_at", None)
-        if startedAt is not None:
-            durationMs = (time.perf_counter() - startedAt) * 1000
-            app.logger.info(
-                "request_id=%s method=%s path=%s status=%s duration_ms=%.2f",
-                requestId,
-                request.method,
-                request.path,
-                response.status_code,
-                durationMs,
-            )
-
-        response.headers.setdefault("X-Content-Type-Options", "nosniff")
-        response.headers.setdefault("X-Frame-Options", "DENY")
-        response.headers.setdefault("Referrer-Policy", "no-referrer")
-        response.headers.setdefault(
-            "Permissions-Policy", "camera=(), microphone=(), geolocation=()"
-        )
-        response.headers.setdefault("Cross-Origin-Opener-Policy", "same-origin")
-        response.headers.setdefault("Cross-Origin-Resource-Policy", "same-origin")
-        response.headers.setdefault(
-            "Content-Security-Policy",
-            "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; "
-            "form-action 'none'",
-        )
-
-        if not app.config.get("DEBUG"):
-            hstsSeconds = int(app.config.get("HSTS_SECONDS", 31536000))
-            if hstsSeconds > 0:
-                response.headers.setdefault(
-                    "Strict-Transport-Security",
-                    f"max-age={hstsSeconds}; includeSubDomains",
-                )
-
-        return response
+    register_error_handlers(app)
+    register_request_hooks(app)
+    register_response_hooks(app)
 
     # Import models so Alembic sees them
+    from app.cli import register_cli
     from app.models import AnalysisResult, Dataset, Province, User  # noqa: F401
+    from app.setup.blueprints import register_blueprints
 
-    # Blueprints
-    from app.api.Analysis import analysis_bp
-    from app.api.Auth import auth_bp
-    from app.api.Dashboard import dashboard_bp
-    from app.api.Dataset import dataset_bp
-    from app.api.Health import health_bp
-    from app.api.Users import users_bp
-
-    app.register_blueprint(health_bp)
-    app.register_blueprint(dataset_bp, url_prefix="/api")
-    app.register_blueprint(analysis_bp, url_prefix="/api")
-    app.register_blueprint(dashboard_bp, url_prefix="/api")
-    app.register_blueprint(auth_bp, url_prefix="/api")
-    app.register_blueprint(users_bp, url_prefix="/api")
+    register_blueprints(app)
+    register_cli(app)
 
     return app

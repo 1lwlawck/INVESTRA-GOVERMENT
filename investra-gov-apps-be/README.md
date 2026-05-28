@@ -24,7 +24,7 @@ The API auto-runs migrations and starts Flask on port 5000.
 Create superadmin account (first-time setup):
 
 ```bash
-python GenerateSuperAdmin.py --password "<YOUR_STRONG_PASSWORD>"
+python generate_super_admin.py --password "<YOUR_STRONG_PASSWORD>"
 ```
 
 ## API Endpoints
@@ -80,7 +80,7 @@ Import file berikut di Postman:
 | `DB_IDLE_IN_TRANSACTION_TIMEOUT_MS` | `15000` |
 | `DB_APPLICATION_NAME` | `investra-api` |
 | `FLASK_ENV` | `production` |
-| `FLASK_APP` | `Wsgi.py` |
+| `FLASK_APP` | `wsgi.py` |
 | `SECRET_KEY` | empty (generate a random value) |
 | `JWT_EXPIRES_HOURS` | `12` |
 | `CORS_ORIGINS` | `http://localhost:3000` |
@@ -96,10 +96,10 @@ export POSTGRES_USER=investra
 export POSTGRES_PASSWORD='<set-your-password>'
 export POSTGRES_DB=investra_db
 export DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}
-export FLASK_APP=Wsgi.py
+export FLASK_APP=wsgi.py
 export SECRET_KEY='<generate-random-secret>'
 
 flask db upgrade
-python GenerateSuperAdmin.py --password "<YOUR_STRONG_PASSWORD>"
+python generate_super_admin.py --password "<YOUR_STRONG_PASSWORD>"
 flask run --host=0.0.0.0 --port=5000 --reload
 ```

@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from sqlalchemy import or_
 
-from app.Extensions import db
-from app.utils.PublicIdentifier import generateUuid, nextCode
+from app.extensions import db
+from app.utils.public_identifier import generate_uuid, next_code
 
 
 class Province(db.Model):
@@ -27,7 +29,7 @@ class Province(db.Model):
         db.CheckConstraint("year BETWEEN 1900 AND 2100", name="ck_provinces_year_range"),
     )
 
-    id = db.Column(db.String(36), primary_key=True, default=generateUuid)
+    id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     code = db.Column(db.String(32), unique=True, nullable=False, index=True)
     dataset_id = db.Column(
         db.String(36),
@@ -45,7 +47,7 @@ class Province(db.Model):
     tpt = db.Column(db.Float, nullable=False)
     year = db.Column(db.Integer, nullable=False, default=2024)
 
-    NUMERIC_COLUMNS = [
+    NUMERIC_COLUMNS: ClassVar[list[str]] = [
         "pmdn_rp",
         "fdi_rp",
         "pdrb_per_kapita",
@@ -56,48 +58,48 @@ class Province(db.Model):
     ]
 
     @classmethod
-    def getByPublicId(cls, publicId: str) -> "Province | None":
-        if not publicId:
+    def get_by_public_id(cls, public_id: str) -> Province | None:
+        if not public_id:
             return None
-        publicId = str(publicId).strip()
-        if not publicId:
+        public_id = str(public_id).strip()
+        if not public_id:
             return None
-        return cls.query.filter(or_(cls.id == publicId, cls.code == publicId)).first()
+        return cls.query.filter(or_(cls.id == public_id, cls.code == public_id)).first()
 
     @classmethod
-    def nextSequenceForYear(cls, year: int) -> int:
+    def next_sequence_for_year(cls, year: int) -> int:
         existing = db.session.query(cls.code).filter(cls.code.like(f"PROV%{year}")).all()
-        maxSeq = 0
+        max_seq = 0
         for row in existing:
             code = row[0]
             if not code or not code.startswith("PROV") or not code.endswith(str(year)):
                 continue
-            seqPart = code[4:-len(str(year))]
-            if seqPart.isdigit():
-                maxSeq = max(maxSeq, int(seqPart))
-        return maxSeq + 1
+            seq_part = code[4:-len(str(year))]
+            if seq_part.isdigit():
+                max_seq = max(max_seq, int(seq_part))
+        return max_seq + 1
 
     @classmethod
-    def buildCode(cls, seq: int, year: int) -> str:
+    def build_code(cls, seq: int, year: int) -> str:
         return f"PROV{seq:03d}{year}"
 
     @classmethod
-    def nextCode(cls, year: int) -> str:
+    def next_code(cls, year: int) -> str:
         existing = db.session.query(cls.code).filter(cls.code.like(f"PROV%{year}")).all()
-        return nextCode(
+        return next_code(
             [row[0] for row in existing],
             prefix="PROV",
-            sequenceWidth=3,
+            sequence_width=3,
             suffix=f"{year}",
         )
 
-    def ensurePublicIdentifiers(self) -> None:
+    def ensure_public_identifiers(self) -> None:
         if not self.id:
-            self.id = generateUuid()
+            self.id = generate_uuid()
         if not self.code:
-            self.code = self.nextCode(self.year)
+            self.code = self.next_code(self.year)
 
-    def toDict(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             "id": self.id,
             "code": self.code,

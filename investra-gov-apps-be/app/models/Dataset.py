@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import hashlib
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import or_
 
-from app.Extensions import db
-from app.utils.PublicIdentifier import generateUuid, nextCode
+from app.extensions import db
+from app.utils.public_identifier import generate_uuid, next_code
 
 
 class Dataset(db.Model):
@@ -20,7 +20,7 @@ class Dataset(db.Model):
         db.CheckConstraint("year BETWEEN 1900 AND 2100", name="ck_datasets_year_range"),
     )
 
-    id = db.Column(db.String(36), primary_key=True, default=generateUuid)
+    id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     code = db.Column(db.String(32), unique=True, nullable=False, index=True)
     version = db.Column(db.Integer, nullable=False, default=1)
     name = db.Column(
@@ -47,7 +47,7 @@ class Dataset(db.Model):
         db.DateTime,
         nullable=False,
         index=True,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
     )
 
     original_filename = db.Column(db.String(255), nullable=True)
@@ -71,39 +71,39 @@ class Dataset(db.Model):
     )
 
     @classmethod
-    def getActive(cls) -> "Dataset | None":
+    def get_active(cls) -> Dataset | None:
         return cls.query.filter_by(is_active=True).first()
 
     @classmethod
-    def nextVersion(cls) -> int:
-        maxVer = db.session.query(db.func.max(cls.version)).scalar()
-        return (maxVer or 0) + 1
+    def next_version(cls) -> int:
+        max_ver = db.session.query(db.func.max(cls.version)).scalar()
+        return (max_ver or 0) + 1
 
     @classmethod
-    def nextCode(cls) -> str:
+    def next_code(cls) -> str:
         existing = db.session.query(cls.code).filter(cls.code.like("DTS%")).all()
-        return nextCode([row[0] for row in existing], prefix="DTS", sequenceWidth=3)
+        return next_code([row[0] for row in existing], prefix="DTS", sequence_width=3)
 
     @classmethod
-    def getByPublicId(cls, publicId: str) -> "Dataset | None":
-        if not publicId:
+    def get_by_public_id(cls, public_id: str) -> Dataset | None:
+        if not public_id:
             return None
-        publicId = str(publicId).strip()
-        if not publicId:
+        public_id = str(public_id).strip()
+        if not public_id:
             return None
-        return cls.query.filter(or_(cls.id == publicId, cls.code == publicId)).first()
+        return cls.query.filter(or_(cls.id == public_id, cls.code == public_id)).first()
 
     @staticmethod
-    def computeChecksum(content: bytes) -> str:
+    def compute_checksum(content: bytes) -> str:
         return hashlib.sha256(content).hexdigest()
 
-    def ensurePublicIdentifiers(self) -> None:
+    def ensure_public_identifiers(self) -> None:
         if not self.id:
-            self.id = generateUuid()
+            self.id = generate_uuid()
         if not self.code:
-            self.code = self.nextCode()
+            self.code = self.next_code()
 
-    def toDict(self, includeUploader: bool = True) -> dict:
+    def to_dict(self, include_uploader: bool = True) -> dict:
         data = {
             "id": self.id,
             "code": self.code,
@@ -118,13 +118,13 @@ class Dataset(db.Model):
             "row_count": self.row_count,
         }
 
-        if includeUploader and self.uploader:
+        if include_uploader and self.uploader:
             data["uploaded_by"] = {
                 "id": self.uploader.id,
                 "code": self.uploader.code,
                 "username": self.uploader.username,
                 "full_name": self.uploader.full_name,
             }
-        elif includeUploader:
+        elif include_uploader:
             data["uploaded_by"] = None
         return data
