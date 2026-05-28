@@ -678,12 +678,24 @@ def evaluate_k_range(
 
 # ─── Cluster labels (descending by investment level) ─────────────────
 
-CLUSTER_LABELS = {
+CLUSTER_LABELS_4 = {
     0: "Investasi Sangat Tinggi",
     1: "Investasi Tinggi",
     2: "Investasi Sedang",
     3: "Investasi Rendah",
 }
+
+
+def _get_cluster_labels(k: int) -> dict[int, str]:
+    """Return cluster labels dynamically based on K.
+    Cluster 0 = highest investment, cluster K-1 = lowest."""
+    if k == 2:
+        return {0: "Investasi Tinggi", 1: "Investasi Rendah"}
+    if k == 3:
+        return {0: "Investasi Tinggi", 1: "Investasi Sedang", 2: "Investasi Rendah"}
+    if k >= 4:
+        return CLUSTER_LABELS_4
+    return {i: f"Cluster {i}" for i in range(k)}
 
 
 # ─── Relabel clusters by investment ──────────────────────────────────
@@ -726,16 +738,35 @@ def _build_cluster_summary(
     data_mode: str = DATA_MODE_PANEL,
     k: int = 4,
 ) -> list[dict]:
-    """Build per-cluster summary statistics with human-readable labels."""
+    """Build per-cluster summary statistics with human-readable labels.
+
+    Provinces are listed by *dominant* cluster (the one they appear in most
+    often across panel observations) so each province appears in exactly one
+    cluster. ``count`` counts dominant provinces; ``observation_count`` keeps
+    the raw observation total for transparency.
+    """
     mode = _normalise_data_mode(data_mode)
+    cluster_labels = _get_cluster_labels(k)
     df_copy = df.copy()
     df_copy["cluster"] = labels
-    summary = []
 
+    # Province -> dominant cluster (mode of cluster assignments per province).
+    dominant_by_province: dict[str, int] = {}
+    if "provinsi" in df_copy.columns:
+        for prov, grp in df_copy.groupby("provinsi"):
+            prov_name = str(prov).strip()
+            if not prov_name:
+                continue
+            counts = grp["cluster"].value_counts()
+            if not counts.empty:
+                dominant_by_province[prov_name] = int(counts.idxmax())
+
+    summary = []
     for cluster_id in sorted(df_copy["cluster"].unique()):
         cluster_df = df_copy[df_copy["cluster"] == cluster_id]
-        provinces = sorted(
-            {str(p).strip() for p in cluster_df["provinsi"].tolist() if str(p).strip()}
+        cid = int(cluster_id)
+        dominant_provinces = sorted(
+            prov for prov, cl in dominant_by_province.items() if cl == cid
         )
         stats = {}
         for col in Province.NUMERIC_COLUMNS:
@@ -746,12 +777,12 @@ def _build_cluster_summary(
                 "std": _safe_float(cluster_df[col].std()),
             }
 
-        label = CLUSTER_LABELS.get(int(cluster_id), f"Cluster {cluster_id}")
+        label = cluster_labels.get(cid, f"Cluster {cid}")
         item = {
-            "cluster": int(cluster_id),
+            "cluster": cid,
             "label": label,
-            "count": len(provinces),
-            "provinces": provinces,
+            "count": len(dominant_provinces),
+            "provinces": dominant_provinces,
             "statistics": stats,
         }
         if mode == DATA_MODE_PANEL:
