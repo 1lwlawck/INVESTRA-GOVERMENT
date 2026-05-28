@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { GitBranch, TrendingUp, MapPin, Play } from 'lucide-react';
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from '@/components/ui/skeleton';
 import { ApiError } from '@/core/api/http-client';
 import {
   analysisApi,
@@ -13,7 +13,7 @@ import {
   CLUSTER_COLORS,
   DEFAULT_PANEL_YEAR_START,
   DEFAULT_PANEL_YEAR_END,
-} from "@/core/api/analysis.api";
+} from '@/core/api/analysis.api';
 import { BasicPageSkeleton } from '@/components/organisms/loading/PageSkeleton';
 
 interface ClusterCard {
@@ -30,7 +30,7 @@ interface ClusterCard {
   provinces: string[];
 }
 
-export function ClusteringView() {
+export function ClusteringPage() {
   useDocumentTitle('Clustering');
   const [clusterData, setClusterData] = useState<ClusterResult | null>(null);
   const [clusters, setClusters] = useState<ClusterCard[]>([]);
@@ -127,16 +127,28 @@ export function ClusteringView() {
       <div className="space-y-6">
         <div className="border-l-4 border-[#F9B233] pl-6 bg-white p-6 rounded-lg shadow-sm">
           <h2 className="text-[#002C5F]">Analisis K-Means Clustering</h2>
-          <p className="text-gray-600 mt-2">Pengelompokan provinsi berdasarkan kesamaan karakteristik investasi</p>
+          <p className="text-gray-600 mt-2">
+            Pengelompokan provinsi berdasarkan kesamaan karakteristik investasi
+          </p>
         </div>
         <Card className="border border-gray-200">
           <CardContent className="p-12 text-center">
             <GitBranch className="h-16 w-16 mx-auto mb-4 text-gray-300" />
             <h3 className="text-lg font-semibold text-gray-700 mb-2">Belum Ada Analisis</h3>
-            <p className="text-gray-500 mb-6">Jalankan analisis PCA & K-Means terlebih dahulu untuk melihat hasil clustering.</p>
+            <p className="text-gray-500 mb-6">
+              Jalankan analisis PCA & K-Means terlebih dahulu untuk melihat hasil clustering.
+            </p>
             {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-            <Button onClick={handleRunAnalysis} disabled={runningAnalysis} className="bg-[#002C5F] hover:bg-[#003D7A]">
-              {runningAnalysis ? <Skeleton className="h-4 w-4 mr-2 rounded-sm" /> : <Play className="h-4 w-4 mr-2" />}
+            <Button
+              onClick={handleRunAnalysis}
+              disabled={runningAnalysis}
+              className="bg-[#002C5F] hover:bg-[#003D7A]"
+            >
+              {runningAnalysis ? (
+                <Skeleton className="h-4 w-4 mr-2 rounded-sm" />
+              ) : (
+                <Play className="h-4 w-4 mr-2" />
+              )}
               Jalankan Analisis
             </Button>
           </CardContent>
@@ -146,15 +158,12 @@ export function ClusteringView() {
   }
 
   const modeFromResult = clusterData.dataMode || 'panel';
-  const uniqueProvinces = new Set(
-    clusterData.summary.flatMap((item) => item.provinces)
-  );
+  const uniqueProvinces = new Set(clusterData.summary.flatMap((item) => item.provinces));
   const totalProvinces = uniqueProvinces.size;
   const totalObservations = Object.keys(clusterData.assignments).length;
   const observationLabel =
     modeFromResult === 'panel' ? 'Observasi Terklasifikasi' : 'Provinsi Terklasifikasi';
-  const observationValue =
-    modeFromResult === 'panel' ? totalObservations : totalProvinces;
+  const observationValue = modeFromResult === 'panel' ? totalObservations : totalProvinces;
   const yearRangeLabel = clusterData.yearRange
     ? `${clusterData.yearRange.start}-${clusterData.yearRange.end}`
     : `${panelYearStart}-${panelYearEnd}`;
@@ -167,9 +176,7 @@ export function ClusteringView() {
     <div className="space-y-6">
       {/* Header */}
       <div className="border-l-4 border-[#F9B233] pl-6 bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-[#002C5F]">
-          Analisis K-Means Clustering
-        </h2>
+        <h2 className="text-[#002C5F]">Analisis K-Means Clustering</h2>
         <p className="text-gray-600 mt-2">
           Pengelompokan provinsi berdasarkan kesamaan karakteristik investasi dan pembangunan
         </p>
@@ -185,9 +192,7 @@ export function ClusteringView() {
                 <Badge variant="outline">Tahun: {yearRangeLabel}</Badge>
               )}
               {modeFromResult === 'panel' && panelStability && (
-                <Badge variant="secondary">
-                  Stabilitas Provinsi: {panelStabilityPercent}
-                </Badge>
+                <Badge variant="secondary">Stabilitas Provinsi: {panelStabilityPercent}</Badge>
               )}
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
@@ -230,7 +235,9 @@ export function ClusteringView() {
           <CardContent className="p-6 text-center">
             <TrendingUp className="h-10 w-10 text-[#059669] mx-auto mb-3" />
             <div className="text-3xl text-[#002C5F] mb-1">
-              {modeFromResult === 'panel' ? panelStabilityPercent : clusterData.metrics.silhouetteScore.toFixed(3)}
+              {modeFromResult === 'panel'
+                ? panelStabilityPercent
+                : clusterData.metrics.silhouetteScore.toFixed(3)}
             </div>
             <p className="text-sm text-gray-600">
               {modeFromResult === 'panel' ? 'Stabilitas Provinsi' : 'Silhouette Score'}
@@ -241,33 +248,29 @@ export function ClusteringView() {
 
       {/* Cluster Details */}
       {clusters.map((cluster) => (
-        <Card 
-          key={cluster.id} 
+        <Card
+          key={cluster.id}
           className="border-l-4 shadow-lg bg-white"
           style={{ borderLeftColor: cluster.color }}
         >
           <CardHeader className="border-b border-gray-200 bg-linear-to-r from-gray-50 to-blue-50">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
               <div className="flex items-center gap-3">
-                <div 
-                  className="w-4 h-4 rounded-full"
-                  style={{ backgroundColor: cluster.color }}
-                />
+                <div className="w-4 h-4 rounded-full" style={{ backgroundColor: cluster.color }} />
                 <div>
                   <CardTitle className="text-[#002C5F]">{cluster.name}</CardTitle>
                   <CardDescription className="mt-1">
                     {modeFromResult === 'panel'
                       ? `${cluster.observationCount ?? cluster.count} Observasi (${cluster.count} Provinsi${
-                          cluster.yearMin && cluster.yearMax ? `, ${cluster.yearMin}-${cluster.yearMax}` : ''
+                          cluster.yearMin && cluster.yearMax
+                            ? `, ${cluster.yearMin}-${cluster.yearMax}`
+                            : ''
                         })`
                       : `${cluster.count} Provinsi dalam klaster ini`}
                   </CardDescription>
                 </div>
               </div>
-              <Badge 
-                className="text-white"
-                style={{ backgroundColor: cluster.color }}
-              >
+              <Badge className="text-white" style={{ backgroundColor: cluster.color }}>
                 Klaster {cluster.id + 1}
               </Badge>
             </div>
@@ -280,7 +283,9 @@ export function ClusteringView() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="p-4 bg-linear-to-br from-gray-50 to-blue-50 rounded-lg border border-gray-200">
                   <p className="text-xs text-gray-600 mb-1">PDRB per Kapita</p>
-                  <p className="text-lg text-[#002C5F]">Rp {cluster.avgPDRB.toLocaleString('id-ID', { maximumFractionDigits: 0 })} rb</p>
+                  <p className="text-lg text-[#002C5F]">
+                    Rp {cluster.avgPDRB.toLocaleString('id-ID', { maximumFractionDigits: 0 })} rb
+                  </p>
                 </div>
                 <div className="p-4 bg-linear-to-br from-gray-50 to-blue-50 rounded-lg border border-gray-200">
                   <p className="text-xs text-gray-600 mb-1">IPM Rata-rata</p>
@@ -288,7 +293,13 @@ export function ClusteringView() {
                 </div>
                 <div className="p-4 bg-linear-to-br from-gray-50 to-blue-50 rounded-lg border border-gray-200">
                   <p className="text-xs text-gray-600 mb-1">Investasi Avg (PMDN+PMA)</p>
-                  <p className="text-lg text-[#002C5F]">Rp {(cluster.avgInvestment / 1e12).toLocaleString('id-ID', { maximumFractionDigits: 2 })} T</p>
+                  <p className="text-lg text-[#002C5F]">
+                    Rp{' '}
+                    {(cluster.avgInvestment / 1e12).toLocaleString('id-ID', {
+                      maximumFractionDigits: 2,
+                    })}{' '}
+                    T
+                  </p>
                 </div>
               </div>
             </div>
@@ -298,8 +309,8 @@ export function ClusteringView() {
               <h4 className="text-[#002C5F] mb-3">Daftar Provinsi</h4>
               <div className="flex flex-wrap gap-2">
                 {cluster.provinces.map((province, idx) => (
-                  <Badge 
-                    key={idx} 
+                  <Badge
+                    key={idx}
                     variant="outline"
                     className="px-3 py-1"
                     style={{ borderColor: cluster.color, color: cluster.color }}

@@ -1,6 +1,3 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+// Re-export to keep shadcn-style local imports working while the canonical
+// definition lives in @/shared/utils/cn.util.
+export { cn } from '@/shared/utils/cn.util';

@@ -5,7 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -46,7 +53,7 @@ const ROLE_CONFIG: Record<UserRole, { label: string; color: string; icon: typeof
   user: { label: 'User', color: '#059669', icon: UserIcon },
 };
 
-export function UserManagementView() {
+export function UserManagementPage() {
   useDocumentTitle('Manajemen User');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -186,30 +193,58 @@ export function UserManagementView() {
             <DialogHeader>
               <DialogTitle>{editingUser ? 'Edit Pengguna' : 'Tambah Pengguna Baru'}</DialogTitle>
               <DialogDescription>
-                {editingUser ? 'Perbarui informasi pengguna.' : 'Isi data untuk menambah pengguna baru.'}
+                {editingUser
+                  ? 'Perbarui informasi pengguna.'
+                  : 'Isi data untuk menambah pengguna baru.'}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Nama Lengkap</Label>
-                <Input id="name" value={formName} onChange={(e) => setFormName(e.target.value)} placeholder="Nama lengkap" />
+                <Input
+                  id="name"
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
+                  placeholder="Nama lengkap"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="username">Username</Label>
-                <Input id="username" value={formUsername} onChange={(e) => setFormUsername(e.target.value)} placeholder="Username" />
+                <Input
+                  id="username"
+                  value={formUsername}
+                  onChange={(e) => setFormUsername(e.target.value)}
+                  placeholder="Username"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={formEmail} onChange={(e) => setFormEmail(e.target.value)} placeholder="email@investra.go.id" />
+                <Input
+                  id="email"
+                  type="email"
+                  value={formEmail}
+                  onChange={(e) => setFormEmail(e.target.value)}
+                  placeholder="email@investra.go.id"
+                />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">{editingUser ? 'Password Baru (kosongkan jika tidak diubah)' : 'Password'}</Label>
-                <Input id="password" type="password" value={formPassword} onChange={(e) => setFormPassword(e.target.value)} placeholder={editingUser ? '••••••••' : 'Masukkan password'} />
+                <Label htmlFor="password">
+                  {editingUser ? 'Password Baru (kosongkan jika tidak diubah)' : 'Password'}
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={formPassword}
+                  onChange={(e) => setFormPassword(e.target.value)}
+                  placeholder={editingUser ? '••••••••' : 'Masukkan password'}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Role</Label>
                 <Select value={formRole} onValueChange={(v) => setFormRole(v as UserRole)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="user">User</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
@@ -219,8 +254,13 @@ export function UserManagementView() {
               </div>
               <div className="space-y-2">
                 <Label>Status</Label>
-                <Select value={formStatus} onValueChange={(v) => setFormStatus(v as 'active' | 'inactive')}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={formStatus}
+                  onValueChange={(v) => setFormStatus(v as 'active' | 'inactive')}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="active">Aktif</SelectItem>
                     <SelectItem value="inactive">Nonaktif</SelectItem>
@@ -229,12 +269,34 @@ export function UserManagementView() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => { setDialogOpen(false); resetForm(); }}>Batal</Button>
-              <Button onClick={handleSave} className="bg-[#002C5F] hover:bg-[#003D7A]" disabled={!formName || !formUsername || !formEmail || (!editingUser && !formPassword) || saving}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setDialogOpen(false);
+                  resetForm();
+                }}
+              >
+                Batal
+              </Button>
+              <Button
+                onClick={handleSave}
+                className="bg-[#002C5F] hover:bg-[#003D7A]"
+                disabled={
+                  !formName ||
+                  !formUsername ||
+                  !formEmail ||
+                  (!editingUser && !formPassword) ||
+                  saving
+                }
+              >
                 {saving ? (
-                  <span className="flex items-center gap-2"><Skeleton className="h-4 w-4 rounded-sm" /> Menyimpan...</span>
+                  <span className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-4 rounded-sm" /> Menyimpan...
+                  </span>
+                ) : editingUser ? (
+                  'Simpan Perubahan'
                 ) : (
-                  editingUser ? 'Simpan Perubahan' : 'Tambah'
+                  'Tambah'
                 )}
               </Button>
             </DialogFooter>
@@ -244,22 +306,24 @@ export function UserManagementView() {
 
       {/* Role Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {(Object.entries(ROLE_CONFIG) as [UserRole, typeof ROLE_CONFIG[UserRole]][]).map(([role, cfg]) => {
-          const Icon = cfg.icon;
-          return (
-            <Card key={role} className="border-l-4" style={{ borderLeftColor: cfg.color }}>
-              <CardContent className="p-5 flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">{cfg.label}</p>
-                  <p className="text-3xl font-bold text-[#002C5F]">{roleStats[role]}</p>
-                </div>
-                <div className="p-3 rounded-lg bg-gray-50">
-                  <Icon className="h-6 w-6" style={{ color: cfg.color }} />
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+        {(Object.entries(ROLE_CONFIG) as [UserRole, (typeof ROLE_CONFIG)[UserRole]][]).map(
+          ([role, cfg]) => {
+            const Icon = cfg.icon;
+            return (
+              <Card key={role} className="border-l-4" style={{ borderLeftColor: cfg.color }}>
+                <CardContent className="p-5 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500">{cfg.label}</p>
+                    <p className="text-3xl font-bold text-[#002C5F]">{roleStats[role]}</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-gray-50">
+                    <Icon className="h-6 w-6" style={{ color: cfg.color }} />
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          },
+        )}
       </div>
 
       {/* Users Table */}
@@ -304,12 +368,16 @@ export function UserManagementView() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={user.isActive ? 'default' : 'secondary'}
-                          className={user.isActive ? 'bg-green-500 text-white' : ''}>
+                        <Badge
+                          variant={user.isActive ? 'default' : 'secondary'}
+                          className={user.isActive ? 'bg-green-500 text-white' : ''}
+                        >
                           {user.isActive ? 'Aktif' : 'Nonaktif'}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-gray-500 text-sm">{new Date(user.updatedAt).toLocaleString('id-ID')}</TableCell>
+                      <TableCell className="text-gray-500 text-sm">
+                        {new Date(user.updatedAt).toLocaleString('id-ID')}
+                      </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Button variant="ghost" size="icon" onClick={() => openEdit(user)}>
@@ -326,8 +394,9 @@ export function UserManagementView() {
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Hapus Pengguna?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Apakah Anda yakin ingin menghapus pengguna <strong>{user.fullName}</strong>?
-                                  Tindakan ini tidak dapat dibatalkan.
+                                  Apakah Anda yakin ingin menghapus pengguna{' '}
+                                  <strong>{user.fullName}</strong>? Tindakan ini tidak dapat
+                                  dibatalkan.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
@@ -365,7 +434,7 @@ export function UserManagementView() {
                 <TableRow>
                   <TableHead>Fitur</TableHead>
                   <TableHead className="text-center">
-                    <span className="text-[#059669]">User</span>
+                    <span className="text-investra-green">User</span>
                   </TableHead>
                   <TableHead className="text-center">
                     <span className="text-[#002C5F]">Admin</span>
@@ -391,7 +460,9 @@ export function UserManagementView() {
                     <TableCell className="font-medium">{row.fitur}</TableCell>
                     <TableCell className="text-center text-lg">{row.user ? '✅' : '❌'}</TableCell>
                     <TableCell className="text-center text-lg">{row.admin ? '✅' : '❌'}</TableCell>
-                    <TableCell className="text-center text-lg">{row.superadmin ? '✅' : '❌'}</TableCell>
+                    <TableCell className="text-center text-lg">
+                      {row.superadmin ? '✅' : '❌'}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

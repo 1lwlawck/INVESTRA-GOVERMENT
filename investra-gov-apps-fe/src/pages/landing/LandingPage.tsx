@@ -1,727 +1,704 @@
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { Button } from "@/components/ui/button";
-import { GarudaEmblem } from "@/components/atoms/media/GarudaEmblem";
-import { ImageWithFallback } from "@/components/atoms/media/ImageWithFallback";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { 
-  Search,
-  User,
+  AlertCircle,
   ArrowRight,
-  Facebook,
-  Twitter,
-  Instagram,
-  Youtube,
-  Linkedin,
-  MapPin,
-  TrendingUp,
   BarChart3,
-  FileText,
-  Database,
-  Globe,
-  Layers,
-  Upload,
-  Cpu,
-  GitBranch,
-  Target,
-  Monitor,
-  HelpCircle,
+  BookOpen,
   CheckCircle2,
-  ChevronRight
+  Database,
+  FileText,
+  GitBranch,
+  Info,
+  Mail,
+  MapPin,
+  Phone,
+  Search,
+  ShieldCheck,
+  User,
 } from 'lucide-react';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { publicApi } from '@/core/api/public.api';
+import type {
+  PublicAnalysisSummary,
+  PublicProvinceAnalysis,
+  PublicProvinceListItem,
+} from '@/core/api/public.api';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { GarudaEmblem } from '@/components/atoms/media/GarudaEmblem';
+import { ImageWithFallback } from '@/components/atoms/media/ImageWithFallback';
+import heroImage from '@/assets/images/premium_photo-1733317260639-6fb8eb703c78.avif';
+
+const indicatorOrder = [
+  'pmdnRp',
+  'fdiRp',
+  'pdrbPerKapita',
+  'ipm',
+  'kemiskinan',
+  'aksesListrik',
+  'tpt',
+];
+
+function formatYearRange(range?: { start: number | null; end: number | null }): string {
+  if (!range?.start && !range?.end) return 'Belum tersedia';
+  if (range.start === range.end) return String(range.end);
+  return `${range.start ?? '-'}-${range.end ?? '-'}`;
+}
+
+function formatLargeCurrency(value: number): string {
+  if (value >= 1_000_000_000_000) {
+    return `Rp ${(value / 1_000_000_000_000).toLocaleString('id-ID', {
+      maximumFractionDigits: 2,
+    })} T`;
+  }
+  if (value >= 1_000_000_000) {
+    return `Rp ${(value / 1_000_000_000).toLocaleString('id-ID', {
+      maximumFractionDigits: 2,
+    })} M`;
+  }
+  return `Rp ${value.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`;
+}
+
+function formatIndicatorValue(key: string, value: number): string {
+  if (key === 'pmdnRp' || key === 'fdiRp' || key === 'pdrbPerKapita') {
+    return formatLargeCurrency(value);
+  }
+  if (key === 'ipm') return value.toLocaleString('id-ID', { maximumFractionDigits: 2 });
+  return `${value.toLocaleString('id-ID', { maximumFractionDigits: 2 })}%`;
+}
+
+function publicErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return 'Data publik belum dapat dimuat.';
+}
 
 export function LandingPage() {
   useDocumentTitle('Beranda');
   const navigate = useNavigate();
+  const [summary, setSummary] = useState<PublicAnalysisSummary | null>(null);
+  const [provinces, setProvinces] = useState<PublicProvinceListItem[]>([]);
+  const [selectedProvince, setSelectedProvince] = useState('');
+  const [provinceResult, setProvinceResult] = useState<PublicProvinceAnalysis | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [checkingProvince, setCheckingProvince] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [provinceError, setProvinceError] = useState<string | null>(null);
+  const [provinceMenuOpen, setProvinceMenuOpen] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadPublicData() {
+      setLoading(true);
+      setError(null);
+      try {
+        const [summaryData, provinceData] = await Promise.all([
+          publicApi.getSummary(),
+          publicApi.getProvinces(),
+        ]);
+        if (!active) return;
+        setSummary(summaryData);
+        setProvinces(provinceData);
+      } catch (err) {
+        if (!active) return;
+        setError(publicErrorMessage(err));
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    loadPublicData();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const provinceNames = useMemo(
+    () => provinces.map((item) => item.provinsi).sort((a, b) => a.localeCompare(b, 'id-ID')),
+    [provinces],
+  );
+  const filteredProvinceNames = useMemo(() => {
+    const query = selectedProvince.trim().toLowerCase();
+    const names = query
+      ? provinceNames.filter((name) => name.toLowerCase().includes(query))
+      : provinceNames;
+    return names.slice(0, 12);
+  }, [provinceNames, selectedProvince]);
+
+  const handleCheckProvince = async () => {
+    const province = selectedProvince.trim();
+    if (!province) {
+      setProvinceError('Pilih atau ketik nama provinsi terlebih dahulu.');
+      return;
+    }
+
+    setCheckingProvince(true);
+    setProvinceError(null);
+    setProvinceResult(null);
+    try {
+      const result = await publicApi.getProvinceAnalysis(province);
+      setProvinceResult(result);
+    } catch (err) {
+      setProvinceError(publicErrorMessage(err));
+    } finally {
+      setCheckingProvince(false);
+    }
+  };
+
+  const totalProvinceCount =
+    summary?.clusters.reduce((total, cluster) => total + cluster.provinceCount, 0) ?? 0;
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Top Bar */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 sm:py-3">
-          <div className="flex items-center justify-between">
-            {/* Left Logos */}
-            <div className="flex items-center gap-3 sm:gap-6">
-              <div className="flex items-center gap-2">
-                <div className="w-12 h-12">
-                  <GarudaEmblem />
-                </div>
-                <div className="border-l-2 border-gray-300 pl-3">
-                  <div className="text-[#002C5F] text-sm" style={{ fontWeight: 700, letterSpacing: '1px' }}>
-                    INVESTRA
-                  </div>
-                  <div className="text-gray-500 text-xs" style={{ fontWeight: 400 }}>
-                    Investment Analytics
-                  </div>
-                </div>
-              </div>
-              <div className="h-8 w-px bg-gray-300 hidden sm:block"></div>
-              <div className="hidden sm:flex items-center gap-2">
-                <div className="text-[#002C5F] text-xs" style={{ fontWeight: 600 }}>
-                  INDONESIA
-                </div>
-              </div>
-            </div>
-
-            {/* Search Bar */}
-            <div className="hidden md:block flex-1 max-w-md mx-8">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Cari Berita atau Informasi..."
-                  className="w-full px-4 py-2 pr-10 text-sm border border-gray-300 rounded-full focus:outline-none focus:border-[#002C5F]"
-                />
-                <Button className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <Search className="h-4 w-4 text-gray-400" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Right Side */}
-            <div className="flex items-center gap-4">
-              <div className="text-xs text-gray-600">
-                <div style={{ fontWeight: 600 }}>TOPIK</div>
-                <div style={{ fontWeight: 400 }}>PILIHAN</div>
-              </div>
-              <Button 
-                onClick={() => navigate('/login')}
-                size="sm"
-                className="bg-[#002C5F] hover:bg-[#001F4D] text-white"
-                style={{ fontWeight: 600 }}
-              >
-                <User className="h-4 w-4 mr-1" />
-                LOGIN
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Navigation */}
-      <nav className="bg-white border-b-2 border-gray-200 sticky top-0 z-50 shadow-sm hidden md:block">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center">
-            <a 
-              href="#hero" 
-              className="flex items-center gap-2 px-5 py-4 text-[#002C5F] hover:bg-gray-50 transition-colors"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-              </svg>
-            </a>
-            
-            <a href="#tentang" className="px-5 py-4 text-gray-700 hover:bg-gray-50 text-sm flex items-center gap-1 transition-colors" style={{ fontWeight: 500 }}>
-              PROFIL
-            </a>
-            
-            <a href="#cara-kerja" className="px-5 py-4 text-gray-700 hover:bg-gray-50 text-sm flex items-center gap-1 transition-colors" style={{ fontWeight: 500 }}>
-              METODOLOGI
-            </a>
-            
-            <a href="#fitur" className="px-5 py-4 text-gray-700 hover:bg-gray-50 text-sm flex items-center gap-1 transition-colors" style={{ fontWeight: 500 }}>
-              FITUR
-            </a>
-            
-            <a href="#dashboard" className="px-5 py-4 text-gray-700 hover:bg-gray-50 text-sm flex items-center gap-1 transition-colors" style={{ fontWeight: 500 }}>
-              DASHBOARD
-            </a>
-            
-            <a href="#faq" className="px-5 py-4 text-gray-700 hover:bg-gray-50 text-sm flex items-center gap-1 transition-colors" style={{ fontWeight: 500 }}>
-              FAQ
-            </a>
-            
-            <a href="#kontak" className="px-5 py-4 text-gray-700 hover:bg-gray-50 text-sm flex items-center gap-1 transition-colors" style={{ fontWeight: 500 }}>
-              KONTAK
-            </a>
-          </div>
-        </div>
-      </nav>
-
-      {/* Hero Section */}
-      <div id="hero" className="relative h-170 overflow-hidden">
-        <div className="absolute inset-0 bg-linear-to-r from-[#002C5F]/90 via-[#002C5F]/70 to-transparent z-10"></div>
-        <ImageWithFallback
-          src="https://images.unsplash.com/photo-1761387787737-c850f5db6fa3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbmRvbmVzaWElMjBnb3Zlcm5tZW50JTIwYnVpbGRpbmd8ZW58MXx8fHwxNzYyNDM0MzI1fDA&ixlib=rb-4.1.0&q=80&w=1080"
-          alt="Hero Background"
-          className="w-full h-full object-cover"
-        />
-        
-        <div className="absolute inset-0 z-20 flex items-center">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
-            <div className="max-w-3xl pr-4 sm:pr-0">
-              <div className="inline-block bg-[#DC2626] text-white px-3 sm:px-4 py-1 rounded text-xs mb-2 sm:mb-4" style={{ fontWeight: 700 }}>
-                SISTEM TERBARU
-              </div>
-              <h1 className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl mb-3 sm:mb-6" style={{ fontWeight: 700, lineHeight: '1.2' }}>
-                Sistem Analisis Ketimpangan Distribusi Investasi Antar Wilayah di Indonesia
-              </h1>
-              <p className="text-white/90 text-sm sm:text-base md:text-lg mb-4 sm:mb-8 leading-relaxed" style={{ fontWeight: 400 }}>
-                Platform berbasis PCA dan K-Means Clustering untuk monitoring ketimpangan ekonomi regional 34 provinsi Indonesia
-              </p>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                <Button 
-                  onClick={() => navigate('/login')}
-                  size="lg"
-                  className="bg-white text-[#002C5F] hover:bg-gray-100 gap-2"
-                  style={{ fontWeight: 600 }}
-                >
-                  Akses Dashboard
-                  <ArrowRight className="h-5 w-5" />
-                </Button>
-                <Button className="text-white flex items-center gap-2 hover:gap-3 transition-all" style={{ fontWeight: 500 }}>
-                  <span className="border-b border-white/50">Baca Selengkapnya</span>
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Social Media Icons */}
-        <div className="absolute bottom-4 right-4 sm:bottom-8 sm:right-8 z-20 hidden sm:flex items-center gap-3">
-          <Button className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors flex items-center justify-center">
-            <Facebook className="h-5 w-5 text-white" />
-          </Button>
-          <Button className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors flex items-center justify-center">
-            <Twitter className="h-5 w-5 text-white" />
-          </Button>
-          <Button className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors flex items-center justify-center">
-            <Instagram className="h-5 w-5 text-white" />
-          </Button>
-          <Button className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors flex items-center justify-center">
-            <Youtube className="h-5 w-5 text-white" />
-          </Button>
-          <Button className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors flex items-center justify-center">
-            <Linkedin className="h-5 w-5 text-white" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Statistik Ringkas Section */}
-      <div className="relative -mt-16 z-30 pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white rounded-xl shadow-lg p-6 text-center border-t-4 border-[#002C5F] hover:shadow-xl transition-shadow">
-              <div className="flex items-center justify-center w-12 h-12 bg-[#002C5F]/10 rounded-full mx-auto mb-3">
-                <Globe className="h-6 w-6 text-[#002C5F]" />
-              </div>
-              <div className="text-3xl sm:text-4xl text-[#002C5F] mb-1" style={{ fontWeight: 800 }}>38</div>
-              <div className="text-sm text-gray-500" style={{ fontWeight: 500 }}>Provinsi Dianalisis</div>
-            </div>
-            <div className="bg-white rounded-xl shadow-lg p-6 text-center border-t-4 border-[#F9B233] hover:shadow-xl transition-shadow">
-              <div className="flex items-center justify-center w-12 h-12 bg-[#F9B233]/10 rounded-full mx-auto mb-3">
-                <Database className="h-6 w-6 text-[#F9B233]" />
-              </div>
-              <div className="text-3xl sm:text-4xl text-[#002C5F] mb-1" style={{ fontWeight: 800 }}>7</div>
-              <div className="text-sm text-gray-500" style={{ fontWeight: 500 }}>Variabel Analisis</div>
-            </div>
-            <div className="bg-white rounded-xl shadow-lg p-6 text-center border-t-4 border-[#059669] hover:shadow-xl transition-shadow">
-              <div className="flex items-center justify-center w-12 h-12 bg-[#059669]/10 rounded-full mx-auto mb-3">
-                <Layers className="h-6 w-6 text-[#059669]" />
-              </div>
-              <div className="text-3xl sm:text-4xl text-[#002C5F] mb-1" style={{ fontWeight: 800 }}>3</div>
-              <div className="text-sm text-gray-500" style={{ fontWeight: 500 }}>Cluster Klasifikasi</div>
-            </div>
-            <div className="bg-white rounded-xl shadow-lg p-6 text-center border-t-4 border-[#DC2626] hover:shadow-xl transition-shadow">
-              <div className="flex items-center justify-center w-12 h-12 bg-[#DC2626]/10 rounded-full mx-auto mb-3">
-                <TrendingUp className="h-6 w-6 text-[#DC2626]" />
-              </div>
-              <div className="text-3xl sm:text-4xl text-[#002C5F] mb-1" style={{ fontWeight: 800 }}>2</div>
-              <div className="text-sm text-gray-500" style={{ fontWeight: 500 }}>Metode Analisis</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Tentang Sistem Section */}
-      <div id="tentang" className="bg-white py-16 sm:py-20 scroll-mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <div className="min-h-screen bg-white text-gray-900">
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+          <a href="#beranda" className="flex items-center gap-3">
+            <GarudaEmblem size={42} />
             <div>
-              <div className="inline-block bg-[#002C5F]/10 text-[#002C5F] px-4 py-1.5 rounded-full text-xs mb-4" style={{ fontWeight: 600 }}>
-                TENTANG SISTEM
-              </div>
-              <h2 className="text-[#002C5F] text-2xl sm:text-3xl mb-6" style={{ fontWeight: 700, lineHeight: '1.3' }}>
-                Mengapa INVESTRA Dibangun?
-              </h2>
-              <p className="text-gray-600 mb-6 leading-relaxed" style={{ fontWeight: 400 }}>
-                Ketimpangan distribusi investasi antar wilayah merupakan tantangan utama pembangunan nasional. Beberapa provinsi menerima porsi investasi yang sangat besar, sementara wilayah lain tertinggal jauh.
+              <div className="text-sm font-bold tracking-wide text-[#002C5F]">INVESTRA</div>
+              <div className="text-xs text-gray-500">Portal Analisis Investasi Wilayah</div>
+            </div>
+          </a>
+          <nav className="hidden items-center gap-6 text-sm text-gray-600 md:flex">
+            <a href="#cek-daerah" className="hover:text-[#002C5F]">
+              Cek Daerah
+            </a>
+            <a href="#hasil" className="hover:text-[#002C5F]">
+              Hasil
+            </a>
+            <a href="#metode" className="hover:text-[#002C5F]">
+              Data & Metode
+            </a>
+            <a href="#batasan" className="hover:text-[#002C5F]">
+              Batasan
+            </a>
+          </nav>
+          <Button
+            onClick={() => navigate('/login')}
+            className="bg-[#002C5F] text-white hover:bg-[#003D7A]"
+            size="sm"
+          >
+            <User className="mr-2 h-4 w-4" />
+            Login Pengelola
+          </Button>
+        </div>
+      </header>
+
+      <main>
+        <section id="beranda" className="relative min-h-screen overflow-hidden">
+          <ImageWithFallback
+            src={heroImage}
+            alt="Panorama skyline Jakarta saat senja"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-linear-to-r from-[#002C5F]/95 via-[#002C5F]/80 to-[#002C5F]/25" />
+          <div className="relative mx-auto flex min-h-screen max-w-7xl items-center px-4 py-16 sm:px-6">
+            <div className="max-w-3xl text-white">
+              <Badge className="mb-5 bg-[#F9B233] text-[#002C5F] hover:bg-[#F9B233]">
+                Informasi Publik
+              </Badge>
+              <h1 className="mb-5 text-3xl font-bold leading-tight sm:text-5xl">
+                Pahami posisi investasi daerah Anda berdasarkan data
+              </h1>
+              <p className="mb-8 max-w-2xl text-base leading-relaxed text-white/90 sm:text-lg">
+                INVESTRA membantu masyarakat membaca hasil analisis ketimpangan investasi antar
+                provinsi. Anda dapat melihat daerah masuk kelompok apa, indikator apa yang
+                digunakan, dan bagaimana hasilnya perlu ditafsirkan.
               </p>
-              <p className="text-gray-600 mb-8 leading-relaxed" style={{ fontWeight: 400 }}>
-                INVESTRA hadir sebagai sistem analitik berbasis data yang menggabungkan metode <strong>Principal Component Analysis (PCA)</strong> dan <strong>K-Means Clustering</strong> untuk memetakan pola ketimpangan dan memberikan rekomendasi kebijakan yang terukur.
-              </p>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-[#059669] mt-0.5 shrink-0" />
-                  <span className="text-gray-700 text-sm" style={{ fontWeight: 500 }}>Mengidentifikasi faktor dominan penyebab ketimpangan ekonomi</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-[#059669] mt-0.5 shrink-0" />
-                  <span className="text-gray-700 text-sm" style={{ fontWeight: 500 }}>Mengelompokkan provinsi berdasarkan karakteristik investasi</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-[#059669] mt-0.5 shrink-0" />
-                  <span className="text-gray-700 text-sm" style={{ fontWeight: 500 }}>Menyusun rekomendasi kebijakan spesifik per cluster wilayah</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-[#059669] mt-0.5 shrink-0" />
-                  <span className="text-gray-700 text-sm" style={{ fontWeight: 500 }}>Visualisasi data interaktif untuk pengambil keputusan</span>
-                </div>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button asChild size="lg" className="bg-white text-[#002C5F] hover:bg-gray-100">
+                  <a href="#cek-daerah">
+                    Cek Daerah Saya
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </a>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  className="border border-white/50 bg-white/10 text-white hover:bg-white/20"
+                >
+                  <a href="#metode">
+                    Lihat Data & Metode
+                    <BookOpen className="ml-2 h-5 w-5" />
+                  </a>
+                </Button>
               </div>
             </div>
-            <div className="relative">
-              <div className="bg-gradient-to-br from-[#002C5F] to-[#003D7A] rounded-2xl p-8 text-white">
-                <h3 className="text-xl mb-6" style={{ fontWeight: 700 }}>7 Variabel Analisis</h3>
-                <div className="space-y-4">
-                  {[
-                    { label: 'PMDN', desc: 'Penanaman Modal Dalam Negeri' },
-                    { label: 'PMA/FDI', desc: 'Penanaman Modal Asing' },
-                    { label: 'PDRB', desc: 'Produk Domestik Regional Bruto per Kapita' },
-                    { label: 'IPM', desc: 'Indeks Pembangunan Manusia' },
-                    { label: 'Kemiskinan', desc: 'Persentase Penduduk Miskin' },
-                    { label: 'Listrik', desc: 'Rasio Akses Listrik' },
-                    { label: 'TPT', desc: 'Tingkat Pengangguran Terbuka' },
-                  ].map((v) => (
-                    <div key={v.label} className="flex items-center gap-3 bg-white/10 rounded-lg px-4 py-3">
-                      <ChevronRight className="h-4 w-4 text-[#F9B233] shrink-0" />
-                      <div>
-                        <span style={{ fontWeight: 600 }}>{v.label}</span>
-                        <span className="text-white/70 text-sm ml-2" style={{ fontWeight: 400 }}>— {v.desc}</span>
+          </div>
+        </section>
+
+        <section className="border-b border-gray-200 bg-white py-6">
+          <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 px-4 sm:grid-cols-3 sm:px-6">
+            <div className="flex items-center gap-3">
+              <Database className="h-9 w-9 text-[#002C5F]" />
+              <div>
+                <p className="text-xs text-gray-500">Periode Data</p>
+                <p className="font-semibold text-[#002C5F]">
+                  {loading ? 'Memuat...' : formatYearRange(summary?.yearRange)}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <MapPin className="h-9 w-9 text-[#059669]" />
+              <div>
+                <p className="text-xs text-gray-500">Provinsi Dalam Analisis</p>
+                <p className="font-semibold text-[#002C5F]">
+                  {loading ? 'Memuat...' : `${totalProvinceCount || provinces.length} provinsi`}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <GitBranch className="h-9 w-9 text-[#F9B233]" />
+              <div>
+                <p className="text-xs text-gray-500">Kelompok Hasil Analisis</p>
+                <p className="font-semibold text-[#002C5F]">
+                  {loading ? 'Memuat...' : `${summary?.analysis.k ?? 0} cluster`}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {error && (
+          <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+            <Alert className="border-amber-500 bg-amber-50">
+              <AlertCircle className="h-4 w-4 text-amber-600" />
+              <AlertTitle className="text-amber-800">Data publik belum tersedia</AlertTitle>
+              <AlertDescription className="text-amber-800">
+                {error}. Jalankan analisis dari dashboard pengelola agar hasil publik dapat
+                ditampilkan.
+              </AlertDescription>
+            </Alert>
+          </section>
+        )}
+
+        <section id="cek-daerah" className="bg-gray-50 py-16 scroll-mt-20">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="mb-8 max-w-3xl">
+              <Badge className="mb-3 bg-[#002C5F] text-white hover:bg-[#002C5F]">
+                Cek Daerah Saya
+              </Badge>
+              <h2 className="mb-3 text-2xl font-bold text-[#002C5F] sm:text-3xl">
+                Lihat provinsi Anda masuk kelompok investasi mana
+              </h2>
+              <p className="text-gray-600">
+                Pilih nama provinsi untuk melihat cluster hasil analisis, ringkasan indikator, dan
+                penjelasan singkat yang mudah dibaca.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+              <div className="self-start rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+                <Label htmlFor="province-search" className="text-[#002C5F]">
+                  Nama Provinsi
+                </Label>
+                <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+                  <div className="relative flex-1">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <Input
+                      id="province-search"
+                      value={selectedProvince}
+                      onChange={(event) => {
+                        setSelectedProvince(event.target.value);
+                        setProvinceMenuOpen(true);
+                      }}
+                      onFocus={() => setProvinceMenuOpen(true)}
+                      onBlur={() => {
+                        window.setTimeout(() => setProvinceMenuOpen(false), 120);
+                      }}
+                      placeholder="Contoh: Jawa Barat"
+                      className="pl-9 pr-9"
+                      autoComplete="off"
+                    />
+                    <button
+                      type="button"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => setProvinceMenuOpen((open) => !open)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                      aria-label="Tampilkan daftar provinsi"
+                    >
+                      <ArrowRight
+                        className={`h-4 w-4 rotate-90 transition-transform ${provinceMenuOpen ? '-rotate-90' : ''}`}
+                      />
+                    </button>
+                    {provinceMenuOpen && (
+                      <div className="absolute left-0 right-0 top-full z-40 mt-2 max-h-72 overflow-y-auto rounded-lg border border-gray-200 bg-white py-2 shadow-lg">
+                        {filteredProvinceNames.length > 0 ? (
+                          filteredProvinceNames.map((name) => (
+                            <button
+                              key={name}
+                              type="button"
+                              onMouseDown={(event) => event.preventDefault()}
+                              onClick={() => {
+                                setSelectedProvince(name);
+                                setProvinceMenuOpen(false);
+                              }}
+                              className="block w-full px-4 py-2 text-left text-sm font-semibold text-[#002C5F] hover:bg-blue-50"
+                            >
+                              {name}
+                            </button>
+                          ))
+                        ) : (
+                          <div className="px-4 py-3 text-sm text-gray-500">
+                            Provinsi tidak ditemukan.
+                          </div>
+                        )}
                       </div>
+                    )}
+                  </div>
+                  <Button
+                    onClick={handleCheckProvince}
+                    disabled={checkingProvince || loading || Boolean(error)}
+                    className="bg-[#002C5F] text-white hover:bg-[#003D7A]"
+                  >
+                    {checkingProvince ? 'Memeriksa...' : 'Cek Hasil'}
+                  </Button>
+                </div>
+                {provinceError && (
+                  <Alert className="mt-4 border-red-500 bg-red-50">
+                    <AlertCircle className="h-4 w-4 text-red-600" />
+                    <AlertDescription className="text-red-700">{provinceError}</AlertDescription>
+                  </Alert>
+                )}
+                <div className="mt-6 rounded-lg bg-blue-50 p-4 text-sm text-[#002C5F]">
+                  <Info className="mb-2 h-5 w-5" />
+                  Hasil cluster menunjukkan kemiripan pola data provinsi dibandingkan provinsi lain,
+                  bukan penilaian mutlak terhadap keberhasilan daerah.
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+                {!provinceResult ? (
+                  <div className="flex min-h-72 flex-col items-center justify-center text-center text-gray-500">
+                    <MapPin className="mb-3 h-12 w-12 text-gray-300" />
+                    <p className="font-medium text-gray-700">Hasil daerah akan muncul di sini</p>
+                    <p className="mt-1 max-w-md text-sm">
+                      Setelah provinsi dipilih, sistem menampilkan cluster, periode data, dan
+                      indikator utama hasil analisis.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="text-sm text-gray-500">Provinsi</p>
+                        <h3 className="text-2xl font-bold text-[#002C5F]">
+                          {provinceResult.province}
+                        </h3>
+                      </div>
+                      <Badge
+                        className="w-fit text-white hover:opacity-90"
+                        style={{ backgroundColor: provinceResult.cluster.color }}
+                      >
+                        {provinceResult.cluster.label}
+                      </Badge>
+                    </div>
+
+                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                      <p className="mb-2 text-sm font-semibold text-[#002C5F]">Artinya</p>
+                      <p className="text-sm leading-relaxed text-gray-700">
+                        {provinceResult.cluster.policyRationale || provinceResult.plainLanguageNote}
+                      </p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Badge variant="outline">
+                          Periode {formatYearRange(provinceResult.yearRange)}
+                        </Badge>
+                        <Badge variant="outline">
+                          Konsistensi {(provinceResult.cluster.consistencyRatio * 100).toFixed(1)}%
+                        </Badge>
+                        {provinceResult.cluster.dominantFactor && (
+                          <Badge variant="outline">{provinceResult.cluster.dominantFactor}</Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="mb-3 font-semibold text-[#002C5F]">Ringkasan Indikator</h4>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        {indicatorOrder
+                          .filter((key) => provinceResult.indicators[key])
+                          .map((key) => {
+                            const item = provinceResult.indicators[key];
+                            return (
+                              <div key={key} className="rounded-lg border border-gray-200 p-3">
+                                <p className="text-xs text-gray-500">{item.label}</p>
+                                <p className="mt-1 font-semibold text-[#002C5F]">
+                                  {formatIndicatorValue(key, item.value)}
+                                </p>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </div>
+
+                    {provinceResult.cluster.policyDirections.length > 0 && (
+                      <div>
+                        <h4 className="mb-3 font-semibold text-[#002C5F]">
+                          Arah Kebijakan Umum Cluster
+                        </h4>
+                        <div className="space-y-3">
+                          {provinceResult.cluster.policyDirections.map((item) => (
+                            <div key={item.direction} className="rounded-lg bg-blue-50 p-4">
+                              <p className="font-semibold text-[#002C5F]">{item.direction}</p>
+                              <p className="mt-1 text-sm text-gray-700">{item.rationale}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="hasil" className="bg-white py-16 scroll-mt-20">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <Badge className="mb-3 bg-[#F9B233] text-[#002C5F] hover:bg-[#F9B233]">
+                  Ringkasan Hasil
+                </Badge>
+                <h2 className="text-2xl font-bold text-[#002C5F] sm:text-3xl">
+                  Sebaran cluster provinsi
+                </h2>
+              </div>
+              {summary && (
+                <p className="text-sm text-gray-500">
+                  Analisis {summary.analysis.code || summary.analysis.id} - k={summary.analysis.k}
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+              {(summary?.clusters ?? []).map((cluster) => (
+                <Card key={cluster.clusterId} className="border border-gray-200 shadow-sm">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div
+                        className="h-4 w-4 rounded-full"
+                        style={{ backgroundColor: cluster.color }}
+                      />
+                      <Badge variant="outline">{cluster.provinceCount} provinsi</Badge>
+                    </div>
+                    <CardTitle className="text-base text-[#002C5F]">{cluster.label}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="min-h-16 text-sm text-gray-600">
+                      {cluster.policyRationale ||
+                        'Cluster ini berisi provinsi dengan karakteristik indikator yang mirip.'}
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {cluster.provinces.slice(0, 4).map((province) => (
+                        <Badge key={province} variant="secondary">
+                          {province}
+                        </Badge>
+                      ))}
+                      {cluster.provinces.length > 4 && (
+                        <Badge variant="secondary">+{cluster.provinces.length - 4}</Badge>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="metode" className="bg-gray-50 py-16 scroll-mt-20">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="mb-10 max-w-3xl">
+              <Badge className="mb-3 bg-[#002C5F] text-white hover:bg-[#002C5F]">
+                Data & Metode
+              </Badge>
+              <h2 className="mb-3 text-2xl font-bold text-[#002C5F] sm:text-3xl">
+                Bagaimana hasil dihitung
+              </h2>
+              <p className="text-gray-600">
+                Sistem memakai data panel provinsi, menstandarkan indikator agar dapat dibandingkan,
+                lalu menggunakan PCA dan K-Means untuk membaca pola.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+              <div className="rounded-lg border border-gray-200 bg-white p-6">
+                <Database className="mb-4 h-8 w-8 text-[#002C5F]" />
+                <h3 className="mb-3 font-semibold text-[#002C5F]">Data yang Digunakan</h3>
+                <div className="space-y-2">
+                  {(summary?.variables ?? []).map((variable) => (
+                    <div
+                      key={variable.key}
+                      className="flex items-start gap-2 text-sm text-gray-700"
+                    >
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#059669]" />
+                      <span>{variable.label}</span>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="absolute -top-4 -right-4 w-24 h-24 bg-[#F9B233]/20 rounded-full blur-2xl"></div>
-              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-[#002C5F]/20 rounded-full blur-2xl"></div>
+
+              <div className="rounded-lg border border-gray-200 bg-white p-6">
+                <BarChart3 className="mb-4 h-8 w-8 text-[#F9B233]" />
+                <h3 className="mb-3 font-semibold text-[#002C5F]">PCA</h3>
+                <p className="text-sm leading-relaxed text-gray-700">
+                  PCA merangkum banyak indikator menjadi beberapa dimensi utama. Tujuannya membantu
+                  melihat faktor yang paling kuat membedakan kondisi antar provinsi.
+                </p>
+              </div>
+
+              <div className="rounded-lg border border-gray-200 bg-white p-6">
+                <GitBranch className="mb-4 h-8 w-8 text-[#DC2626]" />
+                <h3 className="mb-3 font-semibold text-[#002C5F]">K-Means</h3>
+                <p className="text-sm leading-relaxed text-gray-700">
+                  K-Means mengelompokkan provinsi yang polanya mirip. Label seperti investasi tinggi
+                  atau rendah adalah cara membaca posisi relatif antar provinsi dalam dataset.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
 
-      {/* Cara Kerja Section */}
-      <div id="cara-kerja" className="bg-gray-50 py-16 sm:py-20 scroll-mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-14">
-            <div className="inline-block bg-[#002C5F]/10 text-[#002C5F] px-4 py-1.5 rounded-full text-xs mb-4" style={{ fontWeight: 600 }}>
-              METODOLOGI
-            </div>
-            <h2 className="text-[#002C5F] text-2xl sm:text-3xl mb-4" style={{ fontWeight: 700 }}>
-              Cara Kerja Sistem
-            </h2>
-            <div className="w-20 h-1 bg-[#F9B233] mx-auto mb-4"></div>
-            <p className="text-gray-600 max-w-2xl mx-auto" style={{ fontWeight: 400 }}>
-              Empat tahapan analisis yang mengubah data mentah menjadi insight dan rekomendasi kebijakan
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                step: '01',
-                icon: Upload,
-                title: 'Input Data',
-                desc: 'Upload dataset investasi 38 provinsi dengan 7 variabel ekonomi dari sumber terpercaya (BPS)',
-                color: '#002C5F',
-              },
-              {
-                step: '02',
-                icon: Cpu,
-                title: 'Analisis PCA',
-                desc: 'Reduksi dimensi data menggunakan Principal Component Analysis untuk menemukan faktor dominan',
-                color: '#F9B233',
-              },
-              {
-                step: '03',
-                icon: GitBranch,
-                title: 'K-Means Clustering',
-                desc: 'Pengelompokan provinsi menjadi 3 cluster berdasarkan kesamaan karakteristik investasi',
-                color: '#059669',
-              },
-              {
-                step: '04',
-                icon: Target,
-                title: 'Rekomendasi',
-                desc: 'Penyusunan strategi kebijakan spesifik untuk setiap cluster guna mengurangi ketimpangan',
-                color: '#DC2626',
-              },
-            ].map((item) => (
-              <div key={item.step} className="relative group">
-                <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-all h-full border border-gray-100">
-                  <div className="text-5xl text-gray-100 absolute top-4 right-4" style={{ fontWeight: 800 }}>
-                    {item.step}
+        <section id="batasan" className="bg-white py-16 scroll-mt-20">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[0.8fr_1.2fr]">
+              <div>
+                <Badge className="mb-3 bg-[#DC2626] text-white hover:bg-[#DC2626]">
+                  Transparansi
+                </Badge>
+                <h2 className="mb-3 text-2xl font-bold text-[#002C5F] sm:text-3xl">
+                  Batasan pembacaan hasil
+                </h2>
+                <p className="text-gray-600">
+                  Bagian ini penting agar hasil tidak dibaca berlebihan. Analisis membantu memahami
+                  pola, tetapi keputusan kebijakan tetap memerlukan kajian lanjutan.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                {(
+                  summary?.limitations ?? [
+                    'Hasil publik akan muncul setelah analisis dijalankan oleh pengelola.',
+                    'Data dan metode perlu dibaca bersama konteks wilayah.',
+                    'Dashboard penuh hanya untuk pengelola sistem.',
+                  ]
+                ).map((item) => (
+                  <div key={item} className="rounded-lg border border-gray-200 bg-gray-50 p-5">
+                    <ShieldCheck className="mb-3 h-6 w-6 text-[#002C5F]" />
+                    <p className="text-sm leading-relaxed text-gray-700">{item}</p>
                   </div>
-                  <div
-                    className="flex items-center justify-center w-14 h-14 rounded-xl mb-5"
-                    style={{ backgroundColor: `${item.color}15` }}
-                  >
-                    <item.icon className="h-7 w-7" style={{ color: item.color }} />
-                  </div>
-                  <h3 className="text-[#002C5F] text-lg mb-3" style={{ fontWeight: 600 }}>
-                    {item.title}
-                  </h3>
-                  <p className="text-gray-500 text-sm leading-relaxed" style={{ fontWeight: 400 }}>
-                    {item.desc}
-                  </p>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Features Section */}
-      <div id="fitur" className="bg-white py-16 sm:py-20 scroll-mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-[#002C5F] text-2xl sm:text-3xl mb-4" style={{ fontWeight: 700 }}>
-              Fitur Unggulan Sistem
-            </h2>
-            <div className="w-20 h-1 bg-[#F9B233] mx-auto mb-4"></div>
-            <p className="text-gray-600 max-w-2xl mx-auto" style={{ fontWeight: 400 }}>
-              INVESTRA menyediakan berbagai tools analitik untuk monitoring dan evaluasi ketimpangan investasi regional
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="mb-4">
-                <BarChart3 className="h-8 w-8 text-[#002C5F]" />
-              </div>
-              <h3 className="text-[#002C5F] mb-3" style={{ fontWeight: 600 }}>
-                Analisis PCA
-              </h3>
-              <p className="text-gray-600 text-sm leading-relaxed" style={{ fontWeight: 400 }}>
-                Principal Component Analysis untuk identifikasi faktor dominan ketimpangan ekonomi regional
-              </p>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="mb-4">
-                <TrendingUp className="h-8 w-8 text-[#002C5F]" />
-              </div>
-              <h3 className="text-[#002C5F] mb-3" style={{ fontWeight: 600 }}>
-                K-Means Clustering
-              </h3>
-              <p className="text-gray-600 text-sm leading-relaxed" style={{ fontWeight: 400 }}>
-                Klasifikasi 34 provinsi menjadi 3 cluster berdasarkan tingkat investasi dan pembangunan
-              </p>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="mb-4">
-                <MapPin className="h-8 w-8 text-[#002C5F]" />
-              </div>
-              <h3 className="text-[#002C5F] mb-3" style={{ fontWeight: 600 }}>
-                Peta Interaktif
-              </h3>
-              <p className="text-gray-600 text-sm leading-relaxed" style={{ fontWeight: 400 }}>
-                Visualisasi geografis distribusi cluster investasi dengan kode warna untuk setiap provinsi
-              </p>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="mb-4">
-                <FileText className="h-8 w-8 text-[#002C5F]" />
-              </div>
-              <h3 className="text-[#002C5F] mb-3" style={{ fontWeight: 600 }}>
-                Rekomendasi Kebijakan
-              </h3>
-              <p className="text-gray-600 text-sm leading-relaxed" style={{ fontWeight: 400 }}>
-                Strategi pembangunan spesifik untuk setiap cluster dan provinsi berbasis analisis data
-              </p>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="mb-4">
-                <BarChart3 className="h-8 w-8 text-[#002C5F]" />
-              </div>
-              <h3 className="text-[#002C5F] mb-3" style={{ fontWeight: 600 }}>
-                Dashboard Real-time
-              </h3>
-              <p className="text-gray-600 text-sm leading-relaxed" style={{ fontWeight: 400 }}>
-                Monitoring metrik kunci ketimpangan investasi dengan visualisasi grafik yang interaktif
-              </p>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="mb-4">
-                <FileText className="h-8 w-8 text-[#002C5F]" />
-              </div>
-              <h3 className="text-[#002C5F] mb-3" style={{ fontWeight: 600 }}>
-                Laporan PDF
-              </h3>
-              <p className="text-gray-600 text-sm leading-relaxed" style={{ fontWeight: 400 }}>
-                Export laporan komprehensif dalam format PDF untuk disebarluaskan ke pemangku kepentingan
-              </p>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
 
-      {/* Preview Dashboard Section */}
-      <div id="dashboard" className="bg-gray-50 py-16 sm:py-20 scroll-mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <div className="inline-block bg-[#002C5F]/10 text-[#002C5F] px-4 py-1.5 rounded-full text-xs mb-4" style={{ fontWeight: 600 }}>
-              PREVIEW
-            </div>
-            <h2 className="text-[#002C5F] text-2xl sm:text-3xl mb-4" style={{ fontWeight: 700 }}>
-              Tampilan Dashboard
-            </h2>
-            <div className="w-20 h-1 bg-[#F9B233] mx-auto mb-4"></div>
-            <p className="text-gray-600 max-w-2xl mx-auto" style={{ fontWeight: 400 }}>
-              Antarmuka yang intuitif dan informatif untuk memudahkan analisis data investasi regional
-            </p>
-          </div>
-
-          <div className="relative max-w-5xl mx-auto">
-            <div className="bg-gradient-to-br from-[#002C5F] to-[#003D7A] rounded-2xl p-4 sm:p-6 shadow-2xl">
-              {/* Mock Browser Bar */}
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                  <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                </div>
-                <div className="flex-1 ml-3">
-                  <div className="bg-white/10 rounded-md px-4 py-1.5 text-xs text-white/60 max-w-sm" style={{ fontWeight: 400 }}>
-                    investra.go.id/dashboard
-                  </div>
-                </div>
-              </div>
-              {/* Dashboard Preview Content */}
-              <div className="bg-[#f8fafc] rounded-xl p-6 sm:p-8">
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <div className="text-xs text-gray-400 mb-1" style={{ fontWeight: 500 }}>Total PMDN</div>
-                    <div className="text-lg text-[#002C5F]" style={{ fontWeight: 700 }}>Rp 1.245 T</div>
-                    <div className="text-xs text-[#059669] mt-1" style={{ fontWeight: 500 }}>+12.3%</div>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <div className="text-xs text-gray-400 mb-1" style={{ fontWeight: 500 }}>Total FDI</div>
-                    <div className="text-lg text-[#002C5F]" style={{ fontWeight: 700 }}>Rp 1.308 T</div>
-                    <div className="text-xs text-[#059669] mt-1" style={{ fontWeight: 500 }}>+8.7%</div>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <div className="text-xs text-gray-400 mb-1" style={{ fontWeight: 500 }}>Avg IPM</div>
-                    <div className="text-lg text-[#002C5F]" style={{ fontWeight: 700 }}>72.14</div>
-                    <div className="text-xs text-[#059669] mt-1" style={{ fontWeight: 500 }}>+0.45</div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <div className="text-xs text-gray-400 mb-3" style={{ fontWeight: 500 }}>Distribusi Cluster Provinsi</div>
-                    <div className="flex items-end gap-2 h-24">
-                      {[65, 40, 80, 55, 90, 45, 70, 35, 85, 50, 60, 75].map((h, i) => (
-                        <div
-                          key={i}
-                          className="flex-1 rounded-t"
-                          style={{
-                            height: `${h}%`,
-                            backgroundColor: i % 3 === 0 ? '#002C5F' : i % 3 === 1 ? '#F9B233' : '#059669',
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <div className="text-xs text-gray-400 mb-3" style={{ fontWeight: 500 }}>Peta Sebaran Investasi</div>
-                    <div className="flex items-center justify-center h-24">
-                      <div className="relative">
-                        <MapPin className="h-10 w-10 text-[#002C5F]/20" />
-                        <MapPin className="h-6 w-6 text-[#DC2626] absolute -top-1 left-6" />
-                        <MapPin className="h-8 w-8 text-[#059669] absolute top-2 left-12" />
-                        <MapPin className="h-5 w-5 text-[#F9B233] absolute top-4 -left-4" />
-                      </div>
-                      <div className="ml-4 space-y-1">
-                        <div className="flex items-center gap-2 text-xs text-gray-500"><div className="w-2 h-2 rounded-full bg-[#DC2626]"></div>Cluster Tinggi</div>
-                        <div className="flex items-center gap-2 text-xs text-gray-500"><div className="w-2 h-2 rounded-full bg-[#F9B233]"></div>Cluster Sedang</div>
-                        <div className="flex items-center gap-2 text-xs text-gray-500"><div className="w-2 h-2 rounded-full bg-[#059669]"></div>Cluster Rendah</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* Decorative glow */}
-            <div className="absolute -inset-4 bg-gradient-to-r from-[#002C5F]/5 via-[#F9B233]/5 to-[#059669]/5 rounded-3xl blur-2xl -z-10"></div>
-          </div>
-
-          <div className="text-center mt-10">
-            <Button
-              onClick={() => navigate('/login')}
-              size="lg"
-              className="bg-[#002C5F] hover:bg-[#001F4D] text-white gap-2"
-              style={{ fontWeight: 600 }}
-            >
-              <Monitor className="h-5 w-5" />
-              Lihat Dashboard Lengkap
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* FAQ Section */}
-      <div id="faq" className="bg-white py-16 sm:py-20 scroll-mt-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <div className="inline-block bg-[#002C5F]/10 text-[#002C5F] px-4 py-1.5 rounded-full text-xs mb-4" style={{ fontWeight: 600 }}>
-              <HelpCircle className="inline h-3 w-3 mr-1 -mt-0.5" />
-              FAQ
-            </div>
-            <h2 className="text-[#002C5F] text-2xl sm:text-3xl mb-4" style={{ fontWeight: 700 }}>
-              Pertanyaan Umum
-            </h2>
-            <div className="w-20 h-1 bg-[#F9B233] mx-auto mb-4"></div>
-          </div>
-
-          <Accordion type="single" collapsible className="space-y-3">
-            <AccordionItem value="faq-1" className="bg-gray-50 rounded-xl border-none px-6">
-              <AccordionTrigger className="text-[#002C5F] text-left" style={{ fontWeight: 600 }}>
-                Apa itu INVESTRA?
-              </AccordionTrigger>
-              <AccordionContent className="text-gray-600 leading-relaxed">
-                INVESTRA adalah sistem analisis ketimpangan distribusi investasi antar wilayah di Indonesia. Platform ini menggunakan metode PCA (Principal Component Analysis) dan K-Means Clustering untuk menganalisis data investasi 38 provinsi dan memberikan rekomendasi kebijakan berbasis data.
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="faq-2" className="bg-gray-50 rounded-xl border-none px-6">
-              <AccordionTrigger className="text-[#002C5F] text-left" style={{ fontWeight: 600 }}>
-                Data apa saja yang digunakan dalam analisis?
-              </AccordionTrigger>
-              <AccordionContent className="text-gray-600 leading-relaxed">
-                Sistem menganalisis 7 variabel utama: PMDN (Penanaman Modal Dalam Negeri), PMA/FDI (Penanaman Modal Asing), PDRB per Kapita, IPM (Indeks Pembangunan Manusia), Persentase Kemiskinan, Rasio Akses Listrik, dan TPT (Tingkat Pengangguran Terbuka). Data bersumber dari BPS.
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="faq-3" className="bg-gray-50 rounded-xl border-none px-6">
-              <AccordionTrigger className="text-[#002C5F] text-left" style={{ fontWeight: 600 }}>
-                Apa perbedaan PCA dan K-Means Clustering?
-              </AccordionTrigger>
-              <AccordionContent className="text-gray-600 leading-relaxed">
-                PCA (Principal Component Analysis) digunakan untuk mereduksi dimensi data dan menemukan faktor-faktor dominan yang mempengaruhi ketimpangan. Sedangkan K-Means Clustering mengelompokkan 38 provinsi ke dalam 3 cluster berdasarkan kesamaan karakteristik investasi dan pembangunan.
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="faq-4" className="bg-gray-50 rounded-xl border-none px-6">
-              <AccordionTrigger className="text-[#002C5F] text-left" style={{ fontWeight: 600 }}>
-                Bagaimana cara mengakses sistem?
-              </AccordionTrigger>
-              <AccordionContent className="text-gray-600 leading-relaxed">
-                Untuk mengakses dashboard dan fitur analisis, Anda perlu login dengan akun yang terdaftar. Klik tombol "Login" pada halaman utama dan masukkan kredensial yang telah diberikan oleh administrator sistem.
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="faq-5" className="bg-gray-50 rounded-xl border-none px-6">
-              <AccordionTrigger className="text-[#002C5F] text-left" style={{ fontWeight: 600 }}>
-                Apa output dari hasil analisis?
-              </AccordionTrigger>
-              <AccordionContent className="text-gray-600 leading-relaxed">
-                Output analisis meliputi: visualisasi PCA (scree plot, biplot, loading matrix), hasil clustering 3 kelompok provinsi, peta interaktif sebaran cluster, statistik deskriptif per cluster, dan rekomendasi kebijakan spesifik untuk setiap kelompok wilayah. Semua hasil dapat di-eksport dalam format PDF.
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="bg-linear-to-r from-[#002C5F] to-[#003D7A] py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-white text-2xl sm:text-3xl mb-4" style={{ fontWeight: 700 }}>
-            Akses Sistem INVESTRA Sekarang
-          </h2>
-          <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto" style={{ fontWeight: 400 }}>
-            Login untuk menggunakan seluruh fitur analisis dan dashboard monitoring ketimpangan investasi regional
-          </p>
-          <Button 
-            onClick={() => navigate('/login')}
-            size="lg"
-            className="bg-[#F9B233] hover:bg-[#E5A200] text-[#002C5F] gap-2"
-            style={{ fontWeight: 700 }}
-          >
-            <User className="h-5 w-5" />
-            LOGIN SISTEM
-          </Button>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <footer id="kontak" className="bg-[#1a1a1a] text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8">
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12">
-                  <GarudaEmblem />
-                </div>
+      <footer className="bg-[#0A1929] text-gray-300">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+          <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
+            <div className="lg:col-span-1">
+              <div className="flex items-center gap-3">
+                <GarudaEmblem size={42} />
                 <div>
-                  <div className="text-lg" style={{ fontWeight: 700 }}>INVESTRA</div>
-                  <div className="text-xs text-gray-400" style={{ fontWeight: 400 }}>Investment Analytics</div>
+                  <p className="font-bold text-white">INVESTRA</p>
+                  <p className="text-xs text-gray-400">Portal Analisis Investasi Wilayah</p>
                 </div>
               </div>
-              <p className="text-sm text-gray-400 leading-relaxed" style={{ fontWeight: 400 }}>
-                Sistem Analisis Ketimpangan Distribusi Investasi Antar Wilayah di Indonesia
+              <p className="mt-4 text-sm leading-relaxed text-gray-400">
+                Sistem analisis ketimpangan investasi antar provinsi di Indonesia berbasis data
+                resmi BKPM dengan metode PCA dan K-Means.
               </p>
             </div>
 
             <div>
-              <h4 className="mb-4" style={{ fontWeight: 700 }}>NAVIGASI</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#hero" className="hover:text-white transition-colors" style={{ fontWeight: 400 }}>Beranda</a></li>
-                <li><a href="#tentang" className="hover:text-white transition-colors" style={{ fontWeight: 400 }}>Tentang</a></li>
-                <li><a href="#fitur" className="hover:text-white transition-colors" style={{ fontWeight: 400 }}>Fitur</a></li>
-                <li><a href="#dashboard" className="hover:text-white transition-colors" style={{ fontWeight: 400 }}>Dashboard</a></li>
-                <li><a href="#kontak" className="hover:text-white transition-colors" style={{ fontWeight: 400 }}>Kontak</a></li>
+              <h4 className="mb-4 text-sm font-semibold uppercase tracking-wide text-white">
+                Navigasi
+              </h4>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <a href="#beranda" className="text-gray-400 transition hover:text-[#F9B233]">
+                    Beranda
+                  </a>
+                </li>
+                <li>
+                  <a href="#cek-daerah" className="text-gray-400 transition hover:text-[#F9B233]">
+                    Cek Daerah
+                  </a>
+                </li>
+                <li>
+                  <a href="#hasil" className="text-gray-400 transition hover:text-[#F9B233]">
+                    Hasil Analisis
+                  </a>
+                </li>
+                <li>
+                  <a href="#metode" className="text-gray-400 transition hover:text-[#F9B233]">
+                    Data &amp; Metode
+                  </a>
+                </li>
+                <li>
+                  <a href="#batasan" className="text-gray-400 transition hover:text-[#F9B233]">
+                    Batasan
+                  </a>
+                </li>
               </ul>
             </div>
 
             <div>
-              <h4 className="mb-4" style={{ fontWeight: 700 }}>TAUTAN</h4>
+              <h4 className="mb-4 text-sm font-semibold uppercase tracking-wide text-white">
+                Sumber Data
+              </h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors" style={{ fontWeight: 400 }}>Beranda</a></li>
-                <li><a href="#" className="hover:text-white transition-colors" style={{ fontWeight: 400 }}>Dokumentasi</a></li>
-                <li><a href="#" className="hover:text-white transition-colors" style={{ fontWeight: 400 }}>GitHub</a></li>
+                <li className="flex items-start gap-2">
+                  <Database className="mt-0.5 h-4 w-4 shrink-0 text-[#F9B233]" />
+                  <span>BKPM - Realisasi Investasi</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <FileText className="mt-0.5 h-4 w-4 shrink-0 text-[#F9B233]" />
+                  <span>BPS - Indikator Sosial Ekonomi</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#F9B233]" />
+                  <span>Periode 2019 - 2024</span>
+                </li>
               </ul>
             </div>
 
             <div>
-              <h4 className="mb-4" style={{ fontWeight: 700 }}>KONTAK</h4>
+              <h4 className="mb-4 text-sm font-semibold uppercase tracking-wide text-white">
+                Kontak
+              </h4>
               <ul className="space-y-3 text-sm text-gray-400">
                 <li className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-                  <span style={{ fontWeight: 400 }}>Jakarta, Indonesia</span>
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#F9B233]" />
+                  <span>Jakarta, Indonesia</span>
                 </li>
-                <li style={{ fontWeight: 400 }}>Email: investra@mail.com</li>
+                <li className="flex items-start gap-2">
+                  <Mail className="mt-0.5 h-4 w-4 shrink-0 text-[#F9B233]" />
+                  <a href="mailto:info@investra.id" className="transition hover:text-[#F9B233]">
+                    info@investra.id
+                  </a>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Phone className="mt-0.5 h-4 w-4 shrink-0 text-[#F9B233]" />
+                  <span>(021) 0000-0000</span>
+                </li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-gray-800 pt-8">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <p className="text-sm text-gray-400" style={{ fontWeight: 400 }}>
-                © 2026 INVESTRA - Hak Cipta Dilindungi Undang-Undang.
-              </p>
-              <div className="flex items-center gap-4">
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  <Facebook className="h-5 w-5" />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  <Twitter className="h-5 w-5" />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  <Instagram className="h-5 w-5" />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  <Youtube className="h-5 w-5" />
-                </a>
-              </div>
-            </div>
+          <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-gray-500">
+              &copy; {new Date().getFullYear()} INVESTRA. Seluruh hasil analisis bersifat
+              informatif.
+            </p>
+            <p className="text-xs text-gray-500">
+              Dibangun untuk mendukung transparansi data investasi wilayah Indonesia.
+            </p>
           </div>
         </div>
       </footer>

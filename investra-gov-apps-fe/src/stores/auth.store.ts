@@ -35,14 +35,12 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       setHydrated: (isHydrated: boolean) => set({ isHydrated }),
-      login: (user: User, token: string) =>
-        set({ isAuthenticated: true, user, token }),
+      login: (user: User, token: string) => set({ isAuthenticated: true, user, token }),
       setUser: (user: User | null) =>
         set((state) => ({ user, isAuthenticated: Boolean(state.token && user) })),
       setToken: (token: string | null) =>
         set((state) => ({ token, isAuthenticated: Boolean(token && state.user) })),
-      logout: () =>
-        set({ isAuthenticated: false, user: null, token: null }),
+      logout: () => set({ isAuthenticated: false, user: null, token: null }),
     }),
     {
       name: 'investra-auth-v2',
@@ -55,8 +53,8 @@ export const useAuthStore = create<AuthState>()(
       onRehydrateStorage: () => (state) => {
         state?.setHydrated(true);
       },
-    }
-  )
+    },
+  ),
 );
 
 /** Helper: check if user has at least the given role level */

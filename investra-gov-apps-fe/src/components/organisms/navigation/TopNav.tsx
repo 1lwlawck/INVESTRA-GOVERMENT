@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { User, Bell, LogOut, Menu, X } from 'lucide-react';
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { GarudaEmblem } from "@/components/atoms/media/GarudaEmblem";
-import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { GarudaEmblem } from '@/components/atoms/media/GarudaEmblem';
+import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +11,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import { useAuthStore } from '@/stores/auth.store';
 
 interface TopNavProps {
@@ -37,12 +37,10 @@ export function TopNav({ sidebarOpen, setSidebarOpen }: TopNavProps) {
         </Button>
 
         <GarudaEmblem size={40} />
-        
+
         <div className="border-l-2 border-[#F9B233] pl-2">
           <div className="flex items-center gap-2">
-            <h1 className="text-[#002C5F] text-base leading-tight" style={{ fontWeight: 700 }}>
-              INVESTRA
-            </h1>
+            <h1 className="text-[#002C5F] text-base leading-tight font-bold">INVESTRA</h1>
           </div>
         </div>
       </div>
@@ -50,29 +48,25 @@ export function TopNav({ sidebarOpen, setSidebarOpen }: TopNavProps) {
       {/* Center: Dashboard Title */}
       <div className="hidden xl:block text-center">
         {/* <div className="bg-linear-to-r from-[#002C5F] to-[#003D7A] text-white px-6 py-2 rounded-lg shadow-md">
-          <h2 className="text-lg" style={{ fontWeight: 600 }}>
+          <h2 className="text-lg font-semibold">
             Dashboard Analisis Ketimpangan Investasi
           </h2>
-          <p className="text-xs opacity-90 mt-0.5" style={{ fontWeight: 400 }}>
+          <p className="text-xs opacity-90 mt-0.5 font-normal">
             Sistem Monitoring PCA & K-Means Clustering
           </p>
         </div> */}
       </div>
-      
+
       {/* Right: Controls */}
       <div className="flex items-center gap-1 sm:gap-3">
         {/* Notifications */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative text-gray-600 hover:text-[#002C5F]"
-        >
+        <Button variant="ghost" size="icon" className="relative text-gray-600 hover:text-[#002C5F]">
           <Bell className="h-5 w-5" />
           <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-[#DC2626] text-white text-xs">
             3
           </Badge>
         </Button>
-        
+
         {/* User Profile with Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -83,31 +77,41 @@ export function TopNav({ sidebarOpen, setSidebarOpen }: TopNavProps) {
                 </AvatarFallback>
               </Avatar>
               <div className="hidden md:block text-left">
-                <p className="text-sm text-[#002C5F]" style={{ fontWeight: 600 }}>{user?.fullName || 'Guest'}</p>
-                <p className="text-xs" style={{
-                  fontWeight: 600,
-                  color: user?.role === 'superadmin' ? '#DC2626' : user?.role === 'admin' ? '#002C5F' : '#059669'
-                }}>
-                  {user?.role === 'superadmin' ? 'SUPER ADMIN' : user?.role === 'admin' ? 'ADMIN' : 'USER'}
+                <p className="text-sm text-[#002C5F] font-semibold">{user?.fullName || 'Guest'}</p>
+                <p
+                  className="text-xs font-semibold"
+                  style={{
+                    color:
+                      user?.role === 'superadmin'
+                        ? '#DC2626'
+                        : user?.role === 'admin'
+                          ? '#002C5F'
+                          : '#059669',
+                  }}
+                >
+                  {user?.role === 'superadmin'
+                    ? 'SUPER ADMIN'
+                    : user?.role === 'admin'
+                      ? 'ADMIN'
+                      : 'USER'}
                 </p>
               </div>
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel style={{ fontWeight: 600 }}>Akun Saya</DropdownMenuLabel>
+            <DropdownMenuLabel className="font-semibold">Akun Saya</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem style={{ fontWeight: 500 }}>
+            <DropdownMenuItem className="font-medium">
               <User className="mr-2 h-4 w-4" />
               <span>Profil</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={() => {
                 logout();
                 navigate('/login', { replace: true });
               }}
-              className="text-red-600 focus:text-red-600"
-              style={{ fontWeight: 600 }}
+              className="text-red-600 focus:text-red-600 font-semibold"
             >
               <LogOut className="mr-2 h-4 w-4" />
               <span>Keluar</span>

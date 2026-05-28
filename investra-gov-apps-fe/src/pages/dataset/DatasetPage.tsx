@@ -2,11 +2,27 @@ import { useEffect, useState, useRef } from 'react';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import {
-  Database, BarChart3, Download, Upload, FileUp,
-  AlertCircle, CheckCircle2, History, RotateCcw, ChevronDown, ChevronUp,
+  Database,
+  BarChart3,
+  Download,
+  Upload,
+  FileUp,
+  AlertCircle,
+  CheckCircle2,
+  History,
+  RotateCcw,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
@@ -30,7 +46,7 @@ function snakeToCamelKey(value: string): string {
   return value.replace(/_([a-z0-9])/g, (_match, group: string) => group.toUpperCase());
 }
 
-export function DatasetView() {
+export function DatasetPage() {
   useDocumentTitle('Dataset');
   const [datasetInfo, setDatasetInfo] = useState<DatasetInfo | null>(null);
   const [datasetData, setDatasetData] = useState<DatasetData | null>(null);
@@ -66,13 +82,12 @@ export function DatasetView() {
       setLoading(true);
       setError(null);
       setNoActiveDataset(false);
-      
+
       const info = await datasetApi.getDefaultDatasetInfo();
       setDatasetInfo(info);
-      
+
       const data = await datasetApi.getDefaultDatasetSample(10);
       setDatasetData(data);
-      
     } catch (err) {
       if (err instanceof ApiError && err.code === 'NO_ACTIVE_DATASET') {
         setNoActiveDataset(true);
@@ -178,7 +193,7 @@ export function DatasetView() {
     link.href = '/dataset/investasi_per_provinsi_2023.csv';
     link.download = 'investasi_per_provinsi_2023.csv';
     link.click();
-    
+
     setNotification('Download started. Dataset download has been initiated.');
     setTimeout(() => setNotification(null), 3000);
   };
@@ -234,7 +249,13 @@ export function DatasetView() {
     <div className="space-y-6">
       {/* Notification */}
       {notification && (
-        <Alert className={notification.startsWith('Error') ? 'border-red-500 bg-red-50' : 'border-green-500 bg-green-50'}>
+        <Alert
+          className={
+            notification.startsWith('Error')
+              ? 'border-red-500 bg-red-50'
+              : 'border-green-500 bg-green-50'
+          }
+        >
           <AlertDescription>{notification}</AlertDescription>
         </Alert>
       )}
@@ -255,9 +276,7 @@ export function DatasetView() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dataset Investasi</h1>
-          <p className="text-muted-foreground">
-            Dataset investasi per provinsi di Indonesia
-          </p>
+          <p className="text-muted-foreground">Dataset investasi per provinsi di Indonesia</p>
         </div>
         <div className="flex gap-2">
           {/* Version History toggle (admin+) */}
@@ -269,22 +288,32 @@ export function DatasetView() {
             >
               <History className="mr-2 h-4 w-4" />
               Riwayat
-              {showHistory ? <ChevronUp className="ml-1 h-4 w-4" /> : <ChevronDown className="ml-1 h-4 w-4" />}
+              {showHistory ? (
+                <ChevronUp className="ml-1 h-4 w-4" />
+              ) : (
+                <ChevronDown className="ml-1 h-4 w-4" />
+              )}
             </Button>
           )}
 
           {isSuperadmin && (
-            <Dialog open={uploadOpen} onOpenChange={(open) => {
-              setUploadOpen(open);
-              if (!open) {
-                setUploadFile(null);
-                setUploadError(null);
-                setUploadSuccess(null);
-                if (fileInputRef.current) fileInputRef.current.value = '';
-              }
-            }}>
+            <Dialog
+              open={uploadOpen}
+              onOpenChange={(open) => {
+                setUploadOpen(open);
+                if (!open) {
+                  setUploadFile(null);
+                  setUploadError(null);
+                  setUploadSuccess(null);
+                  if (fileInputRef.current) fileInputRef.current.value = '';
+                }
+              }}
+            >
               <DialogTrigger asChild>
-                <Button variant="outline" className="border-[#002C5F] text-[#002C5F] hover:bg-[#002C5F] hover:text-white">
+                <Button
+                  variant="outline"
+                  className="border-[#002C5F] text-[#002C5F] hover:bg-[#002C5F] hover:text-white"
+                >
                   <Upload className="mr-2 h-4 w-4" />
                   Upload CSV
                 </Button>
@@ -293,8 +322,8 @@ export function DatasetView() {
                 <DialogHeader>
                   <DialogTitle className="text-[#002C5F]">Upload Dataset CSV</DialogTitle>
                   <DialogDescription>
-                    Upload file CSV yang sudah melalui proses ETL.
-                    Data akan disimpan sebagai <strong>versi baru</strong> — data lama tetap tersimpan.
+                    Upload file CSV yang sudah melalui proses ETL. Data akan disimpan sebagai{' '}
+                    <strong>versi baru</strong> — data lama tetap tersimpan.
                   </DialogDescription>
                 </DialogHeader>
 
@@ -304,8 +333,13 @@ export function DatasetView() {
                     <AlertCircle className="h-4 w-4 text-[#002C5F]" />
                     <AlertTitle className="text-[#002C5F] text-sm">Kolom Wajib</AlertTitle>
                     <AlertDescription className="text-xs">
-                      <code>provinsi, pmdn_rp, fdi_rp, pdrb_per_kapita, ipm, kemiskinan, akses_listrik, tpt</code>
-                      <span className="ml-1">(opsional: <code>year</code> / <code>tahun</code>)</span>
+                      <code>
+                        provinsi, pmdn_rp, fdi_rp, pdrb_per_kapita, ipm, kemiskinan, akses_listrik,
+                        tpt
+                      </code>
+                      <span className="ml-1">
+                        (opsional: <code>year</code> / <code>tahun</code>)
+                      </span>
                     </AlertDescription>
                   </Alert>
 
@@ -363,13 +397,19 @@ export function DatasetView() {
                     <Alert className="bg-green-50 border-green-500">
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
                       <AlertTitle className="text-green-700">Berhasil</AlertTitle>
-                      <AlertDescription className="text-green-600">{uploadSuccess}</AlertDescription>
+                      <AlertDescription className="text-green-600">
+                        {uploadSuccess}
+                      </AlertDescription>
                     </Alert>
                   )}
                 </div>
 
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setUploadOpen(false)} disabled={uploading}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setUploadOpen(false)}
+                    disabled={uploading}
+                  >
                     Batal
                   </Button>
                   <Button
@@ -416,7 +456,8 @@ export function DatasetView() {
               <Badge variant="secondary">{versions.length} versi</Badge>
             </div>
             <CardDescription>
-              Setiap upload CSV membuat versi baru. Data lama tetap tersimpan untuk audit dan rollback.
+              Setiap upload CSV membuat versi baru. Data lama tetap tersimpan untuk audit dan
+              rollback.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -450,14 +491,19 @@ export function DatasetView() {
                         <TableCell>{v.year}</TableCell>
                         <TableCell>{v.rowCount}</TableCell>
                         <TableCell>
-                          {v.uploadedBy
-                            ? v.uploadedBy.fullName
-                            : <span className="text-muted-foreground">System</span>}
+                          {v.uploadedBy ? (
+                            v.uploadedBy.fullName
+                          ) : (
+                            <span className="text-muted-foreground">System</span>
+                          )}
                         </TableCell>
                         <TableCell className="text-sm">
                           {new Date(v.createdAt).toLocaleString('id-ID', {
-                            day: '2-digit', month: 'short', year: 'numeric',
-                            hour: '2-digit', minute: '2-digit',
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
                           })}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground truncate max-w-30">
@@ -511,9 +557,7 @@ export function DatasetView() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{datasetInfo.rowCount}</div>
-            <p className="text-xs text-muted-foreground">
-              Provinsi di Indonesia
-            </p>
+            <p className="text-xs text-muted-foreground">Provinsi di Indonesia</p>
           </CardContent>
         </Card>
 
@@ -524,9 +568,7 @@ export function DatasetView() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{datasetInfo.columnCount}</div>
-            <p className="text-xs text-muted-foreground">
-              Kolom data
-            </p>
+            <p className="text-xs text-muted-foreground">Kolom data</p>
           </CardContent>
         </Card>
 
@@ -559,9 +601,7 @@ export function DatasetView() {
             )}
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {datasetInfo.isActive ? 'Ready' : 'Pending'}
-            </div>
+            <div className="text-2xl font-bold">{datasetInfo.isActive ? 'Ready' : 'Pending'}</div>
             <p className="text-xs text-muted-foreground">
               {datasetInfo.uploadedBy
                 ? `Diupload oleh ${datasetInfo.uploadedBy.fullName}`

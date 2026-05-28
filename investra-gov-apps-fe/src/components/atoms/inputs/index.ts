@@ -8,10 +8,7 @@ export { Textarea } from '@/components/ui/textarea';
 export { Checkbox } from '@/components/ui/checkbox';
 export { Switch } from '@/components/ui/switch';
 export { Slider } from '@/components/ui/slider';
-export {
-  RadioGroup,
-  RadioGroupItem,
-} from '@/components/ui/radio-group';
+export { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 export {
   Select,
   SelectContent,

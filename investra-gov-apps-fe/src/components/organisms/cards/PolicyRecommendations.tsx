@@ -1,22 +1,27 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import {
   type PolicyResult,
   type ClusterPolicy,
   CLUSTER_COLORS,
   FEATURE_LABELS,
-} from "@/core/api/analysis.api";
+} from '@/core/api/analysis.api';
 
 const CONDITION_COLORS: Record<string, string> = {
-  "Sangat Tinggi": "#059669",
-  "Tinggi": "#3B82F6",
-  "Rata-rata": "#6B7280",
-  "Rendah": "#F59E0B",
-  "Sangat Rendah": "#DC2626",
-  "Sangat Baik": "#059669",
-  "Baik": "#3B82F6",
-  "Sangat Buruk": "#DC2626",
-  "Buruk": "#F59E0B",
+  'Sangat Tinggi': '#059669',
+  Tinggi: '#3B82F6',
+  'Rata-rata': '#6B7280',
+  Rendah: '#F59E0B',
+  'Sangat Rendah': '#DC2626',
+  'Sangat Baik': '#059669',
+  Baik: '#3B82F6',
+  'Sangat Buruk': '#DC2626',
+  Buruk: '#F59E0B',
 };
 
 interface Props {
@@ -30,18 +35,23 @@ export function PolicyRecommendations({ policy }: Props) {
       <Card className="border border-gray-200">
         <CardHeader className="pb-3">
           <CardTitle className="text-[#002C5F] text-sm">Rata-rata Nasional (Baseline)</CardTitle>
-          <CardDescription className="text-xs">Nilai acuan untuk menentukan posisi relatif setiap klaster</CardDescription>
+          <CardDescription className="text-xs">
+            Nilai acuan untuk menentukan posisi relatif setiap klaster
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
             {Object.entries(policy.nationalAverage).map(([key, val]) => (
-              <div key={key} className="bg-gray-50 rounded-lg p-2.5 text-center border border-gray-100">
+              <div
+                key={key}
+                className="bg-gray-50 rounded-lg p-2.5 text-center border border-gray-100"
+              >
                 <p className="text-[10px] text-gray-500 mb-1 leading-tight">{val.label}</p>
                 <p className="text-sm font-bold text-[#002C5F]">
-                  {key === "pmdnRp" || key === "fdiRp"
+                  {key === 'pmdnRp' || key === 'fdiRp'
                     ? `${(val.value / 1e12).toFixed(1)} T`
-                    : key === "pdrbPerKapita"
-                      ? val.value.toLocaleString("id-ID")
+                    : key === 'pdrbPerKapita'
+                      ? val.value.toLocaleString('id-ID')
                       : val.value.toFixed(2)}
                 </p>
               </div>
@@ -71,7 +81,7 @@ export function PolicyRecommendations({ policy }: Props) {
 }
 
 function ClusterAccordionItem({ cp }: { cp: ClusterPolicy }) {
-  const color = CLUSTER_COLORS[cp.clusterId] || "#6B7280";
+  const color = CLUSTER_COLORS[cp.clusterId] || '#6B7280';
 
   return (
     <AccordionItem
@@ -86,7 +96,9 @@ function ClusterAccordionItem({ cp }: { cp: ClusterPolicy }) {
           </div>
           <div className="flex-1">
             <h3 className="text-[#002C5F] font-semibold">{cp.label}</h3>
-            <p className="text-sm text-gray-600 mt-1">{cp.count} provinsi — {cp.dominantFactor}</p>
+            <p className="text-sm text-gray-600 mt-1">
+              {cp.count} provinsi — {cp.dominantFactor}
+            </p>
           </div>
         </div>
       </AccordionTrigger>
@@ -100,22 +112,25 @@ function ClusterAccordionItem({ cp }: { cp: ClusterPolicy }) {
 
           {/* Characteristics Grid */}
           <div>
-            <p className="text-sm font-semibold text-[#002C5F] mb-3">Profil Variabel (vs Rata-rata Nasional)</p>
+            <p className="text-sm font-semibold text-[#002C5F] mb-3">
+              Profil Variabel (vs Rata-rata Nasional)
+            </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
               {Object.entries(cp.characteristics).map(([key, ch]) => (
-                <div key={key} className="bg-gray-50 rounded-lg p-2.5 border border-gray-100 text-center">
+                <div
+                  key={key}
+                  className="bg-gray-50 rounded-lg p-2.5 border border-gray-100 text-center"
+                >
                   <p className="text-[10px] text-gray-500 mb-1 leading-tight">
                     {FEATURE_LABELS[key] || ch.label}
                   </p>
                   <span
                     className="inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded-full text-white"
-                    style={{ backgroundColor: CONDITION_COLORS[ch.condition] || "#6B7280" }}
+                    style={{ backgroundColor: CONDITION_COLORS[ch.condition] || '#6B7280' }}
                   >
                     {ch.condition}
                   </span>
-                  <p className="text-[10px] text-gray-400 mt-1">
-                    rasio: {ch.ratio.toFixed(2)}
-                  </p>
+                  <p className="text-[10px] text-gray-400 mt-1">rasio: {ch.ratio.toFixed(2)}</p>
                 </div>
               ))}
             </div>
@@ -160,7 +175,10 @@ function ClusterAccordionItem({ cp }: { cp: ClusterPolicy }) {
                         <p className="text-xs text-gray-500 font-semibold">Arah Aksi:</p>
                         <ul className="space-y-1.5">
                           {pd.actions.map((action, actionIdx) => (
-                            <li key={actionIdx} className="flex items-start gap-2 text-sm text-gray-700">
+                            <li
+                              key={actionIdx}
+                              className="flex items-start gap-2 text-sm text-gray-700"
+                            >
                               <span
                                 className="inline-block w-1.5 h-1.5 rounded-full mt-1.5 shrink-0"
                                 style={{ backgroundColor: color }}

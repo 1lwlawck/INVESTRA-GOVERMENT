@@ -2,17 +2,17 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Eye, EyeOff, Lock, User, LogIn, ShieldCheck } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { GarudaEmblem } from "@/components/atoms/media/GarudaEmblem";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { GarudaEmblem } from '@/components/atoms/media/GarudaEmblem';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/stores/auth.store';
 import { authApi } from '@/core/api/auth.api';
 
-export function LoginView() {
+export function LoginPage() {
   useDocumentTitle('Login');
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
@@ -56,30 +56,22 @@ export function LoginView() {
             <div className="flex justify-center mb-4">
               <GarudaEmblem size={80} />
             </div>
-            
-            <h1 className="text-white text-2xl mb-2" style={{ fontWeight: 700 }}>
-              INVESTRA
-            </h1>
-            
-            <p className="text-white/90 text-sm mb-1" style={{ fontWeight: 500 }}>
-              Investment Analytics Indonesia
-            </p>
-            
+
+            <h1 className="text-white text-2xl mb-2 font-bold">INVESTRA</h1>
+
+            <p className="text-white/90 text-sm mb-1 font-medium">Investment Analytics Indonesia</p>
+
             <div className="inline-flex items-center gap-2 bg-[#F9B233] text-[#002C5F] px-4 py-2 rounded-full mt-3">
               <ShieldCheck className="h-4 w-4" />
-              <span className="text-xs" style={{ fontWeight: 600 }}>
-                Sistem Analisis Ketimpangan Investasi
-              </span>
+              <span className="text-xs font-semibold">Sistem Analisis Ketimpangan Investasi</span>
             </div>
           </div>
 
           {/* Form Section */}
           <div className="bg-gray-50 p-8">
             <div className="text-center mb-6">
-              <h2 className="text-[#002C5F] text-xl mb-2" style={{ fontWeight: 600 }}>
-                Login Dashboard
-              </h2>
-              <p className="text-gray-600 text-sm" style={{ fontWeight: 400 }}>
+              <h2 className="text-[#002C5F] text-xl mb-2 font-semibold">Login Dashboard</h2>
+              <p className="text-gray-600 text-sm font-normal">
                 Masukkan kredensial Anda untuk mengakses sistem
               </p>
             </div>
@@ -90,11 +82,10 @@ export function LoginView() {
               </Alert>
             )}
 
-
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Username Field */}
               <div className="space-y-2">
-                <Label htmlFor="username" className="text-[#002C5F]" style={{ fontWeight: 600 }}>
+                <Label htmlFor="username" className="text-[#002C5F] font-semibold">
                   Username
                 </Label>
                 <div className="relative">
@@ -105,8 +96,7 @@ export function LoginView() {
                     placeholder="Masukkan username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="pl-10 h-12 border-gray-300 focus:border-[#002C5F] focus:ring-[#002C5F]"
-                    style={{ fontWeight: 400 }}
+                    className="pl-10 h-12 border-gray-300 focus:border-[#002C5F] focus:ring-[#002C5F] font-normal"
                     required
                   />
                 </div>
@@ -114,7 +104,7 @@ export function LoginView() {
 
               {/* Password Field */}
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-[#002C5F]" style={{ fontWeight: 600 }}>
+                <Label htmlFor="password" className="text-[#002C5F] font-semibold">
                   Password
                 </Label>
                 <div className="relative">
@@ -125,8 +115,7 @@ export function LoginView() {
                     placeholder="Masukkan password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10 h-12 border-gray-300 focus:border-[#002C5F] focus:ring-[#002C5F]"
-                    style={{ fontWeight: 400 }}
+                    className="pl-10 pr-10 h-12 border-gray-300 focus:border-[#002C5F] focus:ring-[#002C5F] font-normal"
                     required
                   />
                   <button
@@ -142,8 +131,7 @@ export function LoginView() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full h-12 bg-[#002C5F] hover:bg-[#003D7A] text-white"
-                style={{ fontWeight: 600 }}
+                className="w-full h-12 bg-[#002C5F] hover:bg-[#003D7A] text-white font-semibold"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -163,12 +151,10 @@ export function LoginView() {
 
           {/* Footer */}
           <div className="bg-white px-8 py-4 border-t border-gray-200 text-center">
-            <p className="text-xs text-gray-500" style={{ fontWeight: 400 }}>
+            <p className="text-xs text-gray-500 font-normal">
               © 2025 INVESTRA - Sistem Analisis Ketimpangan Investasi
             </p>
-            <p className="text-xs text-gray-400 mt-1" style={{ fontWeight: 400 }}>
-              Republik Indonesia
-            </p>
+            <p className="text-xs text-gray-400 mt-1 font-normal">Republik Indonesia</p>
           </div>
         </CardContent>
       </Card>

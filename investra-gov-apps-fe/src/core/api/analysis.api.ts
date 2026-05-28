@@ -174,8 +174,8 @@ export interface PolicyCharacteristic {
   clusterMean: number;
   nationalMean: number;
   ratio: number;
-  category: string;        // VERY_LOW | LOW | MEDIUM | HIGH | VERY_HIGH
-  condition: string;        // Human-readable: Sangat Rendah, Rendah, etc.
+  category: string; // VERY_LOW | LOW | MEDIUM | HIGH | VERY_HIGH
+  condition: string; // Human-readable: Sangat Rendah, Rendah, etc.
 }
 
 export interface PolicyDirection {
@@ -223,12 +223,10 @@ export interface PolicyResult {
 export const analysisApi = {
   /** Run full PCA + K-Means analysis */
   run: async (
-    optionsOrK: RunAnalysisOptions | number = { autoK: true }
+    optionsOrK: RunAnalysisOptions | number = { autoK: true },
   ): Promise<AnalysisRunResult> => {
     const requestedPayload: RunAnalysisOptions =
-      typeof optionsOrK === 'number'
-        ? { k: optionsOrK, autoK: false }
-        : optionsOrK;
+      typeof optionsOrK === 'number' ? { k: optionsOrK, autoK: false } : optionsOrK;
     const payload: RunAnalysisOptions = {
       ...requestedPayload,
       dataMode: 'panel',
@@ -262,7 +260,7 @@ export const analysisApi = {
       minClusterSize?: number;
       consensusRuns?: number;
       kmeansNInit?: number;
-    } = {}
+    } = {},
   ): Promise<EvaluateKItem[]> => {
     const searchParams = new URLSearchParams({
       kMin: String(kMin),
@@ -285,7 +283,7 @@ export const analysisApi = {
       searchParams.set('kmeansNInit', String(options.kmeansNInit));
     }
     const res = await apiFetch<{ evaluations: EvaluateKItem[] }>(
-      `/analysis/evaluate-k?${searchParams.toString()}`
+      `/analysis/evaluate-k?${searchParams.toString()}`,
     );
     return res.evaluations;
   },
@@ -295,4 +293,3 @@ export const analysisApi = {
     return apiFetch<PolicyResult>('/analysis/policy');
   },
 };
-

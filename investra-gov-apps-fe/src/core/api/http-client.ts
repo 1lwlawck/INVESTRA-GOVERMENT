@@ -50,9 +50,7 @@ interface ApiErrorPayload {
 }
 
 async function readApiError(response: Response): Promise<ApiErrorPayload> {
-  return response
-    .json()
-    .catch(() => ({ error: 'Network error' })) as Promise<ApiErrorPayload>;
+  return response.json().catch(() => ({ error: 'Network error' })) as Promise<ApiErrorPayload>;
 }
 
 export class ApiError extends Error {
@@ -136,11 +134,7 @@ async function apiFetch<T>(
   const existingToken = getToken();
   let tokenToUse = existingToken;
 
-  if (
-    tokenToUse &&
-    !isAuthBypassEndpoint(endpoint) &&
-    shouldRefreshToken(tokenToUse)
-  ) {
+  if (tokenToUse && !isAuthBypassEndpoint(endpoint) && shouldRefreshToken(tokenToUse)) {
     const refreshedToken = await refreshAccessToken(tokenToUse);
     tokenToUse = refreshedToken ?? tokenToUse;
   }
