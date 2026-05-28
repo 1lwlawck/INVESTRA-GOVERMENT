@@ -69,13 +69,8 @@ export const datasetApi = {
     return apiFetch<DatasetInfo>('/dataset/default');
   },
 
-  getDefaultDatasetData: async (
-    page: number = 1,
-    pageSize: number = 50,
-  ): Promise<DatasetData> => {
-    return apiFetch<DatasetData>(
-      `/dataset/default/data?page=${page}&pageSize=${pageSize}`
-    );
+  getDefaultDatasetData: async (page: number = 1, pageSize: number = 50): Promise<DatasetData> => {
+    return apiFetch<DatasetData>(`/dataset/default/data?page=${page}&pageSize=${pageSize}`);
   },
 
   getDefaultDatasetSample: async (n: number = 5): Promise<DatasetData> => {
@@ -89,14 +84,14 @@ export const datasetApi = {
 
   getVersion: async (versionId: string): Promise<DatasetInfo & { data: Record<string, any>[] }> => {
     return apiFetch<DatasetInfo & { data: Record<string, any>[] }>(
-      `/dataset/versions/${versionId}`
+      `/dataset/versions/${versionId}`,
     );
   },
 
   activateVersion: async (versionId: string): Promise<DatasetVersion & { message: string }> => {
     return apiFetch<DatasetVersion & { message: string }>(
       `/dataset/versions/${versionId}/activate`,
-      { method: 'PUT' }
+      { method: 'PUT' },
     );
   },
 
@@ -131,7 +126,7 @@ export const datasetApi = {
       throw new Error(
         Array.isArray(err.detail)
           ? `${err.error}\n${err.detail.join('\n')}`
-          : err.error || `HTTP ${res.status}`
+          : err.error || `HTTP ${res.status}`,
       );
     }
 

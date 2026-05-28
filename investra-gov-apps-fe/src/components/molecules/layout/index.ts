@@ -11,15 +11,7 @@ export {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-export {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+export { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 export { Toggle, toggleVariants } from '@/components/ui/toggle';
 export { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-export {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@/components/ui/resizable';
+export { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';

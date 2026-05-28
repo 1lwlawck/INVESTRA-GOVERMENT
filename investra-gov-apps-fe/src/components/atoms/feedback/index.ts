@@ -4,9 +4,4 @@
  */
 export { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 export { Toaster } from '@/components/ui/sonner';
-export {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';

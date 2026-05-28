@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from typing import ClassVar
 
 from sqlalchemy import or_
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from app.Extensions import db
-from app.utils.PublicIdentifier import generateUuid, nextCode
+from app.extensions import db
+from app.utils.public_identifier import generate_uuid, next_code
 
 
 class User(db.Model):
@@ -20,7 +21,7 @@ class User(db.Model):
         ),
     )
 
-    id = db.Column(db.String(36), primary_key=True, default=generateUuid)
+    id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     code = db.Column(db.String(32), unique=True, nullable=False, index=True)
     username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     email = db.Column(db.String(150), unique=True, nullable=False, index=True)
@@ -31,57 +32,57 @@ class User(db.Model):
     created_at = db.Column(
         db.DateTime,
         nullable=False,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
     )
     updated_at = db.Column(
         db.DateTime,
         nullable=False,
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
     )
 
-    VALID_ROLES = ("user", "admin", "superadmin")
-    ROLE_HIERARCHY = {"user": 0, "admin": 1, "superadmin": 2}
+    VALID_ROLES: ClassVar[tuple[str, ...]] = ("user", "admin", "superadmin")
+    ROLE_HIERARCHY: ClassVar[dict[str, int]] = {"user": 0, "admin": 1, "superadmin": 2}
 
     @classmethod
-    def nextCode(cls, year: int | None = None) -> str:
-        nowYear = year or datetime.now(timezone.utc).year
-        suffix = f"{nowYear}"
+    def next_code(cls, year: int | None = None) -> str:
+        now_year = year or datetime.now(UTC).year
+        suffix = f"{now_year}"
         existing = db.session.query(cls.code).filter(cls.code.like(f"USR%{suffix}")).all()
-        return nextCode(
+        return next_code(
             [row[0] for row in existing],
             prefix="USR",
-            sequenceWidth=2,
+            sequence_width=2,
             suffix=suffix,
         )
 
     @classmethod
-    def getByPublicId(cls, publicId: str) -> "User | None":
-        if not publicId:
+    def get_by_public_id(cls, public_id: str) -> User | None:
+        if not public_id:
             return None
-        publicId = str(publicId).strip()
-        if not publicId:
+        public_id = str(public_id).strip()
+        if not public_id:
             return None
-        return cls.query.filter(or_(cls.id == publicId, cls.code == publicId)).first()
+        return cls.query.filter(or_(cls.id == public_id, cls.code == public_id)).first()
 
-    def setPassword(self, password: str) -> None:
+    def set_password(self, password: str) -> None:
         self.password_hash = generate_password_hash(password)
 
-    def checkPassword(self, password: str) -> bool:
+    def check_password(self, password: str) -> bool:
         return check_password_hash(self.password_hash, password)
 
-    def hasRole(self, minRole: str) -> bool:
+    def has_role(self, min_role: str) -> bool:
         return self.ROLE_HIERARCHY.get(self.role, 0) >= self.ROLE_HIERARCHY.get(
-            minRole, 0
+            min_role, 0
         )
 
-    def ensurePublicIdentifiers(self) -> None:
+    def ensure_public_identifiers(self) -> None:
         if not self.id:
-            self.id = generateUuid()
+            self.id = generate_uuid()
         if not self.code:
-            self.code = self.nextCode()
+            self.code = self.next_code()
 
-    def toDict(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             "id": self.id,
             "code": self.code,

@@ -2,17 +2,8 @@
  * Molecules / Overlays
  * Overlay trigger components.
  */
-export {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-  PopoverAnchor,
-} from '@/components/ui/popover';
-export {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from '@/components/ui/hover-card';
+export { Popover, PopoverContent, PopoverTrigger, PopoverAnchor } from '@/components/ui/popover';
+export { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 export {
   DropdownMenu,
   DropdownMenuCheckboxItem,

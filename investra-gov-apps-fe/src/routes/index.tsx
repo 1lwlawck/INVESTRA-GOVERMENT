@@ -12,7 +12,7 @@ import { RouteErrorView } from '@/routes/guards/RouteErrorView';
 import { Skeleton } from '@/components/ui/skeleton';
 
 function lazyWithRetry<T extends React.ComponentType<any>>(
-  importer: () => Promise<{ default: T }>
+  importer: () => Promise<{ default: T }>,
 ) {
   return lazy(async () => {
     try {
@@ -32,37 +32,37 @@ function lazyWithRetry<T extends React.ComponentType<any>>(
 
 // ── Lazy-loaded pages ────────────────────────────────────────
 const LandingPage = lazyWithRetry(() =>
-  import('@/pages/landing/LandingPage').then((m) => ({ default: m.LandingPage }))
+  import('@/pages/landing/LandingPage').then((m) => ({ default: m.LandingPage })),
 );
-const LoginView = lazyWithRetry(() =>
-  import('@/pages/auth/LoginPage').then((m) => ({ default: m.LoginView }))
+const LoginPage = lazyWithRetry(() =>
+  import('@/pages/auth/LoginPage').then((m) => ({ default: m.LoginPage })),
 );
 const DashboardTemplate = lazyWithRetry(() =>
-  import('@/templates/DashboardTemplate').then((m) => ({ default: m.DashboardTemplate }))
+  import('@/templates/DashboardTemplate').then((m) => ({ default: m.DashboardTemplate })),
 );
-const DashboardView = lazyWithRetry(() =>
-  import('@/pages/dashboard/DashboardPage').then((m) => ({ default: m.DashboardView }))
+const DashboardPage = lazyWithRetry(() =>
+  import('@/pages/dashboard/DashboardPage').then((m) => ({ default: m.DashboardPage })),
 );
-const PCAAnalysisView = lazyWithRetry(() =>
-  import('@/pages/analysis/PCAAnalysisPage').then((m) => ({ default: m.PCAAnalysisView }))
+const PCAAnalysisPage = lazyWithRetry(() =>
+  import('@/pages/analysis/PCAAnalysisPage').then((m) => ({ default: m.PCAAnalysisPage })),
 );
-const ClusteringView = lazyWithRetry(() =>
-  import('@/pages/analysis/ClusteringPage').then((m) => ({ default: m.ClusteringView }))
+const ClusteringPage = lazyWithRetry(() =>
+  import('@/pages/analysis/ClusteringPage').then((m) => ({ default: m.ClusteringPage })),
 );
-const VisualizationView = lazyWithRetry(() =>
-  import('@/pages/visualization/VisualizationPage').then((m) => ({ default: m.VisualizationView }))
+const VisualizationPage = lazyWithRetry(() =>
+  import('@/pages/visualization/VisualizationPage').then((m) => ({ default: m.VisualizationPage })),
 );
-const PolicyView = lazyWithRetry(() =>
-  import('@/pages/policy/PolicyPage').then((m) => ({ default: m.PolicyView }))
+const PolicyPage = lazyWithRetry(() =>
+  import('@/pages/policy/PolicyPage').then((m) => ({ default: m.PolicyPage })),
 );
-const AboutView = lazyWithRetry(() =>
-  import('@/pages/about/AboutPage').then((m) => ({ default: m.AboutView }))
+const AboutPage = lazyWithRetry(() =>
+  import('@/pages/about/AboutPage').then((m) => ({ default: m.AboutPage })),
 );
-const DatasetView = lazyWithRetry(() =>
-  import('@/pages/dataset/DatasetPage').then((m) => ({ default: m.DatasetView }))
+const DatasetPage = lazyWithRetry(() =>
+  import('@/pages/dataset/DatasetPage').then((m) => ({ default: m.DatasetPage })),
 );
-const UserManagementView = lazyWithRetry(() =>
-  import('@/pages/admin/UserManagementPage').then((m) => ({ default: m.UserManagementView }))
+const UserManagementPage = lazyWithRetry(() =>
+  import('@/pages/admin/UserManagementPage').then((m) => ({ default: m.UserManagementPage })),
 );
 
 // ── Shared loading fallback ──────────────────────────────────
@@ -95,7 +95,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/login',
-    element: withSuspense(LoginView),
+    element: withSuspense(LoginPage),
     errorElement: <RouteErrorView />,
   },
   {
@@ -108,31 +108,31 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: withSuspense(DashboardView),
+            element: withSuspense(DashboardPage),
           },
           {
             path: 'dataset',
-            element: withSuspense(DatasetView),
+            element: withSuspense(DatasetPage),
           },
           {
             path: 'pca',
-            element: withSuspense(PCAAnalysisView),
+            element: withSuspense(PCAAnalysisPage),
           },
           {
             path: 'clustering',
-            element: withSuspense(ClusteringView),
+            element: withSuspense(ClusteringPage),
           },
           {
             path: 'visualization',
-            element: withSuspense(VisualizationView),
+            element: withSuspense(VisualizationPage),
           },
           {
             path: 'policy',
-            element: withSuspense(PolicyView),
+            element: withSuspense(PolicyPage),
           },
           {
             path: 'about',
-            element: withSuspense(AboutView),
+            element: withSuspense(AboutPage),
           },
           {
             path: 'users',
@@ -140,7 +140,7 @@ export const router = createBrowserRouter([
             children: [
               {
                 index: true,
-                element: withSuspense(UserManagementView),
+                element: withSuspense(UserManagementPage),
               },
             ],
           },

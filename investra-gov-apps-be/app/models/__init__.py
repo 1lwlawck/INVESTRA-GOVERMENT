@@ -1,6 +1,6 @@
-from app.models.Dataset import Dataset
-from app.models.Province import Province
-from app.models.AnalysisResult import AnalysisResult
-from app.models.User import User
+from app.models.analysis_result import AnalysisResult
+from app.models.dataset import Dataset
+from app.models.province import Province
+from app.models.user import User
 
-__all__ = ["Dataset", "Province", "AnalysisResult", "User"]
+__all__ = ["AnalysisResult", "Dataset", "Province", "User"]

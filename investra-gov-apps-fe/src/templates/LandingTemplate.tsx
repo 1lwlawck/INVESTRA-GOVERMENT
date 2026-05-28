@@ -11,9 +11,5 @@ interface LandingTemplateProps {
 }
 
 export function LandingTemplate({ children }: LandingTemplateProps) {
-  return (
-    <div className="min-h-screen bg-background">
-      {children}
-    </div>
-  );
+  return <div className="min-h-screen bg-background">{children}</div>;
 }

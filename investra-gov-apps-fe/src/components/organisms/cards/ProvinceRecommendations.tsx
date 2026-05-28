@@ -1,29 +1,25 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Search } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { MapPin, Search } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Input } from "@/components/ui/input";
-import { useMemo, useState } from "react";
-import {
-  type PolicyResult,
-  CLUSTER_COLORS,
-  FEATURE_LABELS,
-} from "@/core/api/analysis.api";
+} from '@/components/ui/accordion';
+import { Input } from '@/components/ui/input';
+import { useMemo, useState } from 'react';
+import { type PolicyResult, CLUSTER_COLORS, FEATURE_LABELS } from '@/core/api/analysis.api';
 
 const CONDITION_BADGE_COLORS: Record<string, string> = {
-  "Sangat Tinggi": "#059669",
-  Tinggi: "#3B82F6",
-  "Rata-rata": "#6B7280",
-  Rendah: "#F59E0B",
-  "Sangat Rendah": "#DC2626",
-  "Sangat Baik": "#059669",
-  Baik: "#3B82F6",
-  "Sangat Buruk": "#DC2626",
-  Buruk: "#F59E0B",
+  'Sangat Tinggi': '#059669',
+  Tinggi: '#3B82F6',
+  'Rata-rata': '#6B7280',
+  Rendah: '#F59E0B',
+  'Sangat Rendah': '#DC2626',
+  'Sangat Baik': '#059669',
+  Baik: '#3B82F6',
+  'Sangat Buruk': '#DC2626',
+  Buruk: '#F59E0B',
 };
 
 interface Props {
@@ -36,7 +32,7 @@ interface Props {
  * characteristics, and applicable policy directions.
  */
 export function ProvinceRecommendations({ policy }: Props) {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [filterCluster, setFilterCluster] = useState<number | null>(null);
 
   // Build flat province list from cluster_policies
@@ -54,12 +50,12 @@ export function ProvinceRecommendations({ policy }: Props) {
           name: prov,
           clusterId: cp.clusterId,
           clusterLabel: cp.label,
-          color: CLUSTER_COLORS[cp.clusterId] || "#6B7280",
+          color: CLUSTER_COLORS[cp.clusterId] || '#6B7280',
         });
       }
     }
 
-    items.sort((a, b) => a.name.localeCompare(b.name, "id"));
+    items.sort((a, b) => a.name.localeCompare(b.name, 'id'));
     return items;
   }, [policy]);
 
@@ -99,8 +95,8 @@ export function ProvinceRecommendations({ policy }: Props) {
                 onClick={() => setFilterCluster(null)}
                 className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
                   filterCluster === null
-                    ? "bg-[#002C5F] text-white border-[#002C5F]"
-                    : "bg-white text-gray-600 border-gray-300 hover:border-gray-400"
+                    ? 'bg-[#002C5F] text-white border-[#002C5F]'
+                    : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
                 }`}
               >
                 Semua ({provinceList.length})
@@ -109,24 +105,22 @@ export function ProvinceRecommendations({ policy }: Props) {
                 <button
                   key={cp.clusterId}
                   onClick={() =>
-                    setFilterCluster(
-                      filterCluster === cp.clusterId ? null : cp.clusterId,
-                    )
+                    setFilterCluster(filterCluster === cp.clusterId ? null : cp.clusterId)
                   }
                   className="text-xs px-3 py-1.5 rounded-full border transition-all"
                   style={{
                     backgroundColor:
                       filterCluster === cp.clusterId
-                        ? (CLUSTER_COLORS[cp.clusterId] || "#6B7280")
-                        : "white",
+                        ? CLUSTER_COLORS[cp.clusterId] || '#6B7280'
+                        : 'white',
                     color:
                       filterCluster === cp.clusterId
-                        ? "white"
-                        : (CLUSTER_COLORS[cp.clusterId] || "#6B7280"),
-                    borderColor: CLUSTER_COLORS[cp.clusterId] || "#6B7280",
+                        ? 'white'
+                        : CLUSTER_COLORS[cp.clusterId] || '#6B7280',
+                    borderColor: CLUSTER_COLORS[cp.clusterId] || '#6B7280',
                   }}
                 >
-                  {cp.label.replace("Investasi ", "")} ({cp.count})
+                  {cp.label.replace('Investasi ', '')} ({cp.count})
                 </button>
               ))}
             </div>
@@ -165,9 +159,7 @@ export function ProvinceRecommendations({ policy }: Props) {
                           style={{ backgroundColor: prov.color }}
                         />
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-[#002C5F] font-semibold text-sm">
-                            {prov.name}
-                          </h4>
+                          <h4 className="text-[#002C5F] font-semibold text-sm">{prov.name}</h4>
                           <p className="text-xs text-gray-500 mt-0.5">
                             {prov.clusterLabel} — {cp.dominantFactor}
                           </p>
@@ -190,10 +182,8 @@ export function ProvinceRecommendations({ policy }: Props) {
                             style={{ backgroundColor: prov.color }}
                           />
                           <span className="text-gray-700">
-                            Termasuk dalam{" "}
-                            <strong style={{ color: prov.color }}>
-                              {prov.clusterLabel}
-                            </strong>{" "}
+                            Termasuk dalam{' '}
+                            <strong style={{ color: prov.color }}>{prov.clusterLabel}</strong>{' '}
                             bersama {cp.count - 1} provinsi lainnya
                           </span>
                         </div>
@@ -204,28 +194,25 @@ export function ProvinceRecommendations({ policy }: Props) {
                             Profil Klaster (vs Rata-rata Nasional)
                           </p>
                           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-                            {Object.entries(cp.characteristics).map(
-                              ([key, ch]) => (
-                                <div
-                                  key={key}
-                                  className="bg-gray-50 rounded-lg p-2 border border-gray-100 text-center"
+                            {Object.entries(cp.characteristics).map(([key, ch]) => (
+                              <div
+                                key={key}
+                                className="bg-gray-50 rounded-lg p-2 border border-gray-100 text-center"
+                              >
+                                <p className="text-[9px] text-gray-500 mb-1 leading-tight">
+                                  {FEATURE_LABELS[key] || ch.label}
+                                </p>
+                                <span
+                                  className="inline-block text-[9px] font-semibold px-1.5 py-0.5 rounded-full text-white"
+                                  style={{
+                                    backgroundColor:
+                                      CONDITION_BADGE_COLORS[ch.condition] || '#6B7280',
+                                  }}
                                 >
-                                  <p className="text-[9px] text-gray-500 mb-1 leading-tight">
-                                    {FEATURE_LABELS[key] || ch.label}
-                                  </p>
-                                  <span
-                                    className="inline-block text-[9px] font-semibold px-1.5 py-0.5 rounded-full text-white"
-                                    style={{
-                                      backgroundColor:
-                                        CONDITION_BADGE_COLORS[ch.condition] ||
-                                        "#6B7280",
-                                    }}
-                                  >
-                                    {ch.condition}
-                                  </span>
-                                </div>
-                              ),
-                            )}
+                                  {ch.condition}
+                                </span>
+                              </div>
+                            ))}
                           </div>
                         </div>
 
@@ -320,9 +307,7 @@ export function ProvinceRecommendations({ policy }: Props) {
             <div className="text-center py-12">
               <MapPin className="h-12 w-12 text-gray-300 mx-auto mb-3" />
               <p className="text-gray-500">Tidak ada provinsi yang ditemukan</p>
-              <p className="text-sm text-gray-400 mt-1">
-                Coba kata kunci pencarian yang berbeda
-              </p>
+              <p className="text-sm text-gray-400 mt-1">Coba kata kunci pencarian yang berbeda</p>
             </div>
           )}
         </CardContent>

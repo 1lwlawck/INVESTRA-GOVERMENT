@@ -1,3 +1,5 @@
+name: investra-gov
+
 services:
   db:
     image: postgres:16-alpine
@@ -40,7 +42,7 @@ services:
       - "127.0.0.1:5000:5000"
     env_file: .env
     environment:
-      FLASK_APP: Wsgi.py
+      FLASK_APP: wsgi.py
       FLASK_ENV: ${FLASK_ENV:-production}
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       SECRET_KEY: ${SECRET_KEY}
@@ -66,7 +68,7 @@ services:
       timeout: 5s
       retries: 3
     command: >
-      sh -c "flask db upgrade && gunicorn --bind 0.0.0.0:5000 --workers 4 --worker-class gthread --threads 4 --keep-alive 5 --timeout 120 --graceful-timeout 30 Wsgi:app"
+      sh -c "flask db upgrade && gunicorn --bind 0.0.0.0:5000 --workers 4 --worker-class gthread --threads 4 --keep-alive 5 --timeout 120 --graceful-timeout 30 wsgi:app"
 
 volumes:
   pgdata:

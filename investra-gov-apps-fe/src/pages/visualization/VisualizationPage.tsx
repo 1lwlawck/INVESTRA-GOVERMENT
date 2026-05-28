@@ -36,7 +36,7 @@ function toNumber(value: unknown): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-export function VisualizationView() {
+export function VisualizationPage() {
   useDocumentTitle('Visualisasi');
   const isMobile = useIsMobile();
   const chartHeight = isMobile ? 250 : 400;
@@ -82,9 +82,14 @@ export function VisualizationView() {
       setProvinceData([]);
       if (err instanceof ApiError && err.code === 'NO_ACTIVE_DATASET') {
         setNoActiveDataset(true);
-        setError((prev) => prev ?? 'Belum ada dataset aktif. Upload CSV terlebih dahulu di halaman Dataset.');
+        setError(
+          (prev) =>
+            prev ?? 'Belum ada dataset aktif. Upload CSV terlebih dahulu di halaman Dataset.',
+        );
       } else {
-        setError((prev) => prev ?? (err instanceof Error ? err.message : 'Gagal memuat data provinsi.'));
+        setError(
+          (prev) => prev ?? (err instanceof Error ? err.message : 'Gagal memuat data provinsi.'),
+        );
       }
     } finally {
       setLoading(false);
@@ -93,7 +98,9 @@ export function VisualizationView() {
 
   const investmentByCluster = (clusterData?.summary || []).map((s: ClusterSummaryItem) => ({
     cluster: `Klaster ${s.cluster + 1} - ${s.label}`,
-    value: +(((s.statistics?.pmdnRp?.mean ?? 0) + (s.statistics?.fdiRp?.mean ?? 0)) / 1e12).toFixed(2),
+    value: +(((s.statistics?.pmdnRp?.mean ?? 0) + (s.statistics?.fdiRp?.mean ?? 0)) / 1e12).toFixed(
+      2,
+    ),
     color: CLUSTER_COLORS[s.cluster] || '#6B7280',
   }));
 
@@ -140,7 +147,8 @@ export function VisualizationView() {
       <div className="rounded-lg border-l-4 border-[#F9B233] bg-white p-6 shadow-sm">
         <h2 className="text-[#002C5F]">Visualisasi Data Regional</h2>
         <p className="mt-2 text-gray-600">
-          Representasi visual hasil analisis ketimpangan investasi antar provinsi (Rata-rata 2022-2024)
+          Representasi visual hasil analisis ketimpangan investasi antar provinsi (Rata-rata
+          2022-2024)
         </p>
       </div>
 
@@ -188,7 +196,11 @@ export function VisualizationView() {
                     <XAxis dataKey="cluster" stroke="#6B7280" tick={{ fontSize: 11 }} />
                     <YAxis
                       stroke="#6B7280"
-                      label={{ value: 'Investasi Avg (Triliun Rp)', angle: -90, position: 'insideLeft' }}
+                      label={{
+                        value: 'Investasi Avg (Triliun Rp)',
+                        angle: -90,
+                        position: 'insideLeft',
+                      }}
                     />
                     <Tooltip
                       contentStyle={{
@@ -214,7 +226,9 @@ export function VisualizationView() {
         <TabsContent value="distribution">
           <Card className="bg-white shadow-md">
             <CardHeader>
-              <CardTitle className="text-[#002C5F]">Distribusi Jumlah Provinsi per Klaster</CardTitle>
+              <CardTitle className="text-[#002C5F]">
+                Distribusi Jumlah Provinsi per Klaster
+              </CardTitle>
             </CardHeader>
             <CardContent className="flex justify-center">
               {provincesDistribution.length > 0 ? (

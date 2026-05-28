@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Pre-push hook:
+#   - BE: pytest (always)
+#   - FE: vitest run + tsc --noEmit (always)
+# Catches broken tests / broken types before they hit the remote.
+
+set -e
+
+repo_root="$(git rev-parse --show-toplevel)"
+be_dir="$repo_root/investra-gov-apps-be"
+fe_dir="$repo_root/investra-gov-apps-fe"
+
+# ─── Backend ────────────────────────────────────────────────────────
+if [ -x "$be_dir/.venv/Scripts/python.exe" ]; then
+  py="$be_dir/.venv/Scripts/python.exe"
+elif [ -x "$be_dir/.venv/bin/python" ]; then
+  py="$be_dir/.venv/bin/python"
+else
+  py=""
+fi
+
+if [ -n "$py" ]; then
+  echo "[pre-push] running BE pytest..."
+  cd "$be_dir"
+  "$py" -m pytest -q
+  cd "$repo_root"
+else
+  echo "[pre-push] BE venv not found at $be_dir/.venv. Skipping BE tests."
+fi
+
+# ─── Frontend ────────────────────────────────────────────────────────
+if [ -d "$fe_dir/node_modules" ]; then
+  echo "[pre-push] running FE typecheck + tests..."
+  cd "$fe_dir"
+  npx --no-install tsc --noEmit
+  npx --no-install vitest run
+  cd "$repo_root"
+else
+  echo "[pre-push] FE node_modules not found. Skipping FE checks."
+  echo "  Set up with: cd investra-gov-apps-fe && npm ci"
+fi

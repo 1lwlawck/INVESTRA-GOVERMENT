@@ -34,8 +34,8 @@ export function ProtectedRoute({ minRole = 'admin' }: ProtectedRouteProps) {
         <ShieldAlert className="h-12 w-12 text-[#002C5F]" />
         <h1 className="text-2xl font-bold text-[#002C5F]">Akses Ditolak</h1>
         <p className="max-w-md text-center text-gray-600">
-          Anda tidak memiliki izin untuk mengakses halaman ini.
-          Silakan hubungi administrator untuk mendapatkan akses.
+          Anda tidak memiliki izin untuk mengakses halaman ini. Silakan hubungi administrator untuk
+          mendapatkan akses.
         </p>
         <a
           href="/"

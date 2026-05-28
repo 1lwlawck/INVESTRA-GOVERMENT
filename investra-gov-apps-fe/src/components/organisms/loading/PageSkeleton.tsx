@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface BasicPageSkeletonProps {
   cardCount?: number;
@@ -42,10 +42,7 @@ interface TablePageSkeletonProps {
   rowCount?: number;
 }
 
-export function TablePageSkeleton({
-  columnCount = 6,
-  rowCount = 8,
-}: TablePageSkeletonProps) {
+export function TablePageSkeleton({ columnCount = 6, rowCount = 8 }: TablePageSkeletonProps) {
   return (
     <div className="space-y-6">
       <div className="space-y-3">
@@ -61,7 +58,10 @@ export function TablePageSkeleton({
         </div>
 
         <div className="space-y-3">
-          <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}>
+          <div
+            className="grid gap-2"
+            style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
+          >
             {Array.from({ length: columnCount }).map((_, idx) => (
               <Skeleton key={idx} className="h-4 w-full" />
             ))}
@@ -87,7 +87,7 @@ interface BlockSkeletonProps {
   heightClassName?: string;
 }
 
-export function BlockSkeleton({ heightClassName = "h-64" }: BlockSkeletonProps) {
+export function BlockSkeleton({ heightClassName = 'h-64' }: BlockSkeletonProps) {
   return (
     <div className="space-y-3">
       <Skeleton className="h-5 w-48" />
