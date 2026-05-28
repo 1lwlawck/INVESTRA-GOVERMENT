@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Pre-commit hook:
+#   - BE: ruff on staged Python files
+#   - FE: eslint on staged TS/TSX/JS/JSX files
+# Skipped automatically when no relevant files in that area are staged.
+
+set -e
+
+repo_root="$(git rev-parse --show-toplevel)"
+be_dir="$repo_root/investra-gov-apps-be"
+fe_dir="$repo_root/investra-gov-apps-fe"
+
+# ─── Backend (Python) ───────────────────────────────────────────────
+staged_be_py=$(git diff --cached --name-only --diff-filter=ACMR \
+  | grep -E '^investra-gov-apps-be/.+\.py$' || true)
+
+if [ -n "$staged_be_py" ]; then
+  if [ -x "$be_dir/.venv/Scripts/ruff.exe" ]; then
+    ruff_bin="$be_dir/.venv/Scripts/ruff.exe"
+  elif [ -x "$be_dir/.venv/bin/ruff" ]; then
+    ruff_bin="$be_dir/.venv/bin/ruff"
+  elif command -v ruff >/dev/null 2>&1; then
+    ruff_bin="ruff"
+  else
+    echo "[pre-commit] ruff not found. Install dev deps:"
+    echo "  cd investra-gov-apps-be && pip install -e \".[dev]\""
+    exit 1
+  fi
+
+  echo "[pre-commit] running ruff on staged BE files..."
+  cd "$be_dir"
+  echo "$staged_be_py" \
+    | sed 's|^investra-gov-apps-be/||' \
+    | xargs "$ruff_bin" check
+  cd "$repo_root"
+fi
+
+# ─── Frontend (TS/JS) ────────────────────────────────────────────────
+staged_fe_files=$(git diff --cached --name-only --diff-filter=ACMR \
+  | grep -E '^investra-gov-apps-fe/.+\.(ts|tsx|js|jsx)$' || true)
+
+if [ -n "$staged_fe_files" ]; then
+  if [ ! -d "$fe_dir/node_modules" ]; then
+    echo "[pre-commit] FE node_modules not found. Install:"
+    echo "  cd investra-gov-apps-fe && npm ci"
+    exit 1
+  fi
+
+  echo "[pre-commit] running eslint on staged FE files..."
+  cd "$fe_dir"
+
+  relative=$(echo "$staged_fe_files" | sed 's|^investra-gov-apps-fe/||')
+  # Pass file list to npx eslint via xargs so quoting is safe
+  echo "$relative" | xargs npx --no-install eslint --max-warnings=0
+  cd "$repo_root"
+fi
