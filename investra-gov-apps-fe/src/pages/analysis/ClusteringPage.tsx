@@ -100,11 +100,12 @@ export function ClusteringPage() {
     try {
       await analysisApi.run({
         autoK: false,
-        k: 4,
+        k: 3,
         dataMode: 'panel',
         panelYearStart,
         panelYearEnd,
         normaliseByYear: true,
+        enforceMinClusterSize: false,
       });
       await loadClusters();
     } catch (err) {
@@ -157,13 +158,7 @@ export function ClusteringPage() {
     );
   }
 
-  const modeFromResult = clusterData.dataMode || 'panel';
-  const uniqueProvinces = new Set(clusterData.summary.flatMap((item) => item.provinces));
-  const totalProvinces = uniqueProvinces.size;
   const totalObservations = Object.keys(clusterData.assignments).length;
-  const observationLabel =
-    modeFromResult === 'panel' ? 'Observasi Terklasifikasi' : 'Provinsi Terklasifikasi';
-  const observationValue = modeFromResult === 'panel' ? totalObservations : totalProvinces;
   const yearRangeLabel = clusterData.yearRange
     ? `${clusterData.yearRange.start}-${clusterData.yearRange.end}`
     : `${panelYearStart}-${panelYearEnd}`;
@@ -186,12 +181,9 @@ export function ClusteringPage() {
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline">Mode: {modeFromResult}</Badge>
               <Badge variant="secondary">k = {clusterData.k}</Badge>
-              {modeFromResult === 'panel' && (
-                <Badge variant="outline">Tahun: {yearRangeLabel}</Badge>
-              )}
-              {modeFromResult === 'panel' && panelStability && (
+              <Badge variant="outline">Tahun: {yearRangeLabel}</Badge>
+              {panelStability && (
                 <Badge variant="secondary">Stabilitas Provinsi: {panelStabilityPercent}</Badge>
               )}
             </div>
@@ -226,22 +218,16 @@ export function ClusteringPage() {
         <Card className="bg-white shadow-md border-2 border-gray-100">
           <CardContent className="p-6 text-center">
             <MapPin className="h-10 w-10 text-[#F9B233] mx-auto mb-3" />
-            <div className="text-3xl text-[#002C5F] mb-1">{observationValue}</div>
-            <p className="text-sm text-gray-600">{observationLabel}</p>
+            <div className="text-3xl text-[#002C5F] mb-1">{totalObservations}</div>
+            <p className="text-sm text-gray-600">Observasi Terklasifikasi</p>
           </CardContent>
         </Card>
 
         <Card className="bg-white shadow-md border-2 border-gray-100">
           <CardContent className="p-6 text-center">
             <TrendingUp className="h-10 w-10 text-[#059669] mx-auto mb-3" />
-            <div className="text-3xl text-[#002C5F] mb-1">
-              {modeFromResult === 'panel'
-                ? panelStabilityPercent
-                : clusterData.metrics.silhouetteScore.toFixed(3)}
-            </div>
-            <p className="text-sm text-gray-600">
-              {modeFromResult === 'panel' ? 'Stabilitas Provinsi' : 'Silhouette Score'}
-            </p>
+            <div className="text-3xl text-[#002C5F] mb-1">{panelStabilityPercent}</div>
+            <p className="text-sm text-gray-600">Stabilitas Provinsi</p>
           </CardContent>
         </Card>
       </div>
@@ -260,13 +246,11 @@ export function ClusteringPage() {
                 <div>
                   <CardTitle className="text-[#002C5F]">{cluster.name}</CardTitle>
                   <CardDescription className="mt-1">
-                    {modeFromResult === 'panel'
-                      ? `${cluster.observationCount ?? cluster.count} Observasi (${cluster.count} Provinsi${
-                          cluster.yearMin && cluster.yearMax
-                            ? `, ${cluster.yearMin}-${cluster.yearMax}`
-                            : ''
-                        })`
-                      : `${cluster.count} Provinsi dalam klaster ini`}
+                    {`${cluster.observationCount ?? cluster.count} Observasi (${cluster.count} Provinsi${
+                      cluster.yearMin && cluster.yearMax
+                        ? `, ${cluster.yearMin}-${cluster.yearMax}`
+                        : ''
+                    })`}
                   </CardDescription>
                 </div>
               </div>

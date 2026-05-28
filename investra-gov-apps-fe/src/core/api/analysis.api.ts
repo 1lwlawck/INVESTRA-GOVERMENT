@@ -141,19 +141,25 @@ export interface RunAnalysisOptions {
   enforceMinClusterSize?: boolean;
 }
 
-/** Cluster label & color constants (0 = highest investment -> 3 = lowest) */
+/** Cluster label & color constants.
+ *
+ * Default mapping is tuned for K=3 (the dashboard default), where:
+ *   0 = Tinggi, 1 = Sedang, 2 = Rendah.
+ *
+ * For other K values prefer the per-cluster `label` returned by the API
+ * (`ClusterSummaryItem.label`) over this constant. */
 export const CLUSTER_LABELS: Record<number, string> = {
-  0: 'Investasi Sangat Tinggi',
-  1: 'Investasi Tinggi',
-  2: 'Investasi Sedang',
-  3: 'Investasi Rendah',
+  0: 'Investasi Tinggi',
+  1: 'Investasi Sedang',
+  2: 'Investasi Rendah',
+  3: 'Investasi Sangat Rendah',
 };
 
 export const CLUSTER_COLORS: Record<number, string> = {
-  0: '#059669', // Green – Sangat Tinggi
-  1: '#3B82F6', // Blue  – Tinggi
-  2: '#F9B233', // Gold  – Sedang
-  3: '#DC2626', // Red   – Rendah
+  0: '#3B82F6', // Blue   – Tinggi
+  1: '#F9B233', // Gold   – Sedang
+  2: '#DC2626', // Red    – Rendah
+  3: '#7C3AED', // Purple – Sangat Rendah (fallback for K=4)
 };
 
 /** Human-readable labels for numeric columns */

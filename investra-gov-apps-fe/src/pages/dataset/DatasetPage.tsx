@@ -67,7 +67,6 @@ export function DatasetPage() {
   const isAdmin = hasRole(user, 'admin');
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [uploadYear, setUploadYear] = useState<number>(2023);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
@@ -204,7 +203,7 @@ export function DatasetPage() {
     setUploadError(null);
     setUploadSuccess(null);
     try {
-      const result = await datasetApi.uploadCSV(uploadFile, uploadYear);
+      const result = await datasetApi.uploadCSV(uploadFile);
       setUploadSuccess(result.message);
       // Refresh dataset view after successful upload
       await loadDataset();
@@ -334,11 +333,12 @@ export function DatasetPage() {
                     <AlertTitle className="text-[#002C5F] text-sm">Kolom Wajib</AlertTitle>
                     <AlertDescription className="text-xs">
                       <code>
-                        provinsi, pmdn_rp, fdi_rp, pdrb_per_kapita, ipm, kemiskinan, akses_listrik,
-                        tpt
+                        provinsi, year, pmdn_rp, fdi_rp, pdrb_per_kapita, ipm, kemiskinan,
+                        akses_listrik, tpt
                       </code>
-                      <span className="ml-1">
-                        (opsional: <code>year</code> / <code>tahun</code>)
+                      <span className="ml-1 block mt-1 text-muted-foreground">
+                        Mode panel mewajibkan kolom <code>year</code> untuk setiap baris (data
+                        multi-tahun).
                       </span>
                     </AlertDescription>
                   </Alert>
@@ -362,23 +362,6 @@ export function DatasetPage() {
                         {uploadFile.name} ({(uploadFile.size / 1024).toFixed(1)} KB)
                       </p>
                     )}
-                  </div>
-
-                  {/* Year input */}
-                  <div className="space-y-2">
-                    <Label htmlFor="year">Tahun Default</Label>
-                    <Input
-                      id="year"
-                      type="number"
-                      min={2000}
-                      max={2100}
-                      value={uploadYear}
-                      onChange={(e) => setUploadYear(Number(e.target.value))}
-                      className="w-32"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Dipakai jika CSV tidak memiliki kolom <code>year</code>.
-                    </p>
                   </div>
 
                   {/* Error */}

@@ -101,7 +101,6 @@ export const datasetApi = {
    */
   uploadCSV: async (
     file: File,
-    year: number = 2023,
     name?: string,
     description?: string,
   ): Promise<UploadResult> => {
@@ -109,7 +108,6 @@ export const datasetApi = {
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('year', String(year));
     if (name) formData.append('name', name);
     if (description) formData.append('description', description);
 
