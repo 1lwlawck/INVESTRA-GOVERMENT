@@ -1,4 +1,3 @@
-import { Card } from '@/components/ui/card';
 import { useState, useCallback, useMemo, memo, useEffect } from 'react';
 import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -378,18 +377,18 @@ export const InteractiveMap = memo(() => {
           </div>
         )}
 
-        <div className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 bg-white/97 backdrop-blur-sm px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl shadow-xl border border-gray-200">
-          <p className="text-[#002C5F] font-semibold text-xs sm:text-sm mb-2 pb-1.5 border-b border-gray-200">
-            Legenda Klaster
+        <div className="absolute bottom-2 right-2 rounded-xl border border-[#d9d9dd] bg-white/97 px-3 py-2.5 backdrop-blur-sm sm:bottom-4 sm:right-4 sm:px-4 sm:py-3">
+          <p className="mb-2 border-b border-[#f2f2f2] pb-1.5 text-[11px] font-medium uppercase tracking-wider text-[#93939f]">
+            Legenda
           </p>
           <div className="space-y-1.5">
             {activeClusterIds.map((cid) => (
               <div key={cid} className="flex items-center gap-2">
                 <div
-                  className="size-3 rounded-full shadow-sm"
+                  className="size-2.5 rounded-full"
                   style={{ backgroundColor: CLUSTER_COLORS[cid] || '#6B7280' }}
                 />
-                <span className="text-gray-700 text-xs sm:text-sm">
+                <span className="text-xs text-[#212121] sm:text-sm">
                   {CLUSTER_LABELS[cid] ?? `Klaster ${cid}`}
                 </span>
               </div>
@@ -398,21 +397,30 @@ export const InteractiveMap = memo(() => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {clusterStats.map((stat) => (
-          <Card
+          <div
             key={stat.cluster}
-            className="p-5 text-center border-2 hover:shadow-lg transition-all bg-white"
-            style={{ borderColor: stat.color }}
+            className="overflow-hidden rounded-2xl border border-[#d9d9dd] bg-white transition-all hover:border-[#93939f]"
           >
-            <div
-              className="size-4 rounded-full mx-auto mb-3 shadow-sm"
-              style={{ backgroundColor: stat.color }}
-            />
-            <p className="text-gray-600 text-sm mb-1">{stat.label}</p>
-            <p className="text-[#002C5F] text-xl font-bold mb-1">{stat.count} provinsi</p>
-            <p className="text-gray-500 text-sm">{stat.percentage}%</p>
-          </Card>
+            <div className="h-1.5 w-full" style={{ backgroundColor: stat.color }} />
+            <div className="px-5 py-4">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-[11px] font-medium uppercase tracking-wider text-[#93939f]">
+                  {stat.label}
+                </span>
+                <span className="size-2.5 rounded-full" style={{ backgroundColor: stat.color }} />
+              </div>
+              <p
+                className="text-2xl font-normal tracking-tight text-[#17171c]"
+                style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+              >
+                {stat.count}
+                <span className="ml-1 text-sm text-[#616161]">provinsi</span>
+              </p>
+              <p className="mt-1 text-xs text-[#93939f]">{stat.percentage}% dari total</p>
+            </div>
+          </div>
         ))}
       </div>
     </div>

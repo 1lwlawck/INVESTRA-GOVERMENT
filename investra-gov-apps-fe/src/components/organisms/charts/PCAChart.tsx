@@ -42,7 +42,7 @@ export function PCAChart() {
 
   if (!pcaData) {
     return (
-      <div className="text-center py-12 text-gray-500">
+      <div className="py-12 text-center text-[#93939f]">
         <p>Data PCA belum tersedia. Jalankan analisis terlebih dahulu.</p>
       </div>
     );
@@ -68,102 +68,136 @@ export function PCAChart() {
   return (
     <div className="space-y-8">
       {/* Explained Variance */}
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-        <h3 className="text-[#002C5F] mb-4">Varians yang Dijelaskan oleh Komponen Utama</h3>
+      <div className="rounded-2xl border border-[#d9d9dd] bg-white p-6">
+        <h3
+          className="mb-4 font-normal tracking-tight text-[#17171c]"
+          style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+        >
+          Varians yang Dijelaskan oleh Komponen Utama
+        </h3>
         <ResponsiveContainer width="100%" height={isMobile ? 200 : 300}>
           <BarChart data={varianceData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-            <XAxis dataKey="component" stroke="#6B7280" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#f2f2f2" />
+            <XAxis
+              dataKey="component"
+              stroke="#93939f"
+              tickLine={false}
+              axisLine={{ stroke: '#d9d9dd' }}
+            />
             <YAxis
-              stroke="#6B7280"
+              stroke="#93939f"
+              tickLine={false}
+              axisLine={{ stroke: '#d9d9dd' }}
               label={{
                 value: 'Varians (%)',
                 angle: -90,
                 position: 'insideLeft',
-                style: { fill: '#6B7280' },
+                style: { fill: '#93939f' },
               }}
             />
             <Tooltip
+              cursor={{ fill: '#f7f6f3' }}
               contentStyle={{
                 backgroundColor: 'white',
-                border: '2px solid #002C5F',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                border: '1px solid #d9d9dd',
+                borderRadius: '12px',
+                boxShadow: 'none',
               }}
             />
             <Legend />
-            <Bar dataKey="variance" fill="#002C5F" name="Varians (%)" radius={[8, 8, 0, 0]} />
+            <Bar dataKey="variance" fill="#003c33" name="Varians (%)" radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       {/* Cumulative Variance Line */}
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-        <h3 className="text-[#002C5F] mb-4">Kumulatif Varians</h3>
+      <div className="rounded-2xl border border-[#d9d9dd] bg-white p-6">
+        <h3
+          className="mb-4 font-normal tracking-tight text-[#17171c]"
+          style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+        >
+          Kumulatif Varians
+        </h3>
         <ResponsiveContainer width="100%" height={isMobile ? 180 : 250}>
           <LineChart data={varianceData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-            <XAxis dataKey="component" stroke="#6B7280" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#f2f2f2" />
+            <XAxis
+              dataKey="component"
+              stroke="#93939f"
+              tickLine={false}
+              axisLine={{ stroke: '#d9d9dd' }}
+            />
             <YAxis
-              stroke="#6B7280"
+              stroke="#93939f"
               domain={[0, 100]}
+              tickLine={false}
+              axisLine={{ stroke: '#d9d9dd' }}
               label={{
                 value: 'Kumulatif (%)',
                 angle: -90,
                 position: 'insideLeft',
-                style: { fill: '#6B7280' },
+                style: { fill: '#93939f' },
               }}
             />
             <Tooltip
+              cursor={{ stroke: '#d9d9dd', strokeWidth: 1 }}
               contentStyle={{
                 backgroundColor: 'white',
-                border: '2px solid #002C5F',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                border: '1px solid #d9d9dd',
+                borderRadius: '12px',
+                boxShadow: 'none',
               }}
             />
             <Legend />
             <Line
               type="monotone"
               dataKey="cumulative"
-              stroke="#F9B233"
-              strokeWidth={3}
+              stroke="#ff7759"
+              strokeWidth={2.5}
               name="Kumulatif Varians (%)"
-              dot={{ fill: '#F9B233', r: 6 }}
+              dot={{ fill: '#ff7759', r: 5, strokeWidth: 0 }}
+              activeDot={{ r: 7, fill: '#ff7759' }}
             />
           </LineChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Factor Loadings Table (PC1) */}
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-        <div className="mb-4 pb-3 border-b border-gray-200">
-          <h3 className="text-[#002C5F]">Loading Faktor (PC1)</h3>
-          <p className="text-sm text-gray-600 mt-1">
+      {/* Factor Loadings */}
+      <div className="rounded-2xl border border-[#d9d9dd] bg-white p-6">
+        <div className="mb-5 border-b border-[#f2f2f2] pb-4">
+          <h3
+            className="font-normal tracking-tight text-[#17171c]"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+          >
+            Loading Faktor (PC1)
+          </h3>
+          <p className="mt-1 text-sm text-[#616161]">
             Kontribusi setiap variabel terhadap komponen utama pertama
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {factorLoadings.map((item) => (
             <div
               key={item.factor}
-              className="flex items-center gap-3 p-4 bg-linear-to-r from-gray-50 to-blue-50 rounded-lg border border-gray-200 hover:shadow-md transition-shadow"
+              className="flex items-center gap-3 rounded-xl border border-[#f2f2f2] bg-[#f7f6f3] p-4 transition-all hover:border-[#d9d9dd]"
             >
               <div className="flex-1">
-                <p className="text-gray-800">{item.factor}</p>
-                <p className="text-xs text-gray-500">
+                <p className="text-sm font-medium text-[#17171c]">{item.factor}</p>
+                <p className="text-xs text-[#93939f]">
                   {item.rawLoading > 0 ? '+' : ''}
                   {item.rawLoading.toFixed(3)}
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-24 h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+                <div className="h-2 w-24 overflow-hidden rounded-full bg-[#eeece7]">
                   <div
-                    className="h-full bg-linear-to-r from-[#F9B233] to-[#002C5F] rounded-full transition-all"
+                    className="h-full rounded-full bg-[#003c33] transition-all"
                     style={{ width: `${item.loading * 100}%` }}
                   />
                 </div>
-                <span className="text-[#002C5F] w-12 text-right">{item.loading.toFixed(2)}</span>
+                <span className="w-12 text-right text-sm font-medium text-[#17171c]">
+                  {item.loading.toFixed(2)}
+                </span>
               </div>
             </div>
           ))}

@@ -217,24 +217,35 @@ export function VisualizationPage() {
               {investmentByCluster.length > 0 ? (
                 <ResponsiveContainer width="100%" height={chartHeight}>
                   <BarChart data={investmentByCluster}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                    <XAxis dataKey="cluster" stroke="#6B7280" tick={{ fontSize: 11 }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f2f2f2" />
+                    <XAxis
+                      dataKey="cluster"
+                      stroke="#93939f"
+                      tick={{ fontSize: 11 }}
+                      tickLine={false}
+                      axisLine={{ stroke: '#d9d9dd' }}
+                    />
                     <YAxis
-                      stroke="#6B7280"
+                      stroke="#93939f"
+                      tickLine={false}
+                      axisLine={{ stroke: '#d9d9dd' }}
                       label={{
                         value: 'Investasi Avg (Triliun Rp)',
                         angle: -90,
                         position: 'insideLeft',
+                        style: { fill: '#93939f' },
                       }}
                     />
                     <Tooltip
+                      cursor={{ fill: '#f7f6f3' }}
                       contentStyle={{
                         backgroundColor: 'white',
                         border: '1px solid #d9d9dd',
                         borderRadius: '12px',
+                        boxShadow: 'none',
                       }}
                     />
-                    <Bar dataKey="value" name="Rata-rata Investasi" radius={[8, 8, 0, 0]}>
+                    <Bar dataKey="value" name="Rata-rata Investasi" radius={[6, 6, 0, 0]}>
                       {investmentByCluster.map((entry) => (
                         <Cell key={entry.cluster} fill={entry.color} />
                       ))}
@@ -277,7 +288,14 @@ export function VisualizationPage() {
                         <Cell key={entry.cluster} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #d9d9dd',
+                        borderRadius: '12px',
+                        boxShadow: 'none',
+                      }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
@@ -301,22 +319,44 @@ export function VisualizationPage() {
               {scatterData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={chartHeight}>
                   <ScatterChart>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f2f2f2" />
                     <XAxis
                       type="number"
                       dataKey="pdrb"
                       name="PDRB per Kapita"
-                      stroke="#6B7280"
-                      label={{ value: 'PDRB per Kapita', position: 'insideBottom', offset: -5 }}
+                      stroke="#93939f"
+                      tickLine={false}
+                      axisLine={{ stroke: '#d9d9dd' }}
+                      label={{
+                        value: 'PDRB per Kapita',
+                        position: 'insideBottom',
+                        offset: -5,
+                        style: { fill: '#93939f' },
+                      }}
                     />
                     <YAxis
                       type="number"
                       dataKey="ipm"
                       name="IPM"
-                      stroke="#6B7280"
-                      label={{ value: 'IPM', angle: -90, position: 'insideLeft' }}
+                      stroke="#93939f"
+                      tickLine={false}
+                      axisLine={{ stroke: '#d9d9dd' }}
+                      label={{
+                        value: 'IPM',
+                        angle: -90,
+                        position: 'insideLeft',
+                        style: { fill: '#93939f' },
+                      }}
                     />
-                    <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+                    <Tooltip
+                      cursor={{ strokeDasharray: '3 3', stroke: '#d9d9dd' }}
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #d9d9dd',
+                        borderRadius: '12px',
+                        boxShadow: 'none',
+                      }}
+                    />
                     {clusterIds.map((clusterId) => (
                       <Scatter
                         key={clusterId}
