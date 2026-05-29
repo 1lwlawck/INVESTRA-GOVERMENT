@@ -100,7 +100,9 @@ export function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
     <>
       {/* Mobile Backdrop */}
       {sidebarOpen && (
-        <div
+        <button
+          type="button"
+          aria-label="Close sidebar"
           className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
           onClick={() => setSidebarOpen(false)}
         />
@@ -130,7 +132,7 @@ export function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
               onClick={() => setSidebarOpen(false)}
               className="ml-auto lg:hidden p-1 rounded-md hover:bg-gray-100 text-gray-500"
             >
-              <X className="h-5 w-5" />
+              <X className="size-5" />
             </Button>
           </div>
 
@@ -165,7 +167,7 @@ export function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
                       <>
                         <Icon
                           className={cn(
-                            'h-5 w-5 shrink-0 mt-0.5 transition-colors',
+                            'size-5 shrink-0 mt-0.5 transition-colors',
                             isActive
                               ? 'text-[#F9B233]'
                               : 'text-[#002C5F] group-hover:text-[#F9B233]',
@@ -203,7 +205,7 @@ export function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
             {/* Footer Info */}
             <div className="mt-6 p-4 bg-linear-to-br from-amber-50 to-yellow-50 border border-[#F9B233]/30 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
-                <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                <div className="size-2 bg-green-500 rounded-full animate-pulse"></div>
                 <span className="text-xs text-gray-700 font-semibold">Status: Aktif</span>
               </div>
               <p className="text-xs text-gray-600 leading-relaxed font-normal">

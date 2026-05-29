@@ -92,7 +92,7 @@ function ClusterAccordionItem({ cp }: { cp: ClusterPolicy }) {
       <AccordionTrigger className="px-6 py-4 hover:no-underline">
         <div className="flex items-center gap-4 text-left w-full">
           <div className="p-3 rounded-lg shrink-0" style={{ backgroundColor: `${color}20` }}>
-            <div className="w-6 h-6 rounded-full" style={{ backgroundColor: color }} />
+            <div className="size-6 rounded-full" style={{ backgroundColor: color }} />
           </div>
           <div className="flex-1">
             <h3 className="text-[#002C5F] font-semibold">{cp.label}</h3>
@@ -158,12 +158,12 @@ function ClusterAccordionItem({ cp }: { cp: ClusterPolicy }) {
             <div className="space-y-4">
               {cp.policyDirections.map((pd, idx) => (
                 <div
-                  key={idx}
+                  key={pd.direction}
                   className="bg-linear-to-br from-gray-50 to-blue-50 p-5 rounded-lg border border-gray-200"
                 >
                   <div className="flex items-start gap-3 mb-3">
                     <div
-                      className="flex items-center justify-center w-7 h-7 rounded-full text-white text-xs font-bold shrink-0"
+                      className="flex items-center justify-center size-7 rounded-full text-white text-xs font-bold shrink-0"
                       style={{ backgroundColor: color }}
                     >
                       {idx + 1}
@@ -174,13 +174,13 @@ function ClusterAccordionItem({ cp }: { cp: ClusterPolicy }) {
                       <div className="space-y-2">
                         <p className="text-xs text-gray-500 font-semibold">Arah Aksi:</p>
                         <ul className="space-y-1.5">
-                          {pd.actions.map((action, actionIdx) => (
+                          {pd.actions.map((action) => (
                             <li
-                              key={actionIdx}
+                              key={action}
                               className="flex items-start gap-2 text-sm text-gray-700"
                             >
                               <span
-                                className="inline-block w-1.5 h-1.5 rounded-full mt-1.5 shrink-0"
+                                className="inline-block size-1.5 rounded-full mt-1.5 shrink-0"
                                 style={{ backgroundColor: color }}
                               />
                               <span>{action}</span>

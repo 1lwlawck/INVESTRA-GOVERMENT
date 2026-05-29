@@ -72,9 +72,10 @@ export function PCAAnalysisPage() {
         // Find the dominant feature for this component from loadings
         const pcKey = `PC${ev.component}`;
         const loadingMap = pcaData.loadings[pcKey] || {};
-        const dominantFeature = Object.entries(loadingMap).sort(
-          ([, a], [, b]) => Math.abs(b) - Math.abs(a),
-        )[0];
+        const dominantFeature = Object.entries(loadingMap).reduce<[string, number] | undefined>(
+          (max, cur) => (max === undefined || Math.abs(cur[1]) > Math.abs(max[1]) ? cur : max),
+          undefined,
+        );
 
         return {
           component: pcKey,
@@ -101,7 +102,7 @@ export function PCAAnalysisPage() {
         </div>
         <Card className="border border-gray-200">
           <CardContent className="p-12 text-center">
-            <TrendingUp className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+            <TrendingUp className="size-16 mx-auto mb-4 text-gray-300" />
             <h3 className="text-lg font-semibold text-gray-700 mb-2">Belum Ada Analisis</h3>
             <p className="text-gray-500 mb-6">
               Jalankan analisis PCA & K-Means terlebih dahulu untuk melihat hasil.
@@ -113,9 +114,9 @@ export function PCAAnalysisPage() {
               className="bg-[#002C5F] hover:bg-[#003D7A]"
             >
               {runningAnalysis ? (
-                <Skeleton className="h-4 w-4 mr-2 rounded-sm" />
+                <Skeleton className="size-4 mr-2 rounded-sm" />
               ) : (
-                <Play className="h-4 w-4 mr-2" />
+                <Play className="size-4 mr-2" />
               )}
               Jalankan Analisis
             </Button>
@@ -155,9 +156,9 @@ export function PCAAnalysisPage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {pcaSummary.slice(0, 4).map((item, index) => (
+        {pcaSummary.slice(0, 4).map((item) => (
           <Card
-            key={index}
+            key={item.component}
             className="border-l-4 hover:shadow-lg transition-all bg-white"
             style={{ borderLeftColor: item.color }}
           >
@@ -176,7 +177,7 @@ export function PCAAnalysisPage() {
 
       {/* Info Alert */}
       <Alert className="bg-blue-50 border-[#002C5F]">
-        <Info className="h-4 w-4 text-[#002C5F]" />
+        <Info className="size-4 text-[#002C5F]" />
         <AlertTitle className="text-[#002C5F]">Tentang PCA</AlertTitle>
         <AlertDescription className="text-gray-700">
           Principal Component Analysis (PCA) adalah metode statistik untuk mereduksi dimensionalitas
@@ -201,14 +202,14 @@ export function PCAAnalysisPage() {
       <Card className="bg-linear-to-br from-blue-50 to-gray-50 border-2 border-gray-200 shadow-md">
         <CardHeader>
           <CardTitle className="text-[#002C5F] flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-[#F9B233]" />
+            <TrendingUp className="size-5 text-[#F9B233]" />
             Interpretasi Hasil
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {interpretations.map((item, idx) => (
+          {interpretations.map((item) => (
             <div
-              key={idx}
+              key={item.component}
               className="p-5 bg-white rounded-lg border-l-4"
               style={{ borderLeftColor: item.color }}
             >

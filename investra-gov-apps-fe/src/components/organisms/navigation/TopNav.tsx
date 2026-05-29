@@ -33,7 +33,7 @@ export function TopNav({ sidebarOpen, setSidebarOpen }: TopNavProps) {
           className="text-[#002C5F] hover:bg-[#002C5F]/10"
           onClick={() => setSidebarOpen(!sidebarOpen)}
         >
-          {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {sidebarOpen ? <X className="size-6" /> : <Menu className="size-6" />}
         </Button>
 
         <GarudaEmblem size={40} />
@@ -61,8 +61,8 @@ export function TopNav({ sidebarOpen, setSidebarOpen }: TopNavProps) {
       <div className="flex items-center gap-1 sm:gap-3">
         {/* Notifications */}
         <Button variant="ghost" size="icon" className="relative text-gray-600 hover:text-[#002C5F]">
-          <Bell className="h-5 w-5" />
-          <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-[#DC2626] text-white text-xs">
+          <Bell className="size-5" />
+          <Badge className="absolute -top-1 -right-1 size-5 p-0 flex items-center justify-center bg-[#DC2626] text-white text-xs">
             3
           </Badge>
         </Button>
@@ -70,10 +70,13 @@ export function TopNav({ sidebarOpen, setSidebarOpen }: TopNavProps) {
         {/* User Profile with Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 bg-gray-50 rounded-lg px-2 sm:px-3 py-2 border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer">
-              <Avatar className="h-8 w-8">
+            <button
+              type="button"
+              className="flex items-center gap-2 bg-gray-50 rounded-lg px-2 sm:px-3 py-2 border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer"
+            >
+              <Avatar className="size-8">
                 <AvatarFallback className="bg-[#002C5F] text-white">
-                  <User className="h-4 w-4" />
+                  <User className="size-4" />
                 </AvatarFallback>
               </Avatar>
               <div className="hidden md:block text-left">
@@ -102,7 +105,7 @@ export function TopNav({ sidebarOpen, setSidebarOpen }: TopNavProps) {
             <DropdownMenuLabel className="font-semibold">Akun Saya</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="font-medium">
-              <User className="mr-2 h-4 w-4" />
+              <User className="mr-2 size-4" />
               <span>Profil</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -113,7 +116,7 @@ export function TopNav({ sidebarOpen, setSidebarOpen }: TopNavProps) {
               }}
               className="text-red-600 focus:text-red-600 font-semibold"
             >
-              <LogOut className="mr-2 h-4 w-4" />
+              <LogOut className="mr-2 size-4" />
               <span>Keluar</span>
             </DropdownMenuItem>
           </DropdownMenuContent>

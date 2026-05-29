@@ -31,7 +31,7 @@ export function ProtectedRoute({ minRole = 'admin' }: ProtectedRouteProps) {
   if (!hasRole(user, minRole)) {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-4">
-        <ShieldAlert className="h-12 w-12 text-[#002C5F]" />
+        <ShieldAlert className="size-12 text-[#002C5F]" />
         <h1 className="text-2xl font-bold text-[#002C5F]">Akses Ditolak</h1>
         <p className="max-w-md text-center text-gray-600">
           Anda tidak memiliki izin untuk mengakses halaman ini. Silakan hubungi administrator untuk

@@ -185,7 +185,7 @@ export function UserManagementPage() {
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={openAdd} className="bg-[#002C5F] hover:bg-[#003D7A]">
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="mr-2 size-4" />
               Tambah Pengguna
             </Button>
           </DialogTrigger>
@@ -291,7 +291,7 @@ export function UserManagementPage() {
               >
                 {saving ? (
                   <span className="flex items-center gap-2">
-                    <Skeleton className="h-4 w-4 rounded-sm" /> Menyimpan...
+                    <Skeleton className="size-4 rounded-sm" /> Menyimpan...
                   </span>
                 ) : editingUser ? (
                   'Simpan Perubahan'
@@ -317,7 +317,7 @@ export function UserManagementPage() {
                     <p className="text-3xl font-bold text-[#002C5F]">{roleStats[role]}</p>
                   </div>
                   <div className="p-3 rounded-lg bg-gray-50">
-                    <Icon className="h-6 w-6" style={{ color: cfg.color }} />
+                    <Icon className="size-6" style={{ color: cfg.color }} />
                   </div>
                 </CardContent>
               </Card>
@@ -330,7 +330,7 @@ export function UserManagementPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-[#002C5F]" />
+            <Users className="size-5 text-[#002C5F]" />
             Daftar Pengguna
           </CardTitle>
           <CardDescription>Total {users.length} pengguna terdaftar dalam sistem</CardDescription>
@@ -381,13 +381,13 @@ export function UserManagementPage() {
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Button variant="ghost" size="icon" onClick={() => openEdit(user)}>
-                            <Pencil className="h-4 w-4 text-[#002C5F]" />
+                            <Pencil className="size-4 text-[#002C5F]" />
                           </Button>
 
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button variant="ghost" size="icon">
-                                <Trash2 className="h-4 w-4 text-red-500" />
+                                <Trash2 className="size-4 text-red-500" />
                               </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>

@@ -2,7 +2,8 @@
  * Atoms / Inputs
  * Smallest indivisible form input elements.
  */
-export { Button, buttonVariants } from '@/components/ui/button';
+export { Button } from '@/components/ui/button';
+export { buttonVariants } from '@/components/ui/button-variants';
 export { Input } from '@/components/ui/input';
 export { Textarea } from '@/components/ui/textarea';
 export { Checkbox } from '@/components/ui/checkbox';

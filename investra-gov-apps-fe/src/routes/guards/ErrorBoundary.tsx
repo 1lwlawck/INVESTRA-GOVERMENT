@@ -34,8 +34,8 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="min-h-100 flex items-center justify-center p-8">
           <div className="max-w-md text-center space-y-4">
-            <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-              <AlertCircle className="h-8 w-8 text-red-600" />
+            <div className="mx-auto size-16 bg-red-100 rounded-full flex items-center justify-center">
+              <AlertCircle className="size-8 text-red-600" />
             </div>
             <h2 className="text-xl text-[#002C5F] font-semibold">Terjadi Kesalahan</h2>
             <p className="text-gray-600 text-sm">
@@ -43,10 +43,11 @@ export class ErrorBoundary extends Component<Props, State> {
                 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.'}
             </p>
             <button
+              type="button"
               onClick={this.handleReset}
               className="inline-flex items-center gap-2 px-4 py-2 bg-[#002C5F] text-white rounded-lg hover:bg-[#003D7A] transition-colors text-sm font-medium"
             >
-              <RefreshCw className="h-4 w-4" />
+              <RefreshCw className="size-4" />
               Coba Lagi
             </button>
           </div>

@@ -183,7 +183,7 @@ export function LandingPage() {
             className="bg-[#002C5F] text-white hover:bg-[#003D7A]"
             size="sm"
           >
-            <User className="mr-2 h-4 w-4" />
+            <User className="mr-2 size-4" />
             Login Pengelola
           </Button>
         </div>
@@ -194,7 +194,7 @@ export function LandingPage() {
           <ImageWithFallback
             src={heroImage}
             alt="Panorama skyline Jakarta saat senja"
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0 size-full object-cover"
           />
           <div className="absolute inset-0 bg-linear-to-r from-[#002C5F]/95 via-[#002C5F]/80 to-[#002C5F]/25" />
           <div className="relative mx-auto flex min-h-screen max-w-7xl items-center px-4 py-16 sm:px-6">
@@ -214,7 +214,7 @@ export function LandingPage() {
                 <Button asChild size="lg" className="bg-white text-[#002C5F] hover:bg-gray-100">
                   <a href="#cek-daerah">
                     Cek Daerah Saya
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                    <ArrowRight className="ml-2 size-5" />
                   </a>
                 </Button>
                 <Button
@@ -224,7 +224,7 @@ export function LandingPage() {
                 >
                   <a href="#metode">
                     Lihat Data & Metode
-                    <BookOpen className="ml-2 h-5 w-5" />
+                    <BookOpen className="ml-2 size-5" />
                   </a>
                 </Button>
               </div>
@@ -235,7 +235,7 @@ export function LandingPage() {
         <section className="border-b border-gray-200 bg-white py-6">
           <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 px-4 sm:grid-cols-3 sm:px-6">
             <div className="flex items-center gap-3">
-              <Database className="h-9 w-9 text-[#002C5F]" />
+              <Database className="size-9 text-[#002C5F]" />
               <div>
                 <p className="text-xs text-gray-500">Periode Data</p>
                 <p className="font-semibold text-[#002C5F]">
@@ -244,7 +244,7 @@ export function LandingPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <MapPin className="h-9 w-9 text-[#059669]" />
+              <MapPin className="size-9 text-[#059669]" />
               <div>
                 <p className="text-xs text-gray-500">Provinsi Dalam Analisis</p>
                 <p className="font-semibold text-[#002C5F]">
@@ -253,7 +253,7 @@ export function LandingPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <GitBranch className="h-9 w-9 text-[#F9B233]" />
+              <GitBranch className="size-9 text-[#F9B233]" />
               <div>
                 <p className="text-xs text-gray-500">Kelompok Hasil Analisis</p>
                 <p className="font-semibold text-[#002C5F]">
@@ -267,7 +267,7 @@ export function LandingPage() {
         {error && (
           <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
             <Alert className="border-amber-500 bg-amber-50">
-              <AlertCircle className="h-4 w-4 text-amber-600" />
+              <AlertCircle className="size-4 text-amber-600" />
               <AlertTitle className="text-amber-800">Data publik belum tersedia</AlertTitle>
               <AlertDescription className="text-amber-800">
                 {error}. Jalankan analisis dari dashboard pengelola agar hasil publik dapat
@@ -299,7 +299,7 @@ export function LandingPage() {
                 </Label>
                 <div className="mt-3 flex flex-col gap-3 sm:flex-row">
                   <div className="relative flex-1">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
                     <Input
                       id="province-search"
                       value={selectedProvince}
@@ -323,7 +323,7 @@ export function LandingPage() {
                       aria-label="Tampilkan daftar provinsi"
                     >
                       <ArrowRight
-                        className={`h-4 w-4 rotate-90 transition-transform ${provinceMenuOpen ? '-rotate-90' : ''}`}
+                        className={`size-4 rotate-90 transition-transform ${provinceMenuOpen ? '-rotate-90' : ''}`}
                       />
                     </button>
                     {provinceMenuOpen && (
@@ -361,12 +361,12 @@ export function LandingPage() {
                 </div>
                 {provinceError && (
                   <Alert className="mt-4 border-red-500 bg-red-50">
-                    <AlertCircle className="h-4 w-4 text-red-600" />
+                    <AlertCircle className="size-4 text-red-600" />
                     <AlertDescription className="text-red-700">{provinceError}</AlertDescription>
                   </Alert>
                 )}
                 <div className="mt-6 rounded-lg bg-blue-50 p-4 text-sm text-[#002C5F]">
-                  <Info className="mb-2 h-5 w-5" />
+                  <Info className="mb-2 size-5" />
                   Hasil cluster menunjukkan kemiripan pola data provinsi dibandingkan provinsi lain,
                   bukan penilaian mutlak terhadap keberhasilan daerah.
                 </div>
@@ -375,7 +375,7 @@ export function LandingPage() {
               <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 {!provinceResult ? (
                   <div className="flex min-h-72 flex-col items-center justify-center text-center text-gray-500">
-                    <MapPin className="mb-3 h-12 w-12 text-gray-300" />
+                    <MapPin className="mb-3 size-12 text-gray-300" />
                     <p className="font-medium text-gray-700">Hasil daerah akan muncul di sini</p>
                     <p className="mt-1 max-w-md text-sm">
                       Setelah provinsi dipilih, sistem menampilkan cluster, periode data, dan
@@ -420,19 +420,18 @@ export function LandingPage() {
                     <div>
                       <h4 className="mb-3 font-semibold text-[#002C5F]">Ringkasan Indikator</h4>
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        {indicatorOrder
-                          .filter((key) => provinceResult.indicators[key])
-                          .map((key) => {
-                            const item = provinceResult.indicators[key];
-                            return (
-                              <div key={key} className="rounded-lg border border-gray-200 p-3">
-                                <p className="text-xs text-gray-500">{item.label}</p>
-                                <p className="mt-1 font-semibold text-[#002C5F]">
-                                  {formatIndicatorValue(key, item.value)}
-                                </p>
-                              </div>
-                            );
-                          })}
+                        {indicatorOrder.map((key) => {
+                          const item = provinceResult.indicators[key];
+                          if (!item) return null;
+                          return (
+                            <div key={key} className="rounded-lg border border-gray-200 p-3">
+                              <p className="text-xs text-gray-500">{item.label}</p>
+                              <p className="mt-1 font-semibold text-[#002C5F]">
+                                {formatIndicatorValue(key, item.value)}
+                              </p>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -482,7 +481,7 @@ export function LandingPage() {
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between gap-3">
                       <div
-                        className="h-4 w-4 rounded-full"
+                        className="size-4 rounded-full"
                         style={{ backgroundColor: cluster.color }}
                       />
                       <Badge variant="outline">{cluster.provinceCount} provinsi</Badge>
@@ -528,7 +527,7 @@ export function LandingPage() {
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               <div className="rounded-lg border border-gray-200 bg-white p-6">
-                <Database className="mb-4 h-8 w-8 text-[#002C5F]" />
+                <Database className="mb-4 size-8 text-[#002C5F]" />
                 <h3 className="mb-3 font-semibold text-[#002C5F]">Data yang Digunakan</h3>
                 <div className="space-y-2">
                   {(summary?.variables ?? []).map((variable) => (
@@ -536,7 +535,7 @@ export function LandingPage() {
                       key={variable.key}
                       className="flex items-start gap-2 text-sm text-gray-700"
                     >
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#059669]" />
+                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#059669]" />
                       <span>{variable.label}</span>
                     </div>
                   ))}
@@ -544,7 +543,7 @@ export function LandingPage() {
               </div>
 
               <div className="rounded-lg border border-gray-200 bg-white p-6">
-                <BarChart3 className="mb-4 h-8 w-8 text-[#F9B233]" />
+                <BarChart3 className="mb-4 size-8 text-[#F9B233]" />
                 <h3 className="mb-3 font-semibold text-[#002C5F]">PCA</h3>
                 <p className="text-sm leading-relaxed text-gray-700">
                   PCA merangkum banyak indikator menjadi beberapa dimensi utama. Tujuannya membantu
@@ -553,7 +552,7 @@ export function LandingPage() {
               </div>
 
               <div className="rounded-lg border border-gray-200 bg-white p-6">
-                <GitBranch className="mb-4 h-8 w-8 text-[#DC2626]" />
+                <GitBranch className="mb-4 size-8 text-[#DC2626]" />
                 <h3 className="mb-3 font-semibold text-[#002C5F]">K-Means</h3>
                 <p className="text-sm leading-relaxed text-gray-700">
                   K-Means mengelompokkan provinsi yang polanya mirip. Label seperti investasi tinggi
@@ -588,7 +587,7 @@ export function LandingPage() {
                   ]
                 ).map((item) => (
                   <div key={item} className="rounded-lg border border-gray-200 bg-gray-50 p-5">
-                    <ShieldCheck className="mb-3 h-6 w-6 text-[#002C5F]" />
+                    <ShieldCheck className="mb-3 size-6 text-[#002C5F]" />
                     <p className="text-sm leading-relaxed text-gray-700">{item}</p>
                   </div>
                 ))}
@@ -654,15 +653,15 @@ export function LandingPage() {
               </h4>
               <ul className="space-y-2 text-sm text-gray-400">
                 <li className="flex items-start gap-2">
-                  <Database className="mt-0.5 h-4 w-4 shrink-0 text-[#F9B233]" />
+                  <Database className="mt-0.5 size-4 shrink-0 text-[#F9B233]" />
                   <span>BKPM - Realisasi Investasi</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <FileText className="mt-0.5 h-4 w-4 shrink-0 text-[#F9B233]" />
+                  <FileText className="mt-0.5 size-4 shrink-0 text-[#F9B233]" />
                   <span>BPS - Indikator Sosial Ekonomi</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#F9B233]" />
+                  <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#F9B233]" />
                   <span>Periode 2019 - 2024</span>
                 </li>
               </ul>
@@ -674,17 +673,17 @@ export function LandingPage() {
               </h4>
               <ul className="space-y-3 text-sm text-gray-400">
                 <li className="flex items-start gap-2">
-                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#F9B233]" />
+                  <MapPin className="mt-0.5 size-4 shrink-0 text-[#F9B233]" />
                   <span>Jakarta, Indonesia</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Mail className="mt-0.5 h-4 w-4 shrink-0 text-[#F9B233]" />
+                  <Mail className="mt-0.5 size-4 shrink-0 text-[#F9B233]" />
                   <a href="mailto:info@investra.id" className="transition hover:text-[#F9B233]">
                     info@investra.id
                   </a>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Phone className="mt-0.5 h-4 w-4 shrink-0 text-[#F9B233]" />
+                  <Phone className="mt-0.5 size-4 shrink-0 text-[#F9B233]" />
                   <span>(021) 0000-0000</span>
                 </li>
               </ul>

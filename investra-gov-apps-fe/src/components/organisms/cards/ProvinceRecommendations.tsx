@@ -82,7 +82,7 @@ export function ProvinceRecommendations({ policy }: Props) {
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
               <Input
                 placeholder="Cari provinsi..."
                 value={search}
@@ -92,6 +92,7 @@ export function ProvinceRecommendations({ policy }: Props) {
             </div>
             <div className="flex flex-wrap gap-2">
               <button
+                type="button"
                 onClick={() => setFilterCluster(null)}
                 className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
                   filterCluster === null
@@ -103,6 +104,7 @@ export function ProvinceRecommendations({ policy }: Props) {
               </button>
               {policy.clusterPolicies.map((cp) => (
                 <button
+                  type="button"
                   key={cp.clusterId}
                   onClick={() =>
                     setFilterCluster(filterCluster === cp.clusterId ? null : cp.clusterId)
@@ -155,7 +157,7 @@ export function ProvinceRecommendations({ policy }: Props) {
                     <AccordionTrigger className="px-4 py-3 hover:no-underline">
                       <div className="flex items-center gap-3 text-left w-full">
                         <div
-                          className="w-3 h-3 rounded-full shrink-0"
+                          className="size-3 rounded-full shrink-0"
                           style={{ backgroundColor: prov.color }}
                         />
                         <div className="flex-1 min-w-0">
@@ -178,7 +180,7 @@ export function ProvinceRecommendations({ policy }: Props) {
                           }}
                         >
                           <div
-                            className="w-3 h-3 rounded-full shrink-0"
+                            className="size-3 rounded-full shrink-0"
                             style={{ backgroundColor: prov.color }}
                           />
                           <span className="text-gray-700">
@@ -234,12 +236,12 @@ export function ProvinceRecommendations({ policy }: Props) {
                           <div className="space-y-3">
                             {cp.policyDirections.map((pd, idx) => (
                               <div
-                                key={idx}
+                                key={pd.direction}
                                 className="bg-linear-to-br from-gray-50 to-blue-50 p-4 rounded-lg border border-gray-200"
                               >
                                 <div className="flex items-start gap-2 mb-2">
                                   <div
-                                    className="flex items-center justify-center w-5 h-5 rounded-full text-white text-[10px] font-bold shrink-0"
+                                    className="flex items-center justify-center size-5 rounded-full text-white text-[10px] font-bold shrink-0"
                                     style={{ backgroundColor: prov.color }}
                                   >
                                     {idx + 1}
@@ -258,7 +260,7 @@ export function ProvinceRecommendations({ policy }: Props) {
                                           className="flex items-start gap-1.5 text-xs text-gray-700"
                                         >
                                           <span
-                                            className="inline-block w-1 h-1 rounded-full mt-1.5 shrink-0"
+                                            className="inline-block size-1 rounded-full mt-1.5 shrink-0"
                                             style={{
                                               backgroundColor: prov.color,
                                             }}
@@ -280,9 +282,8 @@ export function ProvinceRecommendations({ policy }: Props) {
                             Provinsi Lain di Klaster yang Sama
                           </p>
                           <div className="flex flex-wrap gap-1">
-                            {cp.provinces
-                              .filter((p) => p !== prov.name)
-                              .map((other) => (
+                            {cp.provinces.map((other) =>
+                              other === prov.name ? null : (
                                 <span
                                   key={other}
                                   className="text-[10px] px-2 py-0.5 rounded-full border shrink-0"
@@ -294,7 +295,8 @@ export function ProvinceRecommendations({ policy }: Props) {
                                 >
                                   {other}
                                 </span>
-                              ))}
+                              ),
+                            )}
                           </div>
                         </div>
                       </div>
@@ -305,7 +307,7 @@ export function ProvinceRecommendations({ policy }: Props) {
             </Accordion>
           ) : (
             <div className="text-center py-12">
-              <MapPin className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+              <MapPin className="size-12 text-gray-300 mx-auto mb-3" />
               <p className="text-gray-500">Tidak ada provinsi yang ditemukan</p>
               <p className="text-sm text-gray-400 mt-1">Coba kata kunci pencarian yang berbeda</p>
             </div>

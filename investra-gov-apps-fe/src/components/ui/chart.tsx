@@ -44,9 +44,10 @@ function ChartContainer({
 }) {
   const uniqueId = React.useId();
   const chartId = `chart-${id || uniqueId.replace(/:/g, '')}`;
+  const contextValue = React.useMemo(() => ({ config }), [config]);
 
   return (
-    <ChartContext.Provider value={{ config }}>
+    <ChartContext.Provider value={contextValue}>
       <div
         data-slot="chart"
         data-chart={chartId}
@@ -64,32 +65,34 @@ function ChartContainer({
 }
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
-  const colorConfig = Object.entries(config).filter(([, config]) => config.theme || config.color);
+  React.useEffect(() => {
+    const colorConfig = Object.entries(config).filter(([, cfg]) => cfg.theme || cfg.color);
+    if (!colorConfig.length) return;
 
-  if (!colorConfig.length) {
-    return null;
-  }
+    const css = Object.entries(THEMES)
+      .map(([theme, prefix]) => {
+        const props = colorConfig
+          .flatMap(([key, itemConfig]) => {
+            const color =
+              itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
+            return color ? [`  --color-${key}: ${color};`] : [];
+          })
+          .join('\n');
+        return `${prefix} [data-chart="${id}"] {\n${props}\n}`;
+      })
+      .join('\n');
 
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
-${colorConfig
-  .map(([key, itemConfig]) => {
-    const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
-  })
-  .join('\n')}
-}
-`,
-          )
-          .join('\n'),
-      }}
-    />
-  );
+    const styleEl = document.createElement('style');
+    // textContent never interprets HTML — safe alternative to dangerouslySetInnerHTML
+    styleEl.textContent = css;
+    document.head.appendChild(styleEl);
+
+    return () => {
+      document.head.removeChild(styleEl);
+    };
+  }, [id, config]);
+
+  return null;
 };
 
 const ChartTooltip = RechartsPrimitive.Tooltip;
@@ -184,7 +187,7 @@ function ChartTooltipContent({
                         className={cn(
                           'shrink-0 rounded-[2px] border-(--color-border) bg-(--color-bg)',
                           {
-                            'h-2.5 w-2.5': indicator === 'dot',
+                            'size-2.5': indicator === 'dot',
                             'w-1': indicator === 'line',
                             'w-0 border-[1.5px] border-dashed bg-transparent':
                               indicator === 'dashed',
@@ -270,7 +273,7 @@ function ChartLegendContent({
               <itemConfig.icon />
             ) : (
               <div
-                className="h-2 w-2 shrink-0 rounded-[2px]"
+                className="size-2 shrink-0 rounded-[2px]"
                 style={{
                   backgroundColor: item.color,
                 }}

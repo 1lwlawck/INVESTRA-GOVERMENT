@@ -144,9 +144,9 @@ export function PCAChart() {
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {factorLoadings.map((item, index) => (
+          {factorLoadings.map((item) => (
             <div
-              key={index}
+              key={item.factor}
               className="flex items-center gap-3 p-4 bg-linear-to-r from-gray-50 to-blue-50 rounded-lg border border-gray-200 hover:shadow-md transition-shadow"
             >
               <div className="flex-1">

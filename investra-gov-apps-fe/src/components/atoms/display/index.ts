@@ -2,7 +2,8 @@
  * Atoms / Display
  * Smallest indivisible visual display elements.
  */
-export { Badge, badgeVariants } from '@/components/ui/badge';
+export { Badge } from '@/components/ui/badge';
+export { badgeVariants } from '@/components/ui/badge-variants';
 export { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 export { Separator } from '@/components/ui/separator';
 export { Skeleton } from '@/components/ui/skeleton';

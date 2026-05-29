@@ -178,7 +178,7 @@ export const InteractiveMap = memo(() => {
             className="border-[#002C5F] text-[#002C5F] hover:bg-[#002C5F] hover:text-white"
             aria-label="Zoom out"
           >
-            <ZoomOut className="h-4 w-4" />
+            <ZoomOut className="size-4" />
           </Button>
           <span className="text-xs text-gray-500 min-w-12 text-center">
             {Math.round(zoom * 100)}%
@@ -191,7 +191,7 @@ export const InteractiveMap = memo(() => {
             className="border-[#002C5F] text-[#002C5F] hover:bg-[#002C5F] hover:text-white"
             aria-label="Zoom in"
           >
-            <ZoomIn className="h-4 w-4" />
+            <ZoomIn className="size-4" />
           </Button>
           <Button
             variant="outline"
@@ -200,7 +200,7 @@ export const InteractiveMap = memo(() => {
             className="border-[#002C5F] text-[#002C5F] hover:bg-[#002C5F] hover:text-white"
             aria-label="Reset zoom"
           >
-            <Maximize2 className="h-4 w-4" />
+            <Maximize2 className="size-4" />
           </Button>
         </div>
       </div>
@@ -210,7 +210,7 @@ export const InteractiveMap = memo(() => {
         style={{ aspectRatio: '2 / 1', minHeight: 320 }}
       >
         <ComposableMap
-          className="w-full h-full"
+          className="size-full"
           width={1000}
           height={500}
           projection="geoMercator"
@@ -274,7 +274,7 @@ export const InteractiveMap = memo(() => {
                 <span className="text-gray-500">Klaster:</span>
                 <div className="flex items-center gap-1.5">
                   <div
-                    className="w-2.5 h-2.5 rounded-full"
+                    className="size-2.5 rounded-full"
                     style={{
                       backgroundColor: CLUSTER_COLORS[hoveredProvince.cluster] || '#6B7280',
                     }}
@@ -316,7 +316,7 @@ export const InteractiveMap = memo(() => {
             {activeClusterIds.map((cid) => (
               <div key={cid} className="flex items-center gap-2">
                 <div
-                  className="w-3 h-3 rounded-full shadow-sm"
+                  className="size-3 rounded-full shadow-sm"
                   style={{ backgroundColor: CLUSTER_COLORS[cid] || '#6B7280' }}
                 />
                 <span className="text-gray-700 text-xs sm:text-sm">
@@ -336,7 +336,7 @@ export const InteractiveMap = memo(() => {
             style={{ borderColor: stat.color }}
           >
             <div
-              className="w-4 h-4 rounded-full mx-auto mb-3 shadow-sm"
+              className="size-4 rounded-full mx-auto mb-3 shadow-sm"
               style={{ backgroundColor: stat.color }}
             />
             <p className="text-gray-600 text-sm mb-1">{stat.label}</p>

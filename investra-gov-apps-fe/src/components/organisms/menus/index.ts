@@ -46,5 +46,5 @@ export {
   NavigationMenuList,
   NavigationMenuTrigger,
   NavigationMenuViewport,
-  navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
+export { navigationMenuTriggerStyle } from '@/components/ui/navigation-menu-variants';

@@ -62,7 +62,7 @@ export function LoginPage() {
             <p className="text-white/90 text-sm mb-1 font-medium">Investment Analytics Indonesia</p>
 
             <div className="inline-flex items-center gap-2 bg-[#F9B233] text-[#002C5F] px-4 py-2 rounded-full mt-3">
-              <ShieldCheck className="h-4 w-4" />
+              <ShieldCheck className="size-4" />
               <span className="text-xs font-semibold">Sistem Analisis Ketimpangan Investasi</span>
             </div>
           </div>
@@ -89,7 +89,7 @@ export function LoginPage() {
                   Username
                 </Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 size-5 text-gray-400" />
                   <Input
                     id="username"
                     type="text"
@@ -108,7 +108,7 @@ export function LoginPage() {
                   Password
                 </Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 size-5 text-gray-400" />
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
@@ -123,7 +123,7 @@ export function LoginPage() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
                   </button>
                 </div>
               </div>
@@ -136,12 +136,12 @@ export function LoginPage() {
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
-                    <Skeleton className="h-4 w-4 rounded-sm" />
+                    <Skeleton className="size-4 rounded-sm" />
                     Memproses...
                   </span>
                 ) : (
                   <span className="flex items-center justify-center gap-2">
-                    <LogIn className="h-5 w-5" />
+                    <LogIn className="size-5" />
                     Masuk ke Dashboard
                   </span>
                 )}

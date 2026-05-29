@@ -111,22 +111,20 @@ export function VisualizationPage() {
     color: CLUSTER_COLORS[s.cluster] || '#6B7280',
   }));
 
-  const scatterData = provinceData
-    .filter((item) => {
-      const p = item as Record<string, unknown>;
-      const name = String(p.provinsi ?? '');
-      return Boolean(name) && clusterData?.assignments?.[name] !== undefined;
-    })
-    .map((item) => {
-      const p = item as Record<string, unknown>;
-      const name = String(p.provinsi ?? '');
-      return {
-        pdrb: toNumber(p.pdrbPerKapita ?? p.pdrb_per_kapita),
-        ipm: toNumber(p.ipm),
-        cluster: clusterData?.assignments?.[name] ?? 0,
-        name,
-      };
+  const scatterData = provinceData.reduce<
+    Array<{ pdrb: number; ipm: number; cluster: number; name: string }>
+  >((acc, item) => {
+    const p = item as Record<string, unknown>;
+    const name = String(p.provinsi ?? '');
+    if (!name || clusterData?.assignments?.[name] === undefined) return acc;
+    acc.push({
+      pdrb: toNumber(p.pdrbPerKapita ?? p.pdrb_per_kapita),
+      ipm: toNumber(p.ipm),
+      cluster: clusterData?.assignments?.[name] ?? 0,
+      name,
     });
+    return acc;
+  }, []);
 
   const clusterIds = clusterData
     ? Array.from(new Set(Object.values(clusterData.assignments))).sort((a, b) => a - b)
@@ -210,8 +208,8 @@ export function VisualizationPage() {
                       }}
                     />
                     <Bar dataKey="value" name="Rata-rata Investasi" radius={[8, 8, 0, 0]}>
-                      {investmentByCluster.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      {investmentByCluster.map((entry) => (
+                        <Cell key={entry.cluster} fill={entry.color} />
                       ))}
                     </Bar>
                   </BarChart>
@@ -245,8 +243,8 @@ export function VisualizationPage() {
                       outerRadius={120}
                       dataKey="provinces"
                     >
-                      {provincesDistribution.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      {provincesDistribution.map((entry) => (
+                        <Cell key={entry.cluster} fill={entry.color} />
                       ))}
                     </Pie>
                     <Tooltip />

@@ -134,7 +134,7 @@ export function ClusteringPage() {
         </div>
         <Card className="border border-gray-200">
           <CardContent className="p-12 text-center">
-            <GitBranch className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+            <GitBranch className="size-16 mx-auto mb-4 text-gray-300" />
             <h3 className="text-lg font-semibold text-gray-700 mb-2">Belum Ada Analisis</h3>
             <p className="text-gray-500 mb-6">
               Jalankan analisis PCA & K-Means terlebih dahulu untuk melihat hasil clustering.
@@ -146,9 +146,9 @@ export function ClusteringPage() {
               className="bg-[#002C5F] hover:bg-[#003D7A]"
             >
               {runningAnalysis ? (
-                <Skeleton className="h-4 w-4 mr-2 rounded-sm" />
+                <Skeleton className="size-4 mr-2 rounded-sm" />
               ) : (
-                <Play className="h-4 w-4 mr-2" />
+                <Play className="size-4 mr-2" />
               )}
               Jalankan Analisis
             </Button>
@@ -194,9 +194,9 @@ export function ClusteringPage() {
                 className="bg-[#002C5F] hover:bg-[#003D7A]"
               >
                 {runningAnalysis ? (
-                  <Skeleton className="h-4 w-4 mr-2 rounded-sm" />
+                  <Skeleton className="size-4 mr-2 rounded-sm" />
                 ) : (
-                  <Play className="h-4 w-4 mr-2" />
+                  <Play className="size-4 mr-2" />
                 )}
                 Jalankan Ulang
               </Button>
@@ -209,7 +209,7 @@ export function ClusteringPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="bg-white shadow-md border-2 border-gray-100">
           <CardContent className="p-6 text-center">
-            <GitBranch className="h-10 w-10 text-[#002C5F] mx-auto mb-3" />
+            <GitBranch className="size-10 text-[#002C5F] mx-auto mb-3" />
             <div className="text-3xl text-[#002C5F] mb-1">{clusterData.k}</div>
             <p className="text-sm text-gray-600">Total Klaster Terbentuk</p>
           </CardContent>
@@ -217,7 +217,7 @@ export function ClusteringPage() {
 
         <Card className="bg-white shadow-md border-2 border-gray-100">
           <CardContent className="p-6 text-center">
-            <MapPin className="h-10 w-10 text-[#F9B233] mx-auto mb-3" />
+            <MapPin className="size-10 text-[#F9B233] mx-auto mb-3" />
             <div className="text-3xl text-[#002C5F] mb-1">{totalObservations}</div>
             <p className="text-sm text-gray-600">Observasi Terklasifikasi</p>
           </CardContent>
@@ -225,7 +225,7 @@ export function ClusteringPage() {
 
         <Card className="bg-white shadow-md border-2 border-gray-100">
           <CardContent className="p-6 text-center">
-            <TrendingUp className="h-10 w-10 text-[#059669] mx-auto mb-3" />
+            <TrendingUp className="size-10 text-[#059669] mx-auto mb-3" />
             <div className="text-3xl text-[#002C5F] mb-1">{panelStabilityPercent}</div>
             <p className="text-sm text-gray-600">Stabilitas Provinsi</p>
           </CardContent>
@@ -242,7 +242,7 @@ export function ClusteringPage() {
           <CardHeader className="border-b border-gray-200 bg-linear-to-r from-gray-50 to-blue-50">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
               <div className="flex items-center gap-3">
-                <div className="w-4 h-4 rounded-full" style={{ backgroundColor: cluster.color }} />
+                <div className="size-4 rounded-full" style={{ backgroundColor: cluster.color }} />
                 <div>
                   <CardTitle className="text-[#002C5F]">{cluster.name}</CardTitle>
                   <CardDescription className="mt-1">
@@ -292,9 +292,9 @@ export function ClusteringPage() {
             <div>
               <h4 className="text-[#002C5F] mb-3">Daftar Provinsi</h4>
               <div className="flex flex-wrap gap-2">
-                {cluster.provinces.map((province, idx) => (
+                {cluster.provinces.map((province) => (
                   <Badge
-                    key={idx}
+                    key={province}
                     variant="outline"
                     className="px-3 py-1"
                     style={{ borderColor: cluster.color, color: cluster.color }}

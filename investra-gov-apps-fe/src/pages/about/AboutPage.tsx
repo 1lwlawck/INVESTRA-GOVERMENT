@@ -74,7 +74,7 @@ export function AboutPage() {
       <Card className="border-2 border-[#002C5F]/20 shadow-md">
         <CardHeader className="bg-linear-to-r from-gray-50 to-blue-50 border-b border-gray-200">
           <CardTitle className="text-[#002C5F] flex items-center gap-2">
-            <Target className="h-6 w-6 text-[#F9B233]" />
+            <Target className="size-6 text-[#F9B233]" />
             Tujuan Sistem
           </CardTitle>
           <CardDescription>Objektif dan sasaran pengembangan dashboard</CardDescription>
@@ -120,22 +120,22 @@ export function AboutPage() {
       <Card className="border-2 border-[#002C5F]/20 shadow-md">
         <CardHeader className="bg-linear-to-r from-gray-50 to-blue-50 border-b border-gray-200">
           <CardTitle className="text-[#002C5F] flex items-center gap-2">
-            <BookOpen className="h-6 w-6 text-[#F9B233]" />
+            <BookOpen className="size-6 text-[#F9B233]" />
             Metodologi Analisis
           </CardTitle>
           <CardDescription>Pendekatan dan metode yang digunakan dalam sistem</CardDescription>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
-          {methodology.map((method, index) => {
+          {methodology.map((method) => {
             const Icon = method.icon;
             return (
               <div
-                key={index}
+                key={method.title}
                 className="p-5 bg-linear-to-br from-gray-50 to-blue-50 rounded-lg border border-gray-200"
               >
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-white rounded-lg border-2 border-[#002C5F]">
-                    <Icon className="h-6 w-6 text-[#002C5F]" />
+                    <Icon className="size-6 text-[#002C5F]" />
                   </div>
                   <div className="flex-1">
                     <h4 className="text-[#002C5F] mb-2">{method.title}</h4>
@@ -143,9 +143,9 @@ export function AboutPage() {
                       {method.description}
                     </p>
                     <ul className="space-y-1">
-                      {method.details.map((detail, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
-                          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#F9B233] mt-1.5 shrink-0" />
+                      {method.details.map((detail) => (
+                        <li key={detail} className="flex items-start gap-2 text-sm text-gray-700">
+                          <span className="inline-block size-1.5 rounded-full bg-[#F9B233] mt-1.5 shrink-0" />
                           <span>{detail}</span>
                         </li>
                       ))}
@@ -162,16 +162,16 @@ export function AboutPage() {
       <Card className="border-2 border-[#002C5F]/20 shadow-md">
         <CardHeader className="bg-linear-to-r from-gray-50 to-blue-50 border-b border-gray-200">
           <CardTitle className="text-[#002C5F] flex items-center gap-2">
-            <Database className="h-6 w-6 text-[#F9B233]" />
+            <Database className="size-6 text-[#F9B233]" />
             Sumber Data
           </CardTitle>
           <CardDescription>Institusi penyedia data dan variabel yang digunakan</CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <div className="space-y-3">
-            {dataSourcesData.map((item, index) => (
+            {dataSourcesData.map((item) => (
               <div
-                key={index}
+                key={item.source}
                 className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-4 p-4 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
               >
                 <div className="flex-1">
@@ -188,7 +188,7 @@ export function AboutPage() {
       <Card className="bg-linear-to-br from-[#002C5F] to-[#003D7A] text-white shadow-lg">
         <CardHeader className="border-b border-white/20">
           <CardTitle className="flex items-center gap-2">
-            <Code className="h-6 w-6 text-[#F9B233]" />
+            <Code className="size-6 text-[#F9B233]" />
             Informasi Teknis
           </CardTitle>
         </CardHeader>
@@ -214,7 +214,7 @@ export function AboutPage() {
       <Card className="border-2 border-[#F9B233] shadow-md">
         <CardHeader>
           <CardTitle className="text-[#002C5F] flex items-center gap-2">
-            <Users className="h-6 w-6 text-[#F9B233]" />
+            <Users className="size-6 text-[#F9B233]" />
             Kontak & Dukungan
           </CardTitle>
         </CardHeader>

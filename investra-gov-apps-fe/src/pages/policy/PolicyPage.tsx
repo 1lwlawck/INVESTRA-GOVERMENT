@@ -58,7 +58,7 @@ export function PolicyPage() {
       <div className="space-y-6">
         <Card className="border-2 border-red-200 bg-red-50">
           <CardContent className="p-8 text-center">
-            <AlertCircle className="h-10 w-10 text-red-400 mx-auto mb-3" />
+            <AlertCircle className="size-10 text-red-400 mx-auto mb-3" />
             <p className="text-red-700 font-medium mb-2">
               {error || 'Data rekomendasi tidak tersedia'}
             </p>
@@ -86,11 +86,11 @@ export function PolicyPage() {
         </p>
         <div className="flex flex-wrap gap-4 mt-3 text-xs text-gray-500">
           <span className="flex items-center gap-1">
-            <BarChart3 className="h-3.5 w-3.5" />
+            <BarChart3 className="size-3.5" />
             Metode: Ratio-Based Thresholding + Rule Engine
           </span>
           <span className="flex items-center gap-1">
-            <Brain className="h-3.5 w-3.5" />
+            <Brain className="size-3.5" />
             Input: Cluster Summary + PCA Loadings + National Average
           </span>
         </div>
@@ -107,7 +107,7 @@ export function PolicyPage() {
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
                 <div
-                  className="w-4 h-4 rounded-full"
+                  className="size-4 rounded-full"
                   style={{ backgroundColor: CLUSTER_COLORS[cp.clusterId] || '#6B7280' }}
                 />
                 <CardTitle className="text-sm text-[#002C5F]">{cp.label}</CardTitle>
@@ -118,7 +118,7 @@ export function PolicyPage() {
                 {cp.count} <span className="text-sm font-normal text-gray-500">provinsi</span>
               </p>
               <div className="flex items-center gap-1 mt-1">
-                <Target className="h-3 w-3 text-gray-400" />
+                <Target className="size-3 text-gray-400" />
                 <p className="text-xs text-gray-500 truncate">{cp.dominantFactor}</p>
               </div>
             </CardContent>

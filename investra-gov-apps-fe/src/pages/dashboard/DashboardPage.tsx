@@ -262,7 +262,7 @@ export function DashboardPage() {
           <p className="text-gray-600 text-sm mt-1">Sistem Monitoring PCA & K-Means Clustering</p>
         </div>
         <div className="flex items-center gap-3 bg-gray-50 px-4 py-2 rounded-lg border border-gray-100">
-          <Calendar className="w-5 h-5 text-[#F9B233]" />
+          <Calendar className="size-5 text-[#F9B233]" />
           <div>
             <p className="text-xs text-gray-500">Periode Data</p>
             <p className="text-sm font-semibold text-[#002C5F]">{periodLabel}</p>
@@ -272,11 +272,11 @@ export function DashboardPage() {
 
       {/* Summary Cards - Solid & Clear */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {summaryCards.map((card, index) => {
+        {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
             <Card
-              key={index}
+              key={card.title}
               className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow bg-white"
             >
               <CardContent className="p-6">
@@ -287,7 +287,7 @@ export function DashboardPage() {
                   </div>
                   <div className="p-3 rounded-lg bg-gray-50">
                     <div className={`p-2 rounded-md ${card.color} text-white`}>
-                      <Icon className="h-5 w-5" />
+                      <Icon className="size-5" />
                     </div>
                   </div>
                 </div>
@@ -320,9 +320,9 @@ export function DashboardPage() {
               className="bg-[#002C5F] hover:bg-[#003D7A]"
             >
               {analysisLoading ? (
-                <Skeleton className="h-4 w-4 mr-2 rounded-sm" />
+                <Skeleton className="size-4 mr-2 rounded-sm" />
               ) : (
-                <Play className="h-4 w-4 mr-2" />
+                <Play className="size-4 mr-2" />
               )}
               Jalankan Analisis
             </Button>
@@ -330,11 +330,11 @@ export function DashboardPage() {
         </div>
         {evaluationMetrics.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {evaluationMetrics.map((metric, index) => {
+            {evaluationMetrics.map((metric) => {
               const Icon = metric.icon;
               return (
                 <div
-                  key={index}
+                  key={metric.title}
                   className="p-4 bg-linear-to-br from-gray-50 to-blue-50 rounded-lg border border-gray-200 hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-center gap-3 mb-3">
@@ -342,7 +342,7 @@ export function DashboardPage() {
                       className="p-2 rounded-lg bg-white border-2"
                       style={{ borderColor: metric.color }}
                     >
-                      <Icon className="h-5 w-5" style={{ color: metric.color }} />
+                      <Icon className="size-5" style={{ color: metric.color }} />
                     </div>
                     <h4 className="font-semibold text-[#002C5F] text-sm">{metric.title}</h4>
                   </div>
@@ -358,7 +358,7 @@ export function DashboardPage() {
           </div>
         ) : (
           <div className="text-center py-8 text-gray-500">
-            <Activity className="h-12 w-12 mx-auto mb-3 opacity-30" />
+            <Activity className="size-12 mx-auto mb-3 opacity-30" />
             <p>
               Belum ada analisis yang dijalankan. Klik <strong>"Jalankan Analisis"</strong> untuk
               memulai.
@@ -388,7 +388,7 @@ export function DashboardPage() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div
-                      className="w-4 h-4 rounded-full"
+                      className="size-4 rounded-full"
                       style={{ backgroundColor: cluster.color }}
                     ></div>
                     <h4 className="font-bold text-[#002C5F]">Klaster {cluster.id + 1}</h4>
@@ -421,9 +421,9 @@ export function DashboardPage() {
                 <div className="pt-3 border-t border-gray-200">
                   <p className="text-xs text-gray-500 mb-2">Provinsi Utama:</p>
                   <div className="flex flex-wrap gap-1">
-                    {cluster.provinces.slice(0, 4).map((province, idx) => (
+                    {cluster.provinces.slice(0, 4).map((province) => (
                       <Badge
-                        key={idx}
+                        key={province}
                         variant="outline"
                         className="text-xs"
                         style={{ borderColor: cluster.color, color: cluster.color }}
@@ -455,7 +455,7 @@ export function DashboardPage() {
           <Card className="border border-gray-200 shadow-sm">
             <CardHeader className="border-b border-gray-100 bg-gray-50/50 py-4">
               <div className="flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-[#002C5F]" />
+                <MapPin className="size-5 text-[#002C5F]" />
                 <h3 className="font-semibold text-[#002C5F]">Peta Persebaran Klaster</h3>
               </div>
             </CardHeader>
@@ -493,7 +493,7 @@ export function DashboardPage() {
           <Card className="border border-gray-200 shadow-sm">
             <CardHeader className="border-b border-gray-100 bg-gray-50/50 py-4">
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-[#002C5F]" />
+                <TrendingUp className="size-5 text-[#002C5F]" />
                 <h3 className="font-semibold text-[#002C5F]">Temuan Utama</h3>
               </div>
             </CardHeader>
@@ -539,7 +539,7 @@ export function DashboardPage() {
                 Unduh ringkasan lengkap untuk pemangku kebijakan.
               </p>
               <Button className="w-full bg-[#F9B233] hover:bg-[#e0a02e] text-[#002C5F] font-bold">
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="size-4 mr-2" />
                 Download PDF
               </Button>
             </CardContent>
@@ -565,7 +565,7 @@ export function DashboardPage() {
                     Klaster {insight.cluster}
                   </Badge>
                   <div
-                    className="w-3 h-3 rounded-full"
+                    className="size-3 rounded-full"
                     style={{ backgroundColor: insight.color }}
                   ></div>
                 </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -71,12 +71,22 @@ export function DatasetPage() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const versionsLoadedRef = useRef(false);
 
-  useEffect(() => {
-    loadDataset();
+  const loadVersions = useCallback(async () => {
+    try {
+      setVersionsLoading(true);
+      const res = await datasetApi.listVersions();
+      setVersions(res.versions);
+      versionsLoadedRef.current = true;
+    } catch (err) {
+      console.error('Failed to load versions:', err);
+    } finally {
+      setVersionsLoading(false);
+    }
   }, []);
 
-  const loadDataset = async () => {
+  const loadDataset = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -116,7 +126,7 @@ export function DatasetPage() {
         });
         setNotification('Belum ada dataset aktif.');
         setTimeout(() => setNotification(null), 4000);
-        if (isAdmin && versions.length === 0) {
+        if (isAdmin && !versionsLoadedRef.current) {
           loadVersions();
         }
         return;
@@ -129,24 +139,16 @@ export function DatasetPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isAdmin, loadVersions]);
 
-  const loadVersions = async () => {
-    try {
-      setVersionsLoading(true);
-      const res = await datasetApi.listVersions();
-      setVersions(res.versions);
-    } catch (err) {
-      console.error('Failed to load versions:', err);
-    } finally {
-      setVersionsLoading(false);
-    }
-  };
+  useEffect(() => {
+    loadDataset();
+  }, [loadDataset]);
 
   const toggleHistory = () => {
     const next = !showHistory;
     setShowHistory(next);
-    if (next && versions.length === 0) {
+    if (next && !versionsLoadedRef.current) {
       loadVersions();
     }
   };
@@ -261,7 +263,7 @@ export function DatasetPage() {
 
       {noActiveDataset && (
         <Alert className="border-amber-500 bg-amber-50">
-          <AlertCircle className="h-4 w-4 text-amber-600" />
+          <AlertCircle className="size-4 text-amber-600" />
           <AlertTitle className="text-amber-700">Belum Ada Dataset Aktif</AlertTitle>
           <AlertDescription className="text-amber-700">
             {isSuperadmin
@@ -285,12 +287,12 @@ export function DatasetPage() {
               onClick={toggleHistory}
               className="border-[#002C5F] text-[#002C5F]"
             >
-              <History className="mr-2 h-4 w-4" />
+              <History className="mr-2 size-4" />
               Riwayat
               {showHistory ? (
-                <ChevronUp className="ml-1 h-4 w-4" />
+                <ChevronUp className="ml-1 size-4" />
               ) : (
-                <ChevronDown className="ml-1 h-4 w-4" />
+                <ChevronDown className="ml-1 size-4" />
               )}
             </Button>
           )}
@@ -313,7 +315,7 @@ export function DatasetPage() {
                   variant="outline"
                   className="border-[#002C5F] text-[#002C5F] hover:bg-[#002C5F] hover:text-white"
                 >
-                  <Upload className="mr-2 h-4 w-4" />
+                  <Upload className="mr-2 size-4" />
                   Upload CSV
                 </Button>
               </DialogTrigger>
@@ -329,7 +331,7 @@ export function DatasetPage() {
                 <div className="space-y-4 py-4">
                   {/* Required columns info */}
                   <Alert className="bg-blue-50 border-[#002C5F]">
-                    <AlertCircle className="h-4 w-4 text-[#002C5F]" />
+                    <AlertCircle className="size-4 text-[#002C5F]" />
                     <AlertTitle className="text-[#002C5F] text-sm">Kolom Wajib</AlertTitle>
                     <AlertDescription className="text-xs">
                       <code>
@@ -358,7 +360,7 @@ export function DatasetPage() {
                     </div>
                     {uploadFile && (
                       <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <FileUp className="h-3 w-3" />
+                        <FileUp className="size-3" />
                         {uploadFile.name} ({(uploadFile.size / 1024).toFixed(1)} KB)
                       </p>
                     )}
@@ -367,7 +369,7 @@ export function DatasetPage() {
                   {/* Error */}
                   {uploadError && (
                     <Alert variant="destructive">
-                      <AlertCircle className="h-4 w-4" />
+                      <AlertCircle className="size-4" />
                       <AlertTitle>Upload Gagal</AlertTitle>
                       <AlertDescription className="whitespace-pre-line text-xs max-h-40 overflow-y-auto">
                         {uploadError}
@@ -378,7 +380,7 @@ export function DatasetPage() {
                   {/* Success */}
                   {uploadSuccess && (
                     <Alert className="bg-green-50 border-green-500">
-                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <CheckCircle2 className="size-4 text-green-600" />
                       <AlertTitle className="text-green-700">Berhasil</AlertTitle>
                       <AlertDescription className="text-green-600">
                         {uploadSuccess}
@@ -402,12 +404,12 @@ export function DatasetPage() {
                   >
                     {uploading ? (
                       <>
-                        <Skeleton className="mr-2 h-4 w-4 rounded-sm" />
+                        <Skeleton className="mr-2 size-4 rounded-sm" />
                         Mengupload...
                       </>
                     ) : (
                       <>
-                        <Upload className="mr-2 h-4 w-4" />
+                        <Upload className="mr-2 size-4" />
                         Upload Versi Baru
                       </>
                     )}
@@ -417,11 +419,11 @@ export function DatasetPage() {
             </Dialog>
           )}
           <Button onClick={handleDownload} variant="outline" disabled={noActiveDataset}>
-            <Download className="mr-2 h-4 w-4" />
+            <Download className="mr-2 size-4" />
             Download
           </Button>
           <Button onClick={handleAnalyze} disabled={noActiveDataset}>
-            <BarChart3 className="mr-2 h-4 w-4" />
+            <BarChart3 className="mr-2 size-4" />
             Analyze
           </Button>
         </div>
@@ -433,7 +435,7 @@ export function DatasetPage() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-[#002C5F] flex items-center gap-2">
-                <History className="h-5 w-5" />
+                <History className="size-5" />
                 Riwayat Versi Dataset
               </CardTitle>
               <Badge variant="secondary">{versions.length} versi</Badge>
@@ -510,10 +512,10 @@ export function DatasetPage() {
                                 className="text-xs"
                               >
                                 {activating === v.id ? (
-                                  <Skeleton className="h-3 w-3 rounded-sm" />
+                                  <Skeleton className="size-3 rounded-sm" />
                                 ) : (
                                   <>
-                                    <RotateCcw className="h-3 w-3 mr-1" />
+                                    <RotateCcw className="size-3 mr-1" />
                                     Aktifkan
                                   </>
                                 )}
@@ -536,7 +538,7 @@ export function DatasetPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Provinsi</CardTitle>
-            <Database className="h-4 w-4 text-muted-foreground" />
+            <Database className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{datasetInfo.rowCount}</div>
@@ -547,7 +549,7 @@ export function DatasetPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Indikator</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            <BarChart3 className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{datasetInfo.columnCount}</div>
