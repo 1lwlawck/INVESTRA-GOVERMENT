@@ -43,6 +43,8 @@ import { useParallax } from '@/hooks/ui/useParallax';
 import { TermTooltip } from './TermTooltip';
 import { IndicatorRow } from './IndicatorRow';
 import { PublicChoroplethMap } from './PublicChoroplethMap';
+import { ChapterRail } from './ChapterRail';
+import { OverviewSection } from './OverviewSection';
 import heroImage from '@/assets/images/premium_photo-1733317260639-6fb8eb703c78.avif';
 
 const indicatorOrder = [
@@ -205,16 +207,16 @@ export function LandingPage() {
               </div>
             </a>
             <nav className="hidden items-center gap-8 text-sm text-[#212121] md:flex">
-              <a href="#cek-daerah" className="transition hover:text-[#17171c]">
+              <a href="#bab-04" className="transition hover:text-[#17171c]">
                 Cek Daerah
               </a>
-              <a href="#hasil" className="transition hover:text-[#17171c]">
+              <a href="#bab-03" className="transition hover:text-[#17171c]">
                 Hasil
               </a>
-              <a href="#metode" className="transition hover:text-[#17171c]">
+              <a href="#bab-02" className="transition hover:text-[#17171c]">
                 Data &amp; Metode
               </a>
-              <a href="#batasan" className="transition hover:text-[#17171c]">
+              <a href="#bab-05" className="transition hover:text-[#17171c]">
                 Batasan
               </a>
             </nav>
@@ -264,7 +266,7 @@ export function LandingPage() {
                     size="lg"
                     className="rounded-full bg-[#17171c] px-8 py-6 text-base text-white hover:bg-[#2a2a32]"
                   >
-                    <a href="#cek-daerah">
+                    <a href="#bab-04">
                       Cek Daerah Saya
                       <ArrowRight className="ml-2 size-5" />
                     </a>
@@ -275,7 +277,7 @@ export function LandingPage() {
                     variant="ghost"
                     className="px-2 py-6 text-base text-[#212121] underline-offset-4 hover:bg-transparent hover:underline"
                   >
-                    <a href="#metode">
+                    <a href="#bab-02">
                       Pelajari metodenya
                       <ArrowRight className="ml-2 size-4" />
                     </a>
@@ -358,24 +360,206 @@ export function LandingPage() {
             </section>
           )}
 
-          <section id="cek-daerah" className="bg-[#eeece7] py-20 scroll-mt-20 sm:py-24">
+          {/* Chapter rail — sticky left navigation, visible after hero */}
+          <ChapterRail
+            chapters={[
+              { id: 'bab-01', num: '01', title: 'Gambaran' },
+              { id: 'bab-02', num: '02', title: 'Cara Kerja' },
+              { id: 'bab-03', num: '03', title: 'Temuan' },
+              { id: 'bab-04', num: '04', title: 'Cek Daerah' },
+              { id: 'bab-05', num: '05', title: 'Implikasi' },
+            ]}
+          />
+
+          {/* Bab 01 — Gambaran Umum */}
+          <OverviewSection summary={summary} />
+
+          <section id="bab-02" className="bg-[#003c33] py-20 scroll-mt-20 sm:py-24">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6">
+              <Reveal className="mb-12 max-w-3xl">
+                <p
+                  className="mb-4 text-[13px] font-medium uppercase tracking-[0.18em] text-[#ffad9b]"
+                  style={{ fontFamily: "'Space Grotesk', 'Inter', monospace" }}
+                >
+                  02 — Cara Kerja
+                </p>
+                <h2
+                  className="mb-4 text-[clamp(1.75rem,4vw,3rem)] font-normal leading-[1.1] tracking-[-0.02em] text-white"
+                  style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                >
+                  Bagaimana pola ketimpangan ini dibaca
+                </h2>
+                <p className="text-lg leading-relaxed text-white/70">
+                  Untuk membaca pola di balik angka tadi, sistem memakai data panel provinsi,
+                  menstandarkan indikator agar dapat dibandingkan, lalu menggunakan PCA dan K-Means
+                  untuk menemukan kelompok provinsi yang mirip.
+                </p>
+              </Reveal>
+
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <div className="rounded-[16px] border border-white/15 bg-white/5 p-7">
+                  <Database className="mb-4 size-7 text-[#ffad9b]" />
+                  <h3
+                    className="mb-3 text-xl font-normal tracking-tight text-white"
+                    style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                  >
+                    Data yang Digunakan
+                  </h3>
+                  <div className="space-y-2">
+                    {(summary?.variables ?? []).map((variable) => (
+                      <div
+                        key={variable.key}
+                        className="flex items-start gap-2 text-sm text-white/80"
+                      >
+                        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#edfce9]" />
+                        <span>{variable.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-[16px] border border-white/15 bg-white/5 p-7">
+                  <BarChart3 className="mb-4 size-7 text-[#ffad9b]" />
+                  <h3
+                    className="mb-3 text-xl font-normal tracking-tight text-white"
+                    style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                  >
+                    <TermTooltip termKey="pca" accent="#ffad9b" />
+                  </h3>
+                  <p className="text-sm leading-relaxed text-white/80">
+                    PCA merangkum banyak indikator menjadi beberapa dimensi utama. Ibarat meringkas
+                    banyak nilai rapor jadi beberapa angka kunci yang paling membedakan tiap
+                    provinsi.
+                  </p>
+                </div>
+
+                <div className="rounded-[16px] border border-white/15 bg-white/5 p-7">
+                  <GitBranch className="mb-4 size-7 text-[#ffad9b]" />
+                  <h3
+                    className="mb-3 text-xl font-normal tracking-tight text-white"
+                    style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                  >
+                    <TermTooltip termKey="kmeans" accent="#ffad9b">
+                      K-Means
+                    </TermTooltip>
+                  </h3>
+                  <p className="text-sm leading-relaxed text-white/80">
+                    K-Means mengelompokkan provinsi yang polanya mirip, seperti menyusun provinsi ke
+                    dalam beberapa "kelompok kembar". Label tinggi atau rendah adalah posisi
+                    relatif, bukan nilai mutlak.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="bab-03" className="bg-white py-20 scroll-mt-20 sm:py-24">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6">
+              <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <Reveal>
+                  <p
+                    className="mb-4 text-[13px] font-medium uppercase tracking-[0.18em] text-[#ff7759]"
+                    style={{ fontFamily: "'Space Grotesk', 'Inter', monospace" }}
+                  >
+                    03 — Temuan
+                  </p>
+                  <h2
+                    className="text-[clamp(1.75rem,4vw,3rem)] font-normal leading-[1.1] tracking-[-0.02em] text-[#17171c]"
+                    style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                  >
+                    38 provinsi, 3 kelompok yang berbeda
+                  </h2>
+                  <p className="mt-3 max-w-2xl text-base leading-relaxed text-[#616161]">
+                    Hasilnya: provinsi terbagi jadi tiga kelompok dengan karakteristik investasi
+                    yang berbeda. Inilah sebarannya — dan inilah peta wilayahnya.
+                  </p>
+                </Reveal>
+                {summary && (
+                  <p className="text-sm text-[#93939f]">
+                    Analisis {summary.analysis.code || summary.analysis.id} &middot; k=
+                    {summary.analysis.k}
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {(summary?.clusters ?? []).map((cluster, index) => (
+                  <Reveal key={cluster.clusterId} delay={index * 120}>
+                    <div className="group flex h-full flex-col overflow-hidden rounded-[16px] border border-[#d9d9dd] bg-white transition-all hover:border-[#93939f]">
+                      {/* Cluster color band on top */}
+                      <div className="h-2 w-full" style={{ backgroundColor: cluster.color }} />
+                      <div className="flex flex-1 flex-col p-6">
+                        <div className="mb-3 flex items-center justify-between gap-3">
+                          <span
+                            className="rounded-full px-3 py-1 text-xs font-medium text-white"
+                            style={{ backgroundColor: cluster.color }}
+                          >
+                            {cluster.provinceCount} provinsi
+                          </span>
+                        </div>
+                        <h3
+                          className="mb-3 text-xl font-normal tracking-tight text-[#17171c]"
+                          style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                        >
+                          {cluster.label}
+                        </h3>
+                        <p className="text-sm leading-relaxed text-[#616161]">
+                          {cluster.policyRationale ||
+                            'Kelompok ini berisi provinsi dengan karakteristik indikator yang mirip.'}
+                        </p>
+                        <div className="mt-auto flex flex-wrap gap-1.5 border-t border-[#f2f2f2] pt-4">
+                          {cluster.provinces.slice(0, 4).map((province) => (
+                            <span
+                              key={province}
+                              className="rounded-full bg-[#eeece7] px-2.5 py-0.5 text-xs text-[#212121]"
+                            >
+                              {province}
+                            </span>
+                          ))}
+                          {cluster.provinces.length > 4 && (
+                            <span className="rounded-full bg-[#eeece7] px-2.5 py-0.5 text-xs text-[#93939f]">
+                              +{cluster.provinces.length - 4}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+
+              {summary && summary.clusters.length > 0 && (
+                <Reveal className="mt-12">
+                  <h3
+                    className="mb-4 text-xl font-normal tracking-tight text-[#17171c]"
+                    style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                  >
+                    Peta sebaran kelompok
+                  </h3>
+                  <PublicChoroplethMap clusters={summary.clusters} />
+                </Reveal>
+              )}
+            </div>
+          </section>
+
+          <section id="bab-04" className="bg-[#eeece7] py-20 scroll-mt-20 sm:py-24">
             <div className="mx-auto max-w-7xl px-4 sm:px-6">
               <Reveal className="mb-10 max-w-3xl">
                 <p
                   className="mb-4 text-[13px] font-medium uppercase tracking-[0.18em] text-[#ff7759]"
                   style={{ fontFamily: "'Space Grotesk', 'Inter', monospace" }}
                 >
-                  Cek Daerah Saya
+                  04 — Cek Daerah Anda
                 </p>
                 <h2
                   className="mb-4 text-[clamp(1.75rem,4vw,3rem)] font-normal leading-[1.1] tracking-[-0.02em] text-[#17171c]"
                   style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
                 >
-                  Provinsi Anda masuk kelompok investasi mana?
+                  Lalu, bagaimana dengan daerah Anda?
                 </h2>
                 <p className="max-w-xl text-lg leading-relaxed text-[#616161]">
-                  Pilih nama provinsi untuk melihat kelompok hasil analisis, ringkasan indikator,
-                  dan penjelasan singkat yang mudah dibaca.
+                  Sebaran nasional sudah jelas. Sekarang pilih nama provinsi untuk melihat kelompok
+                  hasil analisis, ringkasan indikator, dan penjelasan singkat yang mudah dibaca.
                 </p>
               </Reveal>
 
@@ -583,170 +767,7 @@ export function LandingPage() {
             </div>
           </section>
 
-          <section id="hasil" className="bg-white py-20 scroll-mt-20 sm:py-24">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6">
-              <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <Reveal>
-                  <p
-                    className="mb-4 text-[13px] font-medium uppercase tracking-[0.18em] text-[#ff7759]"
-                    style={{ fontFamily: "'Space Grotesk', 'Inter', monospace" }}
-                  >
-                    Ringkasan Hasil
-                  </p>
-                  <h2
-                    className="text-[clamp(1.75rem,4vw,3rem)] font-normal leading-[1.1] tracking-[-0.02em] text-[#17171c]"
-                    style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
-                  >
-                    Sebaran kelompok provinsi
-                  </h2>
-                </Reveal>
-                {summary && (
-                  <p className="text-sm text-[#93939f]">
-                    Analisis {summary.analysis.code || summary.analysis.id} &middot; k=
-                    {summary.analysis.k}
-                  </p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {(summary?.clusters ?? []).map((cluster, index) => (
-                  <Reveal key={cluster.clusterId} delay={index * 120}>
-                    <div className="group flex h-full flex-col overflow-hidden rounded-[16px] border border-[#d9d9dd] bg-white transition-all hover:border-[#93939f]">
-                      {/* Cluster color band on top */}
-                      <div className="h-2 w-full" style={{ backgroundColor: cluster.color }} />
-                      <div className="flex flex-1 flex-col p-6">
-                        <div className="mb-3 flex items-center justify-between gap-3">
-                          <span
-                            className="rounded-full px-3 py-1 text-xs font-medium text-white"
-                            style={{ backgroundColor: cluster.color }}
-                          >
-                            {cluster.provinceCount} provinsi
-                          </span>
-                        </div>
-                        <h3
-                          className="mb-3 text-xl font-normal tracking-tight text-[#17171c]"
-                          style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
-                        >
-                          {cluster.label}
-                        </h3>
-                        <p className="text-sm leading-relaxed text-[#616161]">
-                          {cluster.policyRationale ||
-                            'Kelompok ini berisi provinsi dengan karakteristik indikator yang mirip.'}
-                        </p>
-                        <div className="mt-auto flex flex-wrap gap-1.5 border-t border-[#f2f2f2] pt-4">
-                          {cluster.provinces.slice(0, 4).map((province) => (
-                            <span
-                              key={province}
-                              className="rounded-full bg-[#eeece7] px-2.5 py-0.5 text-xs text-[#212121]"
-                            >
-                              {province}
-                            </span>
-                          ))}
-                          {cluster.provinces.length > 4 && (
-                            <span className="rounded-full bg-[#eeece7] px-2.5 py-0.5 text-xs text-[#93939f]">
-                              +{cluster.provinces.length - 4}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </Reveal>
-                ))}
-              </div>
-
-              {summary && summary.clusters.length > 0 && (
-                <Reveal className="mt-12">
-                  <h3
-                    className="mb-4 text-xl font-normal tracking-tight text-[#17171c]"
-                    style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
-                  >
-                    Peta sebaran kelompok
-                  </h3>
-                  <PublicChoroplethMap clusters={summary.clusters} />
-                </Reveal>
-              )}
-            </div>
-          </section>
-
-          <section id="metode" className="bg-[#003c33] py-20 scroll-mt-20 sm:py-24">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6">
-              <Reveal className="mb-12 max-w-3xl">
-                <p
-                  className="mb-4 text-[13px] font-medium uppercase tracking-[0.18em] text-[#ffad9b]"
-                  style={{ fontFamily: "'Space Grotesk', 'Inter', monospace" }}
-                >
-                  Data &amp; Metode
-                </p>
-                <h2
-                  className="mb-4 text-[clamp(1.75rem,4vw,3rem)] font-normal leading-[1.1] tracking-[-0.02em] text-white"
-                  style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
-                >
-                  Bagaimana hasil dihitung
-                </h2>
-                <p className="text-lg leading-relaxed text-white/70">
-                  Sistem memakai data panel provinsi, menstandarkan indikator agar dapat
-                  dibandingkan, lalu menggunakan PCA dan K-Means untuk membaca pola.
-                </p>
-              </Reveal>
-
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <div className="rounded-[16px] border border-white/15 bg-white/5 p-7">
-                  <Database className="mb-4 size-7 text-[#ffad9b]" />
-                  <h3
-                    className="mb-3 text-xl font-normal tracking-tight text-white"
-                    style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
-                  >
-                    Data yang Digunakan
-                  </h3>
-                  <div className="space-y-2">
-                    {(summary?.variables ?? []).map((variable) => (
-                      <div
-                        key={variable.key}
-                        className="flex items-start gap-2 text-sm text-white/80"
-                      >
-                        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#edfce9]" />
-                        <span>{variable.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="rounded-[16px] border border-white/15 bg-white/5 p-7">
-                  <BarChart3 className="mb-4 size-7 text-[#ffad9b]" />
-                  <h3
-                    className="mb-3 text-xl font-normal tracking-tight text-white"
-                    style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
-                  >
-                    <TermTooltip termKey="pca" accent="#ffad9b" />
-                  </h3>
-                  <p className="text-sm leading-relaxed text-white/80">
-                    PCA merangkum banyak indikator menjadi beberapa dimensi utama. Ibarat meringkas
-                    banyak nilai rapor jadi beberapa angka kunci yang paling membedakan tiap
-                    provinsi.
-                  </p>
-                </div>
-
-                <div className="rounded-[16px] border border-white/15 bg-white/5 p-7">
-                  <GitBranch className="mb-4 size-7 text-[#ffad9b]" />
-                  <h3
-                    className="mb-3 text-xl font-normal tracking-tight text-white"
-                    style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
-                  >
-                    <TermTooltip termKey="kmeans" accent="#ffad9b">
-                      K-Means
-                    </TermTooltip>
-                  </h3>
-                  <p className="text-sm leading-relaxed text-white/80">
-                    K-Means mengelompokkan provinsi yang polanya mirip, seperti menyusun provinsi ke
-                    dalam beberapa "kelompok kembar". Label tinggi atau rendah adalah posisi
-                    relatif, bukan nilai mutlak.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section id="batasan" className="bg-white py-20 scroll-mt-20 sm:py-24">
+          <section id="bab-05" className="bg-white py-20 scroll-mt-20 sm:py-24">
             <div className="mx-auto max-w-7xl px-4 sm:px-6">
               <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.8fr_1.2fr]">
                 <Reveal>
@@ -754,17 +775,17 @@ export function LandingPage() {
                     className="mb-4 text-[13px] font-medium uppercase tracking-[0.18em] text-[#ff7759]"
                     style={{ fontFamily: "'Space Grotesk', 'Inter', monospace" }}
                   >
-                    Transparansi
+                    05 — Implikasi &amp; Catatan
                   </p>
                   <h2
                     className="mb-4 text-[clamp(1.75rem,4vw,3rem)] font-normal leading-[1.1] tracking-[-0.02em] text-[#17171c]"
                     style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
                   >
-                    Batasan pembacaan hasil
+                    Cara membaca hasil dengan bertanggung jawab
                   </h2>
                   <p className="text-lg leading-relaxed text-[#616161]">
-                    Bagian ini penting agar hasil tidak dibaca berlebihan. Analisis membantu
-                    memahami pola, tetapi keputusan kebijakan tetap memerlukan kajian lanjutan.
+                    Setelah melihat sebaran nasional dan posisi daerah Anda, penting memahami apa
+                    yang bisa dan tidak bisa disimpulkan dari analisis ini.
                   </p>
                 </Reveal>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -881,22 +902,22 @@ export function LandingPage() {
                     </a>
                   </li>
                   <li>
-                    <a href="#cek-daerah" className="transition hover:text-[#ff7759]">
+                    <a href="#bab-04" className="transition hover:text-[#ff7759]">
                       Cek Daerah
                     </a>
                   </li>
                   <li>
-                    <a href="#hasil" className="transition hover:text-[#ff7759]">
+                    <a href="#bab-03" className="transition hover:text-[#ff7759]">
                       Hasil Analisis
                     </a>
                   </li>
                   <li>
-                    <a href="#metode" className="transition hover:text-[#ff7759]">
+                    <a href="#bab-02" className="transition hover:text-[#ff7759]">
                       Data &amp; Metode
                     </a>
                   </li>
                   <li>
-                    <a href="#batasan" className="transition hover:text-[#ff7759]">
+                    <a href="#bab-05" className="transition hover:text-[#ff7759]">
                       Batasan
                     </a>
                   </li>
