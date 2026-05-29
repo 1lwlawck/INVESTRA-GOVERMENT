@@ -52,7 +52,7 @@ export function PCAAnalysisPage() {
     try {
       await analysisApi.run({
         autoK: false,
-        k: 4,
+        k: 3,
       });
       await loadPCA();
     } catch (err) {

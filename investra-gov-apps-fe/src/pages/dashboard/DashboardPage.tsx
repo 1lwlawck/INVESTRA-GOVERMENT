@@ -117,7 +117,7 @@ export function DashboardPage() {
     try {
       await analysisApi.run({
         autoK: false,
-        k: 4,
+        k: 3,
       });
       await loadData();
     } catch (err) {
