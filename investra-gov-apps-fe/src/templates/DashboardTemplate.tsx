@@ -14,11 +14,11 @@ export function DashboardTemplate() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#f7f6f3]">
       <TopNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="flex">
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <main className="flex-1 ml-0 lg:ml-72 mt-16 lg:mt-20 p-4 md:p-8">
+        <main className="ml-0 mt-16 flex-1 p-4 md:p-8 lg:ml-72">
           <div key={location.pathname} className="animate-fade-in">
             <Outlet />
           </div>

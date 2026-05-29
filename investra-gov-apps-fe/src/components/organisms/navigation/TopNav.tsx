@@ -3,7 +3,6 @@ import { User, Bell, LogOut, Menu, X } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { GarudaEmblem } from '@/components/atoms/media/GarudaEmblem';
-import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +13,20 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuthStore } from '@/stores/auth.store';
 
+const DISPLAY_FONT = "'Space Grotesk', 'Inter', sans-serif";
+
+const ROLE_COLORS: Record<string, string> = {
+  superadmin: '#ff7759',
+  admin: '#003c33',
+  user: '#93939f',
+};
+
+const ROLE_LABELS: Record<string, string> = {
+  superadmin: 'Super Admin',
+  admin: 'Admin',
+  user: 'User',
+};
+
 interface TopNavProps {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
@@ -22,99 +35,84 @@ interface TopNavProps {
 export function TopNav({ sidebarOpen, setSidebarOpen }: TopNavProps) {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
+
+  const roleColor = ROLE_COLORS[user?.role ?? 'user'] ?? '#93939f';
+  const roleLabel = ROLE_LABELS[user?.role ?? 'user'] ?? 'User';
+
   return (
-    <nav className="fixed top-0 left-0 right-0 lg:left-72 h-16 lg:h-20 bg-white border-b border-gray-200 flex items-center justify-between px-3 sm:px-4 lg:px-8 z-40 shadow-sm transition-all duration-300">
-      {/* Left: Hamburger + Government Emblem + Branding (Mobile Only) */}
+    <nav className="fixed left-0 right-0 top-0 z-40 flex h-16 items-center justify-between border-b border-[#d9d9dd] bg-white/95 px-3 backdrop-blur transition-all duration-300 sm:px-4 lg:left-72 lg:h-16 lg:px-8">
+      {/* Left: mobile hamburger + brand */}
       <div className="flex items-center gap-2 lg:hidden">
-        {/* Mobile Hamburger */}
         <Button
           variant="ghost"
           size="icon"
-          className="text-[#002C5F] hover:bg-[#002C5F]/10"
+          className="text-[#17171c] hover:bg-[#eeece7]"
           onClick={() => setSidebarOpen(!sidebarOpen)}
         >
-          {sidebarOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+          {sidebarOpen ? <X className="size-5" /> : <Menu className="size-5" />}
         </Button>
-
-        <GarudaEmblem size={40} />
-
-        <div className="border-l-2 border-[#F9B233] pl-2">
-          <div className="flex items-center gap-2">
-            <h1 className="text-[#002C5F] text-base leading-tight font-bold">INVESTRA</h1>
-          </div>
-        </div>
+        <GarudaEmblem size={36} />
+        <p className="text-sm font-semibold text-[#17171c]" style={{ fontFamily: DISPLAY_FONT }}>
+          INVESTRA
+        </p>
       </div>
 
-      {/* Center: Dashboard Title */}
-      <div className="hidden xl:block text-center">
-        {/* <div className="bg-linear-to-r from-[#002C5F] to-[#003D7A] text-white px-6 py-2 rounded-lg shadow-md">
-          <h2 className="text-lg font-semibold">
-            Dashboard Analisis Ketimpangan Investasi
-          </h2>
-          <p className="text-xs opacity-90 mt-0.5 font-normal">
-            Sistem Monitoring PCA & K-Means Clustering
-          </p>
-        </div> */}
-      </div>
+      {/* Spacer on desktop */}
+      <div className="hidden lg:block" />
 
-      {/* Right: Controls */}
-      <div className="flex items-center gap-1 sm:gap-3">
+      {/* Right: bell + user */}
+      <div className="flex items-center gap-2">
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative text-gray-600 hover:text-[#002C5F]">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative text-[#93939f] hover:text-[#17171c]"
+        >
           <Bell className="size-5" />
-          <Badge className="absolute -top-1 -right-1 size-5 p-0 flex items-center justify-center bg-[#DC2626] text-white text-xs">
+          <span className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-[#ff7759] text-[10px] font-medium text-white">
             3
-          </Badge>
+          </span>
         </Button>
 
-        {/* User Profile with Dropdown */}
+        {/* User dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex items-center gap-2 bg-gray-50 rounded-lg px-2 sm:px-3 py-2 border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer"
+              className="flex items-center gap-2.5 rounded-full border border-[#d9d9dd] bg-white py-1.5 pl-1.5 pr-3 transition hover:border-[#93939f]"
             >
-              <Avatar className="size-8">
-                <AvatarFallback className="bg-[#002C5F] text-white">
-                  <User className="size-4" />
+              <Avatar className="size-7">
+                <AvatarFallback
+                  className="text-xs text-white"
+                  style={{ backgroundColor: roleColor }}
+                >
+                  {user?.fullName?.[0]?.toUpperCase() ?? <User className="size-3" />}
                 </AvatarFallback>
               </Avatar>
-              <div className="hidden md:block text-left">
-                <p className="text-sm text-[#002C5F] font-semibold">{user?.fullName || 'Guest'}</p>
-                <p
-                  className="text-xs font-semibold"
-                  style={{
-                    color:
-                      user?.role === 'superadmin'
-                        ? '#DC2626'
-                        : user?.role === 'admin'
-                          ? '#002C5F'
-                          : '#059669',
-                  }}
-                >
-                  {user?.role === 'superadmin'
-                    ? 'SUPER ADMIN'
-                    : user?.role === 'admin'
-                      ? 'ADMIN'
-                      : 'USER'}
+              <div className="hidden text-left md:block">
+                <p className="text-xs font-medium text-[#17171c]">{user?.fullName || 'Guest'}</p>
+                <p className="text-[11px]" style={{ color: roleColor }}>
+                  {roleLabel}
                 </p>
               </div>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel className="font-semibold">Akun Saya</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="font-medium">
-              <User className="mr-2 size-4" />
+          <DropdownMenuContent align="end" className="w-52 rounded-xl border-[#d9d9dd]">
+            <DropdownMenuLabel className="text-xs font-medium uppercase tracking-wider text-[#93939f]">
+              Akun Saya
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-[#f2f2f2]" />
+            <DropdownMenuItem className="rounded-lg text-[#212121]">
+              <User className="mr-2 size-4 text-[#93939f]" />
               <span>Profil</span>
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="bg-[#f2f2f2]" />
             <DropdownMenuItem
               onClick={() => {
                 logout();
                 navigate('/login', { replace: true });
               }}
-              className="text-red-600 focus:text-red-600 font-semibold"
+              className="rounded-lg text-[#ff7759] focus:text-[#ff7759]"
             >
               <LogOut className="mr-2 size-4" />
               <span>Keluar</span>

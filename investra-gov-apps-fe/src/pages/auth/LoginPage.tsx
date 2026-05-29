@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { Eye, EyeOff, Lock, User, LogIn, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff, Lock, User, LogIn, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
 import { GarudaEmblem } from '@/components/atoms/media/GarudaEmblem';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/stores/auth.store';
 import { authApi } from '@/core/api/auth.api';
+
+const DISPLAY_FONT = "'Space Grotesk', 'Inter', sans-serif";
 
 export function LoginPage() {
   useDocumentTitle('Login');
@@ -45,122 +46,162 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiIHN0cm9rZT0iI0NDQyIgc3Ryb2tlLXdpZHRoPSIuNSIgb3BhY2l0eT0iLjA1Ii8+PC9nPjwvc3ZnPg==')] opacity-30" />
+    <div className="grid min-h-screen grid-cols-1 bg-white lg:grid-cols-2">
+      {/* Left: brand panel — Cohere deep-green band */}
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-[#003c33] p-12 lg:flex">
+        <a
+          href="/"
+          className="inline-flex w-fit items-center gap-2 text-sm text-white/70 transition hover:text-white"
+        >
+          <ArrowLeft className="size-4" />
+          Kembali ke beranda
+        </a>
 
-      <Card className="w-full max-w-md relative z-10 shadow-2xl border-0">
-        <CardContent className="p-0">
-          {/* Header Section */}
-          <div className="bg-[#002C5F] pt-10 pb-6 px-8 text-center border-b-4 border-[#F9B233]">
-            <div className="flex justify-center mb-4">
-              <GarudaEmblem size={80} />
-            </div>
-
-            <h1 className="text-white text-2xl mb-2 font-bold">INVESTRA</h1>
-
-            <p className="text-white/90 text-sm mb-1 font-medium">Investment Analytics Indonesia</p>
-
-            <div className="inline-flex items-center gap-2 bg-[#F9B233] text-[#002C5F] px-4 py-2 rounded-full mt-3">
-              <ShieldCheck className="size-4" />
-              <span className="text-xs font-semibold">Sistem Analisis Ketimpangan Investasi</span>
-            </div>
-          </div>
-
-          {/* Form Section */}
-          <div className="bg-gray-50 p-8">
-            <div className="text-center mb-6">
-              <h2 className="text-[#002C5F] text-xl mb-2 font-semibold">Login Dashboard</h2>
-              <p className="text-gray-600 text-sm font-normal">
-                Masukkan kredensial Anda untuk mengakses sistem
+        <div>
+          <div className="mb-8 flex items-center gap-3">
+            <GarudaEmblem size={48} />
+            <div>
+              <p className="text-lg font-semibold text-white" style={{ fontFamily: DISPLAY_FONT }}>
+                INVESTRA
               </p>
+              <p className="text-xs text-white/60">Portal Analisis Investasi Wilayah</p>
+            </div>
+          </div>
+          <h1
+            className="text-[clamp(2rem,3.5vw,3rem)] font-normal leading-[1.1] tracking-[-0.02em] text-white"
+            style={{ fontFamily: DISPLAY_FONT }}
+          >
+            Masuk ke ruang
+            <br />
+            kerja pengelola.
+          </h1>
+          <p className="mt-6 max-w-md text-lg leading-relaxed text-white/70">
+            Kelola dataset, jalankan analisis PCA dan K-Means, serta tinjau hasil clustering
+            investasi antar provinsi Indonesia.
+          </p>
+        </div>
+
+        <p className="text-xs text-white/40">
+          &copy; {new Date().getFullYear()} INVESTRA &middot; Republik Indonesia
+        </p>
+      </div>
+
+      {/* Right: login form — white canvas */}
+      <div className="flex items-center justify-center p-6 sm:p-12">
+        <div className="w-full max-w-sm animate-fade-in">
+          {/* Mobile-only brand (left panel hidden on small screens) */}
+          <div className="mb-8 flex items-center gap-3 lg:hidden">
+            <GarudaEmblem size={40} />
+            <div>
+              <p className="font-semibold text-[#17171c]" style={{ fontFamily: DISPLAY_FONT }}>
+                INVESTRA
+              </p>
+              <p className="text-xs text-[#93939f]">Portal Analisis Investasi Wilayah</p>
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <p
+              className="mb-3 text-[13px] font-medium uppercase tracking-[0.18em] text-[#ff7759]"
+              style={{ fontFamily: "'Space Grotesk', 'Inter', monospace" }}
+            >
+              Login Pengelola
+            </p>
+            <h2
+              className="text-[clamp(1.5rem,3vw,2rem)] font-normal tracking-[-0.02em] text-[#17171c]"
+              style={{ fontFamily: DISPLAY_FONT }}
+            >
+              Selamat datang kembali
+            </h2>
+            <p className="mt-2 text-sm text-[#616161]">
+              Masukkan kredensial Anda untuk mengakses dashboard.
+            </p>
+          </div>
+
+          {error && (
+            <Alert variant="destructive" className="mb-5 border-[#b30000] bg-red-50">
+              <AlertDescription className="text-[#b30000]">{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Username */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="username"
+                className="text-[13px] font-medium uppercase tracking-wider text-[#93939f]"
+              >
+                Username
+              </Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#93939f]" />
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="Masukkan username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="h-12 rounded-lg border-[#d9d9dd] pl-10"
+                  required
+                />
+              </div>
             </div>
 
-            {error && (
-              <Alert variant="destructive" className="mb-4">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Username Field */}
-              <div className="space-y-2">
-                <Label htmlFor="username" className="text-[#002C5F] font-semibold">
-                  Username
-                </Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 size-5 text-gray-400" />
-                  <Input
-                    id="username"
-                    type="text"
-                    placeholder="Masukkan username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="pl-10 h-12 border-gray-300 focus:border-[#002C5F] focus:ring-[#002C5F] font-normal"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Password Field */}
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-[#002C5F] font-semibold">
-                  Password
-                </Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 size-5 text-gray-400" />
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Masukkan password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10 h-12 border-gray-300 focus:border-[#002C5F] focus:ring-[#002C5F] font-normal"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                className="w-full h-12 bg-[#002C5F] hover:bg-[#003D7A] text-white font-semibold"
-                disabled={isLoading}
+            {/* Password */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="password"
+                className="text-[13px] font-medium uppercase tracking-wider text-[#93939f]"
               >
-                {isLoading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <Skeleton className="size-4 rounded-sm" />
-                    Memproses...
-                  </span>
-                ) : (
-                  <span className="flex items-center justify-center gap-2">
-                    <LogIn className="size-5" />
-                    Masuk ke Dashboard
-                  </span>
-                )}
-              </Button>
-            </form>
-          </div>
+                Password
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#93939f]" />
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Masukkan password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="h-12 rounded-lg border-[#d9d9dd] pl-10 pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#93939f] transition hover:text-[#17171c]"
+                  aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
+                >
+                  {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                </button>
+              </div>
+            </div>
 
-          {/* Footer */}
-          <div className="bg-white px-8 py-4 border-t border-gray-200 text-center">
-            <p className="text-xs text-gray-500 font-normal">
-              © 2025 INVESTRA - Sistem Analisis Ketimpangan Investasi
-            </p>
-            <p className="text-xs text-gray-400 mt-1 font-normal">Republik Indonesia</p>
-          </div>
-        </CardContent>
-      </Card>
+            {/* Submit */}
+            <Button
+              type="submit"
+              className="h-12 w-full rounded-full bg-[#17171c] text-white hover:bg-[#2a2a32]"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Skeleton className="size-4 rounded-sm" />
+                  Memproses...
+                </span>
+              ) : (
+                <span className="flex items-center justify-center gap-2">
+                  <LogIn className="size-5" />
+                  Masuk ke Dashboard
+                </span>
+              )}
+            </Button>
+          </form>
 
-      {/* Bottom Decoration */}
-      <div className="absolute bottom-0 left-0 right-0 h-2 bg-linear-to-r from-[#002C5F] via-[#F9B233] to-[#002C5F]" />
+          <p className="mt-8 text-center text-xs text-[#93939f]">
+            Sistem Analisis Ketimpangan Investasi &middot; Akses terbatas untuk pengelola.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

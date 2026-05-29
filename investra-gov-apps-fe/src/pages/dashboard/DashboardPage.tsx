@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Download,
@@ -17,7 +16,6 @@ import {
 import { InteractiveMap } from '@/components/organisms/charts/InteractiveMap';
 import { PCAChart } from '@/components/organisms/charts/PCAChart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { dashboardApi, type DashboardSummary } from '@/core/api/dashboard.api';
@@ -227,20 +225,23 @@ export function DashboardPage() {
   if (noActiveDataset) {
     return (
       <div className="space-y-6">
-        <Alert className="border-amber-500 bg-amber-50">
-          <AlertDescription>{error}</AlertDescription>
+        <Alert className="border-[#ff7759] bg-[#fff4f0]">
+          <AlertDescription className="text-[#212121]">{error}</AlertDescription>
         </Alert>
-        <Card className="border border-gray-200">
-          <CardContent className="p-8 text-center">
-            <h3 className="text-lg font-semibold text-[#002C5F] mb-2">Dataset Belum Tersedia</h3>
-            <p className="text-gray-600 mb-6">
-              Sistem belum memiliki dataset aktif untuk dianalisis.
-            </p>
-            <Button asChild className="bg-[#002C5F] hover:bg-[#003D7A]">
-              <Link to="/dashboard/dataset">Buka Halaman Dataset</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="rounded-2xl border border-[#d9d9dd] bg-white p-8 text-center">
+          <h3
+            className="mb-2 text-lg font-normal tracking-tight text-[#17171c]"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+          >
+            Dataset Belum Tersedia
+          </h3>
+          <p className="mb-6 text-[#616161]">
+            Sistem belum memiliki dataset aktif untuk dianalisis.
+          </p>
+          <Button asChild className="rounded-full bg-[#17171c] text-white hover:bg-[#2a2a32]">
+            <Link to="/dashboard/dataset">Buka Halaman Dataset</Link>
+          </Button>
+        </div>
       </div>
     );
   }
@@ -253,105 +254,128 @@ export function DashboardPage() {
         </Alert>
       )}
 
-      {/* Header Section - Clean & Professional */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Header Section */}
+      <div className="flex flex-col justify-between gap-4 rounded-2xl border border-[#d9d9dd] bg-white p-6 md:flex-row md:items-center">
         <div>
-          <h1 className="text-2xl font-bold text-[#002C5F]">
+          <h1
+            className="text-2xl font-normal tracking-tight text-[#17171c]"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+          >
             Dashboard Analisis Ketimpangan Investasi
           </h1>
-          <p className="text-gray-600 text-sm mt-1">Sistem Monitoring PCA & K-Means Clustering</p>
+          <p className="mt-1 text-sm text-[#616161]">
+            Sistem Monitoring PCA &amp; K-Means Clustering
+          </p>
         </div>
-        <div className="flex items-center gap-3 bg-gray-50 px-4 py-2 rounded-lg border border-gray-100">
-          <Calendar className="size-5 text-[#F9B233]" />
+        <div className="flex items-center gap-3 rounded-xl border border-[#d9d9dd] bg-[#eeece7] px-4 py-2.5">
+          <Calendar className="size-5 text-[#ff7759]" />
           <div>
-            <p className="text-xs text-gray-500">Periode Data</p>
-            <p className="text-sm font-semibold text-[#002C5F]">{periodLabel}</p>
+            <p className="text-[11px] font-medium uppercase tracking-wider text-[#93939f]">
+              Periode Data
+            </p>
+            <p className="text-sm font-medium text-[#17171c]">{periodLabel}</p>
           </div>
         </div>
       </div>
 
-      {/* Summary Cards - Solid & Clear */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
-            <Card
+            <div
               key={card.title}
-              className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow bg-white"
+              className="rounded-2xl border border-[#d9d9dd] bg-white p-6 transition-all hover:border-[#93939f]"
             >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">{card.title}</p>
-                    <h3 className="text-2xl font-bold text-[#002C5F]">{card.value}</h3>
-                  </div>
-                  <div className="p-3 rounded-lg bg-gray-50">
-                    <div className={`p-2 rounded-md ${card.color} text-white`}>
-                      <Icon className="size-5" />
-                    </div>
-                  </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-[#93939f]">
+                    {card.title}
+                  </p>
+                  <h3
+                    className="text-2xl font-normal tracking-tight text-[#17171c]"
+                    style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                  >
+                    {card.value}
+                  </h3>
                 </div>
-              </CardContent>
-            </Card>
+                <div className={`rounded-xl p-2.5 ${card.color} text-white`}>
+                  <Icon className="size-5" />
+                </div>
+              </div>
+            </div>
           );
         })}
       </div>
 
       {/* Evaluation Metrics */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
+      <div className="rounded-2xl border border-[#d9d9dd] bg-white p-6">
+        <div className="mb-6 flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-bold text-[#002C5F]">Metrik Evaluasi Clustering</h3>
-            <p className="text-sm text-gray-600 mt-1">Kualitas dan performa algoritma K-Means</p>
+            <h3
+              className="text-lg font-normal tracking-tight text-[#17171c]"
+              style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+            >
+              Metrik Evaluasi Clustering
+            </h3>
+            <p className="mt-1 text-sm text-[#616161]">Kualitas dan performa algoritma K-Means</p>
           </div>
           {clusters ? (
             <div className="flex items-center gap-2">
-              <Badge className="bg-investra-green text-white">K-Means (k={clusters.k})</Badge>
+              <span className="rounded-full bg-[#003c33] px-3 py-1 text-xs font-medium text-white">
+                K-Means (k={clusters.k})
+              </span>
               {strictStabilityText && (
-                <Badge variant="secondary">
+                <span className="rounded-full bg-[#eeece7] px-3 py-1 text-xs font-medium text-[#212121]">
                   Stabilitas Ketat 3/3: {strictStabilityText} ({strictStabilityPercent})
-                </Badge>
+                </span>
               )}
             </div>
           ) : (
             <Button
               onClick={handleRunAnalysis}
               disabled={analysisLoading}
-              className="bg-[#002C5F] hover:bg-[#003D7A]"
+              className="rounded-full bg-[#17171c] text-white hover:bg-[#2a2a32]"
             >
               {analysisLoading ? (
-                <Skeleton className="size-4 mr-2 rounded-sm" />
+                <Skeleton className="mr-2 size-4 rounded-sm" />
               ) : (
-                <Play className="size-4 mr-2" />
+                <Play className="mr-2 size-4" />
               )}
               Jalankan Analisis
             </Button>
           )}
         </div>
         {evaluationMetrics.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
             {evaluationMetrics.map((metric) => {
               const Icon = metric.icon;
               return (
                 <div
                   key={metric.title}
-                  className="p-4 bg-linear-to-br from-gray-50 to-blue-50 rounded-lg border border-gray-200 hover:shadow-md transition-shadow"
+                  className="rounded-xl border border-[#f2f2f2] bg-[#f7f6f3] p-4 transition-all hover:border-[#d9d9dd]"
                 >
-                  <div className="flex items-center gap-3 mb-3">
+                  <div className="mb-3 flex items-center gap-3">
                     <div
-                      className="p-2 rounded-lg bg-white border-2"
+                      className="rounded-lg border bg-white p-2"
                       style={{ borderColor: metric.color }}
                     >
                       <Icon className="size-5" style={{ color: metric.color }} />
                     </div>
-                    <h4 className="font-semibold text-[#002C5F] text-sm">{metric.title}</h4>
+                    <h4 className="text-sm font-medium text-[#17171c]">{metric.title}</h4>
                   </div>
                   <div className="mb-2">
-                    <p className="text-2xl font-bold" style={{ color: metric.color }}>
+                    <p
+                      className="text-2xl font-normal tracking-tight"
+                      style={{
+                        color: metric.color,
+                        fontFamily: "'Space Grotesk', 'Inter', sans-serif",
+                      }}
+                    >
                       {metric.value}
                     </p>
                   </div>
-                  <p className="text-xs text-gray-600 leading-relaxed">{metric.description}</p>
+                  <p className="text-xs leading-relaxed text-[#616161]">{metric.description}</p>
                 </div>
               );
             })}
@@ -369,77 +393,83 @@ export function DashboardPage() {
 
       {/* Cluster Summary Cards */}
       {clusterSummary.length > 0 && (
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
+        <div className="rounded-2xl border border-[#d9d9dd] bg-white p-6">
+          <div className="mb-6 flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-bold text-[#002C5F]">Ringkasan Klaster</h3>
-              <p className="text-sm text-gray-600 mt-1">
+              <h3
+                className="text-lg font-normal tracking-tight text-[#17171c]"
+                style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+              >
+                Ringkasan Klaster
+              </h3>
+              <p className="mt-1 text-sm text-[#616161]">
                 Detail metrik dan karakteristik per klaster
               </p>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {clusterSummary.map((cluster) => (
               <div
                 key={cluster.id}
-                className="p-5 bg-linear-to-br from-gray-50 to-blue-50 rounded-lg border-2 hover:shadow-lg transition-all"
-                style={{ borderColor: cluster.color }}
+                className="flex h-full flex-col overflow-hidden rounded-xl border border-[#d9d9dd] bg-white transition-all hover:border-[#93939f]"
               >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="size-4 rounded-full"
+                {/* color band */}
+                <div className="h-1.5 w-full" style={{ backgroundColor: cluster.color }} />
+                <div className="flex flex-1 flex-col p-5">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h4
+                      className="text-base font-normal text-[#17171c]"
+                      style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                    >
+                      Klaster {cluster.id + 1}
+                    </h4>
+                    <span
+                      className="rounded-full px-2.5 py-0.5 text-xs font-medium text-white"
                       style={{ backgroundColor: cluster.color }}
-                    ></div>
-                    <h4 className="font-bold text-[#002C5F]">Klaster {cluster.id + 1}</h4>
-                  </div>
-                  <Badge className="text-white" style={{ backgroundColor: cluster.color }}>
-                    {cluster.count} Provinsi
-                  </Badge>
-                </div>
-                <p className="text-xs font-semibold mb-3" style={{ color: cluster.color }}>
-                  {cluster.name}
-                </p>
-                <div className="space-y-3 mb-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">PDRB Avg</span>
-                    <span className="text-sm font-semibold text-[#002C5F]">
-                      Rp {cluster.avgPDRB}
+                    >
+                      {cluster.count} Provinsi
                     </span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">IPM Avg</span>
-                    <span className="text-sm font-semibold text-[#002C5F]">{cluster.avgIPM}</span>
+                  <p className="mb-4 text-xs font-medium" style={{ color: cluster.color }}>
+                    {cluster.name}
+                  </p>
+                  <div className="mb-4 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-[#93939f]">PDRB Avg</span>
+                      <span className="text-sm font-medium text-[#17171c]">
+                        Rp {cluster.avgPDRB}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-[#93939f]">IPM Avg</span>
+                      <span className="text-sm font-medium text-[#17171c]">{cluster.avgIPM}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-[#93939f]">Investasi Avg</span>
+                      <span className="text-sm font-medium text-[#17171c]">
+                        Rp {cluster.avgInvestment}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Investasi Avg</span>
-                    <span className="text-sm font-semibold text-[#002C5F]">
-                      Rp {cluster.avgInvestment}
-                    </span>
-                  </div>
-                </div>
-                <div className="pt-3 border-t border-gray-200">
-                  <p className="text-xs text-gray-500 mb-2">Provinsi Utama:</p>
-                  <div className="flex flex-wrap gap-1">
-                    {cluster.provinces.slice(0, 4).map((province) => (
-                      <Badge
-                        key={province}
-                        variant="outline"
-                        className="text-xs"
-                        style={{ borderColor: cluster.color, color: cluster.color }}
-                      >
-                        {province}
-                      </Badge>
-                    ))}
-                    {cluster.provinces.length > 4 && (
-                      <Badge
-                        variant="outline"
-                        className="text-xs"
-                        style={{ borderColor: cluster.color, color: cluster.color }}
-                      >
-                        +{cluster.provinces.length - 4}
-                      </Badge>
-                    )}
+                  <div className="mt-auto border-t border-[#f2f2f2] pt-4">
+                    <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-[#93939f]">
+                      Provinsi Utama
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {cluster.provinces.slice(0, 4).map((province) => (
+                        <span
+                          key={province}
+                          className="rounded-full bg-[#eeece7] px-2 py-0.5 text-[11px] text-[#212121]"
+                        >
+                          {province}
+                        </span>
+                      ))}
+                      {cluster.provinces.length > 4 && (
+                        <span className="rounded-full bg-[#eeece7] px-2 py-0.5 text-[11px] text-[#93939f]">
+                          +{cluster.provinces.length - 4}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -451,18 +481,21 @@ export function DashboardPage() {
       {/* Main Analysis Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Interactive Map & Charts */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="border border-gray-200 shadow-sm">
-            <CardHeader className="border-b border-gray-100 bg-gray-50/50 py-4">
-              <div className="flex items-center gap-2">
-                <MapPin className="size-5 text-[#002C5F]" />
-                <h3 className="font-semibold text-[#002C5F]">Peta Persebaran Klaster</h3>
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
+        <div className="space-y-6 lg:col-span-2">
+          <div className="overflow-hidden rounded-2xl border border-[#d9d9dd] bg-white">
+            <div className="flex items-center gap-2 border-b border-[#f2f2f2] px-6 py-4">
+              <MapPin className="size-5 text-[#003c33]" />
+              <h3
+                className="font-normal tracking-tight text-[#17171c]"
+                style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+              >
+                Peta Persebaran Klaster
+              </h3>
+            </div>
+            <div className="p-0">
               <Tabs defaultValue="map" className="w-full">
-                <div className="border-b border-gray-100 px-6 py-2">
-                  <TabsList className="bg-gray-100">
+                <div className="border-b border-[#f2f2f2] px-6 py-2">
+                  <TabsList className="bg-[#eeece7]">
                     <TabsTrigger
                       value="map"
                       className="data-[state=active]:bg-white data-[state=active]:shadow-sm"
@@ -477,106 +510,118 @@ export function DashboardPage() {
                     </TabsTrigger>
                   </TabsList>
                 </div>
-                <TabsContent value="map" className="m-0 p-6 min-h-125">
+                <TabsContent value="map" className="m-0 min-h-125 p-6">
                   <InteractiveMap />
                 </TabsContent>
-                <TabsContent value="pca" className="m-0 p-6 min-h-125">
+                <TabsContent value="pca" className="m-0 min-h-125 p-6">
                   <PCAChart />
                 </TabsContent>
               </Tabs>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Right Column: Key Findings & Action */}
         <div className="space-y-6">
-          <Card className="border border-gray-200 shadow-sm">
-            <CardHeader className="border-b border-gray-100 bg-gray-50/50 py-4">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="size-5 text-[#002C5F]" />
-                <h3 className="font-semibold text-[#002C5F]">Temuan Utama</h3>
-              </div>
-            </CardHeader>
-            <CardContent className="p-6 space-y-4">
-              <div className="flex gap-3 items-start">
-                <div className="mt-1 min-w-1 h-12 bg-[#DC2626] rounded-full"></div>
+          <div className="overflow-hidden rounded-2xl border border-[#d9d9dd] bg-white">
+            <div className="flex items-center gap-2 border-b border-[#f2f2f2] px-6 py-4">
+              <TrendingUp className="size-5 text-[#003c33]" />
+              <h3
+                className="font-normal tracking-tight text-[#17171c]"
+                style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+              >
+                Temuan Utama
+              </h3>
+            </div>
+            <div className="space-y-5 p-6">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-[#ff7759] text-[11px] font-medium text-white">
+                  1
+                </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 text-sm">Konsentrasi Jawa</h4>
-                  <p className="text-sm text-gray-600 mt-1 leading-relaxed">
+                  <h4 className="text-sm font-medium text-[#17171c]">Konsentrasi Jawa</h4>
+                  <p className="mt-1 text-sm leading-relaxed text-[#616161]">
                     Investasi nasional masih terpusat di P. Jawa, menciptakan gap infrastruktur
                     signifikan.
                   </p>
                 </div>
               </div>
-              <div className="flex gap-3 items-start">
-                <div className="mt-1 min-w-1 h-12 bg-[#F9B233] rounded-full"></div>
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-[#003c33] text-[11px] font-medium text-white">
+                  2
+                </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 text-sm">
-                    Disparitas IPM & Investasi
+                  <h4 className="text-sm font-medium text-[#17171c]">
+                    Disparitas IPM &amp; Investasi
                   </h4>
-                  <p className="text-sm text-gray-600 mt-1 leading-relaxed">
+                  <p className="mt-1 text-sm leading-relaxed text-[#616161]">
                     IPM dan akses listrik berkorelasi kuat dengan tingkat investasi regional.
                   </p>
                 </div>
               </div>
-              <div className="flex gap-3 items-start">
-                <div className="mt-1 min-w-1 h-12 bg-[#002C5F] rounded-full"></div>
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-[#17171c] text-[11px] font-medium text-white">
+                  3
+                </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 text-sm">4 Klaster Investasi</h4>
-                  <p className="text-sm text-gray-600 mt-1 leading-relaxed">
-                    K-Means mengidentifikasi 4 kelompok provinsi berdasarkan tingkat investasi, dari
-                    rendah hingga sangat tinggi.
+                  <h4 className="text-sm font-medium text-[#17171c]">3 Kelompok Investasi</h4>
+                  <p className="mt-1 text-sm leading-relaxed text-[#616161]">
+                    K-Means mengidentifikasi 3 kelompok provinsi berdasarkan tingkat investasi, dari
+                    rendah hingga tinggi.
                   </p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="bg-[#002C5F] text-white">
-            <CardContent className="p-6">
-              <h3 className="font-semibold mb-2">Laporan Eksekutif</h3>
-              <p className="text-blue-100 text-sm mb-4">
-                Unduh ringkasan lengkap untuk pemangku kebijakan.
-              </p>
-              <Button className="w-full bg-[#F9B233] hover:bg-[#e0a02e] text-[#002C5F] font-bold">
-                <Download className="size-4 mr-2" />
-                Download PDF
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="rounded-2xl bg-[#17171c] p-6 text-white">
+            <h3
+              className="mb-2 font-normal tracking-tight"
+              style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+            >
+              Laporan Eksekutif
+            </h3>
+            <p className="mb-4 text-sm text-white/60">
+              Unduh ringkasan lengkap untuk pemangku kebijakan.
+            </p>
+            <Button className="w-full rounded-full bg-white text-[#17171c] hover:bg-white/90">
+              <Download className="mr-2 size-4" />
+              Download PDF
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Detailed Clusters - Clean Cards */}
+      {/* Policy Recommendations */}
       <div>
-        <h3 className="text-lg font-bold text-[#002C5F] mb-4">Rekomendasi Kebijakan</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {policyInsights.map((insight) => (
-            <Card
+        <h3
+          className="mb-4 text-lg font-normal tracking-tight text-[#17171c]"
+          style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+        >
+          Rekomendasi Kebijakan
+        </h3>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {policyInsights.slice(0, 3).map((insight) => (
+            <div
               key={insight.cluster}
-              className="border border-gray-200 shadow-sm hover:border-[#002C5F] transition-colors bg-white"
+              className="flex h-full flex-col overflow-hidden rounded-xl border border-[#d9d9dd] bg-white transition-all hover:border-[#93939f]"
             >
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between mb-2">
-                  <Badge
-                    variant="secondary"
-                    className="bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  >
+              <div className="h-1.5 w-full" style={{ backgroundColor: insight.color }} />
+              <div className="p-5">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="rounded-full bg-[#eeece7] px-2.5 py-0.5 text-xs font-medium text-[#212121]">
                     Klaster {insight.cluster}
-                  </Badge>
-                  <div
-                    className="size-3 rounded-full"
-                    style={{ backgroundColor: insight.color }}
-                  ></div>
+                  </span>
                 </div>
-                <CardTitle className="text-base font-bold text-[#002C5F]">
+                <h4
+                  className="mb-2 text-base font-normal tracking-tight text-[#17171c]"
+                  style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                >
                   {insight.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600 leading-relaxed">{insight.description}</p>
-              </CardContent>
-            </Card>
+                </h4>
+                <p className="text-sm leading-relaxed text-[#616161]">{insight.description}</p>
+              </div>
+            </div>
           ))}
         </div>
       </div>
