@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { GitBranch, TrendingUp, MapPin, Play } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -126,34 +124,48 @@ export function ClusteringPage() {
   if (!clusterData) {
     return (
       <div className="space-y-6">
-        <div className="border-l-4 border-[#F9B233] pl-6 bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-[#002C5F]">Analisis K-Means Clustering</h2>
-          <p className="text-gray-600 mt-2">
+        <div className="rounded-2xl border border-[#d9d9dd] bg-white p-6">
+          <p
+            className="mb-1 text-[11px] font-medium uppercase tracking-[0.18em] text-[#ff7759]"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', monospace" }}
+          >
+            Analisis
+          </p>
+          <h2
+            className="text-xl font-normal tracking-tight text-[#17171c]"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+          >
+            Analisis K-Means Clustering
+          </h2>
+          <p className="mt-1 text-sm text-[#616161]">
             Pengelompokan provinsi berdasarkan kesamaan karakteristik investasi
           </p>
         </div>
-        <Card className="border border-gray-200">
-          <CardContent className="p-12 text-center">
-            <GitBranch className="size-16 mx-auto mb-4 text-gray-300" />
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">Belum Ada Analisis</h3>
-            <p className="text-gray-500 mb-6">
-              Jalankan analisis PCA & K-Means terlebih dahulu untuk melihat hasil clustering.
-            </p>
-            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-            <Button
-              onClick={handleRunAnalysis}
-              disabled={runningAnalysis}
-              className="bg-[#002C5F] hover:bg-[#003D7A]"
-            >
-              {runningAnalysis ? (
-                <Skeleton className="size-4 mr-2 rounded-sm" />
-              ) : (
-                <Play className="size-4 mr-2" />
-              )}
-              Jalankan Analisis
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="rounded-2xl border border-[#d9d9dd] bg-white p-12 text-center">
+          <GitBranch className="size-16 mx-auto mb-4 text-[#d9d9dd]" />
+          <h3
+            className="mb-2 text-lg font-normal tracking-tight text-[#17171c]"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+          >
+            Belum Ada Analisis
+          </h3>
+          <p className="mb-6 text-sm text-[#616161]">
+            Jalankan analisis PCA & K-Means terlebih dahulu untuk melihat hasil clustering.
+          </p>
+          {error && <p className="mb-4 text-sm text-[#ff7759]">{error}</p>}
+          <Button
+            onClick={handleRunAnalysis}
+            disabled={runningAnalysis}
+            className="rounded-full bg-[#17171c] text-white hover:bg-[#2a2a32]"
+          >
+            {runningAnalysis ? (
+              <Skeleton className="size-4 mr-2 rounded-sm" />
+            ) : (
+              <Play className="size-4 mr-2" />
+            )}
+            Jalankan Analisis
+          </Button>
+        </div>
       </div>
     );
   }
@@ -170,114 +182,163 @@ export function ClusteringPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="border-l-4 border-[#F9B233] pl-6 bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-[#002C5F]">Analisis K-Means Clustering</h2>
-        <p className="text-gray-600 mt-2">
+      <div className="rounded-2xl border border-[#d9d9dd] bg-white p-6">
+        <p
+          className="mb-1 text-[11px] font-medium uppercase tracking-[0.18em] text-[#ff7759]"
+          style={{ fontFamily: "'Space Grotesk', 'Inter', monospace" }}
+        >
+          Analisis
+        </p>
+        <h2
+          className="text-xl font-normal tracking-tight text-[#17171c]"
+          style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+        >
+          Analisis K-Means Clustering
+        </h2>
+        <p className="mt-1 text-sm text-[#616161]">
           Pengelompokan provinsi berdasarkan kesamaan karakteristik investasi dan pembangunan
         </p>
       </div>
 
-      <Card className="border border-gray-200 bg-white">
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary">k = {clusterData.k}</Badge>
-              <Badge variant="outline">Tahun: {yearRangeLabel}</Badge>
-              {panelStability && (
-                <Badge variant="secondary">Stabilitas Provinsi: {panelStabilityPercent}</Badge>
-              )}
-            </div>
-            <div className="flex gap-2 w-full sm:w-auto">
-              <Button
-                onClick={handleRunAnalysis}
-                disabled={runningAnalysis}
-                className="bg-[#002C5F] hover:bg-[#003D7A]"
-              >
-                {runningAnalysis ? (
-                  <Skeleton className="size-4 mr-2 rounded-sm" />
-                ) : (
-                  <Play className="size-4 mr-2" />
-                )}
-                Jalankan Ulang
-              </Button>
-            </div>
+      <div className="rounded-2xl border border-[#d9d9dd] bg-white p-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-[#003c33] px-3 py-1 text-xs font-medium text-white">
+              k = {clusterData.k}
+            </span>
+            <span className="rounded-full bg-[#eeece7] px-3 py-1 text-xs font-medium text-[#212121]">
+              Tahun: {yearRangeLabel}
+            </span>
+            {panelStability && (
+              <span className="rounded-full bg-[#eeece7] px-3 py-1 text-xs font-medium text-[#212121]">
+                Stabilitas Provinsi: {panelStabilityPercent}
+              </span>
+            )}
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button
+              onClick={handleRunAnalysis}
+              disabled={runningAnalysis}
+              className="rounded-full bg-[#17171c] text-white hover:bg-[#2a2a32]"
+            >
+              {runningAnalysis ? (
+                <Skeleton className="size-4 mr-2 rounded-sm" />
+              ) : (
+                <Play className="size-4 mr-2" />
+              )}
+              Jalankan Ulang
+            </Button>
+          </div>
+        </div>
+      </div>
 
       {/* Clustering Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-white shadow-md border-2 border-gray-100">
-          <CardContent className="p-6 text-center">
-            <GitBranch className="size-10 text-[#002C5F] mx-auto mb-3" />
-            <div className="text-3xl text-[#002C5F] mb-1">{clusterData.k}</div>
-            <p className="text-sm text-gray-600">Total Klaster Terbentuk</p>
-          </CardContent>
-        </Card>
+        <div className="rounded-2xl border border-[#d9d9dd] bg-white p-6 text-center transition-all hover:border-[#93939f]">
+          <GitBranch className="size-10 text-[#003c33] mx-auto mb-3" />
+          <div
+            className="text-3xl font-normal tracking-tight text-[#17171c] mb-1"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+          >
+            {clusterData.k}
+          </div>
+          <p className="text-sm text-[#616161]">Total Klaster Terbentuk</p>
+        </div>
 
-        <Card className="bg-white shadow-md border-2 border-gray-100">
-          <CardContent className="p-6 text-center">
-            <MapPin className="size-10 text-[#F9B233] mx-auto mb-3" />
-            <div className="text-3xl text-[#002C5F] mb-1">{totalObservations}</div>
-            <p className="text-sm text-gray-600">Observasi Terklasifikasi</p>
-          </CardContent>
-        </Card>
+        <div className="rounded-2xl border border-[#d9d9dd] bg-white p-6 text-center transition-all hover:border-[#93939f]">
+          <MapPin className="size-10 text-[#ff7759] mx-auto mb-3" />
+          <div
+            className="text-3xl font-normal tracking-tight text-[#17171c] mb-1"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+          >
+            {totalObservations}
+          </div>
+          <p className="text-sm text-[#616161]">Observasi Terklasifikasi</p>
+        </div>
 
-        <Card className="bg-white shadow-md border-2 border-gray-100">
-          <CardContent className="p-6 text-center">
-            <TrendingUp className="size-10 text-[#059669] mx-auto mb-3" />
-            <div className="text-3xl text-[#002C5F] mb-1">{panelStabilityPercent}</div>
-            <p className="text-sm text-gray-600">Stabilitas Provinsi</p>
-          </CardContent>
-        </Card>
+        <div className="rounded-2xl border border-[#d9d9dd] bg-white p-6 text-center transition-all hover:border-[#93939f]">
+          <TrendingUp className="size-10 text-[#003c33] mx-auto mb-3" />
+          <div
+            className="text-3xl font-normal tracking-tight text-[#17171c] mb-1"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+          >
+            {panelStabilityPercent}
+          </div>
+          <p className="text-sm text-[#616161]">Stabilitas Provinsi</p>
+        </div>
       </div>
 
       {/* Cluster Details */}
       {clusters.map((cluster) => (
-        <Card
+        <div
           key={cluster.id}
-          className="border-l-4 shadow-lg bg-white"
-          style={{ borderLeftColor: cluster.color }}
+          className="flex h-full flex-col overflow-hidden rounded-2xl border border-[#d9d9dd] bg-white transition-all hover:border-[#93939f]"
         >
-          <CardHeader className="border-b border-gray-200 bg-linear-to-r from-gray-50 to-blue-50">
+          {/* color band */}
+          <div className="h-1.5 w-full" style={{ backgroundColor: cluster.color }} />
+          <div className="border-b border-[#f2f2f2] px-6 py-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
               <div className="flex items-center gap-3">
                 <div className="size-4 rounded-full" style={{ backgroundColor: cluster.color }} />
                 <div>
-                  <CardTitle className="text-[#002C5F]">{cluster.name}</CardTitle>
-                  <CardDescription className="mt-1">
+                  <h3
+                    className="text-base font-normal tracking-tight text-[#17171c]"
+                    style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                  >
+                    {cluster.name}
+                  </h3>
+                  <p className="mt-1 text-sm text-[#616161]">
                     {`${cluster.observationCount ?? cluster.count} Observasi (${cluster.count} Provinsi${
                       cluster.yearMin && cluster.yearMax
                         ? `, ${cluster.yearMin}-${cluster.yearMax}`
                         : ''
                     })`}
-                  </CardDescription>
+                  </p>
                 </div>
               </div>
-              <Badge className="text-white" style={{ backgroundColor: cluster.color }}>
+              <span
+                className="rounded-full px-2.5 py-0.5 text-xs font-medium text-white"
+                style={{ backgroundColor: cluster.color }}
+              >
                 Klaster {cluster.id + 1}
-              </Badge>
+              </span>
             </div>
-          </CardHeader>
+          </div>
 
-          <CardContent className="p-6 space-y-6">
+          <div className="flex flex-1 flex-col gap-6 p-6">
             {/* Metrics */}
             <div>
-              <h4 className="text-[#002C5F] mb-3">Metrik Rata-rata</h4>
+              <h4
+                className="mb-3 text-sm font-medium text-[#17171c]"
+                style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+              >
+                Metrik Rata-rata
+              </h4>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-4 bg-linear-to-br from-gray-50 to-blue-50 rounded-lg border border-gray-200">
-                  <p className="text-xs text-gray-600 mb-1">PDRB per Kapita</p>
-                  <p className="text-lg text-[#002C5F]">
+                <div className="rounded-xl border border-[#f2f2f2] bg-[#f7f6f3] p-4">
+                  <p className="mb-1 text-xs text-[#93939f]">PDRB per Kapita</p>
+                  <p
+                    className="text-lg font-normal tracking-tight text-[#17171c]"
+                    style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                  >
                     Rp {cluster.avgPDRB.toLocaleString('id-ID', { maximumFractionDigits: 0 })} rb
                   </p>
                 </div>
-                <div className="p-4 bg-linear-to-br from-gray-50 to-blue-50 rounded-lg border border-gray-200">
-                  <p className="text-xs text-gray-600 mb-1">IPM Rata-rata</p>
-                  <p className="text-lg text-[#002C5F]">{cluster.avgIPM.toFixed(1)}</p>
+                <div className="rounded-xl border border-[#f2f2f2] bg-[#f7f6f3] p-4">
+                  <p className="mb-1 text-xs text-[#93939f]">IPM Rata-rata</p>
+                  <p
+                    className="text-lg font-normal tracking-tight text-[#17171c]"
+                    style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                  >
+                    {cluster.avgIPM.toFixed(1)}
+                  </p>
                 </div>
-                <div className="p-4 bg-linear-to-br from-gray-50 to-blue-50 rounded-lg border border-gray-200">
-                  <p className="text-xs text-gray-600 mb-1">Investasi Avg (PMDN+PMA)</p>
-                  <p className="text-lg text-[#002C5F]">
+                <div className="rounded-xl border border-[#f2f2f2] bg-[#f7f6f3] p-4">
+                  <p className="mb-1 text-xs text-[#93939f]">Investasi Avg (PMDN+PMA)</p>
+                  <p
+                    className="text-lg font-normal tracking-tight text-[#17171c]"
+                    style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                  >
                     Rp{' '}
                     {(cluster.avgInvestment / 1e12).toLocaleString('id-ID', {
                       maximumFractionDigits: 2,
@@ -289,23 +350,26 @@ export function ClusteringPage() {
             </div>
 
             {/* Provinces */}
-            <div>
-              <h4 className="text-[#002C5F] mb-3">Daftar Provinsi</h4>
+            <div className="mt-auto">
+              <h4
+                className="mb-3 text-sm font-medium text-[#17171c]"
+                style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+              >
+                Daftar Provinsi
+              </h4>
               <div className="flex flex-wrap gap-2">
                 {cluster.provinces.map((province) => (
-                  <Badge
+                  <span
                     key={province}
-                    variant="outline"
-                    className="px-3 py-1"
-                    style={{ borderColor: cluster.color, color: cluster.color }}
+                    className="rounded-full bg-[#eeece7] px-2.5 py-0.5 text-xs text-[#212121]"
                   >
                     {province}
-                  </Badge>
+                  </span>
                 ))}
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ))}
     </div>
   );

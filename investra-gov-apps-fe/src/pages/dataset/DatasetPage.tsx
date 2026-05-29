@@ -253,8 +253,8 @@ export function DatasetPage() {
         <Alert
           className={
             notification.startsWith('Error')
-              ? 'border-red-500 bg-red-50'
-              : 'border-green-500 bg-green-50'
+              ? 'rounded-xl border border-[#ff7759] bg-[#fff1ed] text-[#17171c]'
+              : 'rounded-xl border border-[#003c33] bg-[#edfce9] text-[#003c33]'
           }
         >
           <AlertDescription>{notification}</AlertDescription>
@@ -262,10 +262,10 @@ export function DatasetPage() {
       )}
 
       {noActiveDataset && (
-        <Alert className="border-amber-500 bg-amber-50">
-          <AlertCircle className="size-4 text-amber-600" />
-          <AlertTitle className="text-amber-700">Belum Ada Dataset Aktif</AlertTitle>
-          <AlertDescription className="text-amber-700">
+        <Alert className="rounded-xl border border-[#ff7759] bg-[#fff1ed]">
+          <AlertCircle className="size-4 text-[#ff7759]" />
+          <AlertTitle className="text-[#17171c]">Belum Ada Dataset Aktif</AlertTitle>
+          <AlertDescription className="text-[#616161]">
             {isSuperadmin
               ? 'Upload file CSV untuk membuat dataset pertama.'
               : 'Minta superadmin untuk upload dataset pertama.'}
@@ -276,8 +276,19 @@ export function DatasetPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dataset Investasi</h1>
-          <p className="text-muted-foreground">Dataset investasi per provinsi di Indonesia</p>
+          <p
+            className="mb-2 text-xs uppercase tracking-[0.18em] text-[#ff7759]"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', monospace" }}
+          >
+            Data Source
+          </p>
+          <h1
+            className="text-3xl font-normal tracking-tight text-[#17171c]"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+          >
+            Dataset Investasi
+          </h1>
+          <p className="text-[#616161]">Dataset investasi per provinsi di Indonesia</p>
         </div>
         <div className="flex gap-2">
           {/* Version History toggle (admin+) */}
@@ -285,7 +296,7 @@ export function DatasetPage() {
             <Button
               variant="outline"
               onClick={toggleHistory}
-              className="border-[#002C5F] text-[#002C5F]"
+              className="rounded-full border-[#d9d9dd] text-[#17171c] hover:border-[#93939f] hover:bg-[#f7f6f3]"
             >
               <History className="mr-2 size-4" />
               Riwayat
@@ -313,15 +324,20 @@ export function DatasetPage() {
               <DialogTrigger asChild>
                 <Button
                   variant="outline"
-                  className="border-[#002C5F] text-[#002C5F] hover:bg-[#002C5F] hover:text-white"
+                  className="rounded-full border-[#d9d9dd] text-[#17171c] hover:border-[#93939f] hover:bg-[#f7f6f3]"
                 >
                   <Upload className="mr-2 size-4" />
                   Upload CSV
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-lg">
+              <DialogContent className="rounded-2xl border-[#d9d9dd] sm:max-w-lg">
                 <DialogHeader>
-                  <DialogTitle className="text-[#002C5F]">Upload Dataset CSV</DialogTitle>
+                  <DialogTitle
+                    className="font-normal tracking-tight text-[#17171c]"
+                    style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                  >
+                    Upload Dataset CSV
+                  </DialogTitle>
                   <DialogDescription>
                     Upload file CSV yang sudah melalui proses ETL. Data akan disimpan sebagai{' '}
                     <strong>versi baru</strong> — data lama tetap tersimpan.
@@ -330,15 +346,15 @@ export function DatasetPage() {
 
                 <div className="space-y-4 py-4">
                   {/* Required columns info */}
-                  <Alert className="bg-blue-50 border-[#002C5F]">
-                    <AlertCircle className="size-4 text-[#002C5F]" />
-                    <AlertTitle className="text-[#002C5F] text-sm">Kolom Wajib</AlertTitle>
-                    <AlertDescription className="text-xs">
+                  <Alert className="rounded-xl border border-[#003c33] bg-[#edfce9]">
+                    <AlertCircle className="size-4 text-[#003c33]" />
+                    <AlertTitle className="text-sm text-[#003c33]">Kolom Wajib</AlertTitle>
+                    <AlertDescription className="text-xs text-[#003c33]">
                       <code>
                         provinsi, year, pmdn_rp, fdi_rp, pdrb_per_kapita, ipm, kemiskinan,
                         akses_listrik, tpt
                       </code>
-                      <span className="ml-1 block mt-1 text-muted-foreground">
+                      <span className="mt-1 ml-1 block text-[#616161]">
                         Mode panel mewajibkan kolom <code>year</code> untuk setiap baris (data
                         multi-tahun).
                       </span>
@@ -359,7 +375,7 @@ export function DatasetPage() {
                       />
                     </div>
                     {uploadFile && (
-                      <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <p className="text-sm text-[#616161] flex items-center gap-1">
                         <FileUp className="size-3" />
                         {uploadFile.name} ({(uploadFile.size / 1024).toFixed(1)} KB)
                       </p>
@@ -379,10 +395,10 @@ export function DatasetPage() {
 
                   {/* Success */}
                   {uploadSuccess && (
-                    <Alert className="bg-green-50 border-green-500">
-                      <CheckCircle2 className="size-4 text-green-600" />
-                      <AlertTitle className="text-green-700">Berhasil</AlertTitle>
-                      <AlertDescription className="text-green-600">
+                    <Alert className="rounded-xl border border-[#003c33] bg-[#edfce9]">
+                      <CheckCircle2 className="size-4 text-[#003c33]" />
+                      <AlertTitle className="text-[#003c33]">Berhasil</AlertTitle>
+                      <AlertDescription className="text-[#003c33]">
                         {uploadSuccess}
                       </AlertDescription>
                     </Alert>
@@ -394,13 +410,14 @@ export function DatasetPage() {
                     variant="outline"
                     onClick={() => setUploadOpen(false)}
                     disabled={uploading}
+                    className="rounded-full border-[#d9d9dd] text-[#17171c] hover:border-[#93939f] hover:bg-[#f7f6f3]"
                   >
                     Batal
                   </Button>
                   <Button
                     onClick={handleUpload}
                     disabled={!uploadFile || uploading}
-                    className="bg-[#002C5F] hover:bg-[#003D7A]"
+                    className="rounded-full bg-[#17171c] text-white hover:bg-[#2a2a32]"
                   >
                     {uploading ? (
                       <>
@@ -418,11 +435,20 @@ export function DatasetPage() {
               </DialogContent>
             </Dialog>
           )}
-          <Button onClick={handleDownload} variant="outline" disabled={noActiveDataset}>
+          <Button
+            onClick={handleDownload}
+            variant="outline"
+            disabled={noActiveDataset}
+            className="rounded-full border-[#d9d9dd] text-[#17171c] hover:border-[#93939f] hover:bg-[#f7f6f3]"
+          >
             <Download className="mr-2 size-4" />
             Download
           </Button>
-          <Button onClick={handleAnalyze} disabled={noActiveDataset}>
+          <Button
+            onClick={handleAnalyze}
+            disabled={noActiveDataset}
+            className="rounded-full bg-[#17171c] text-white hover:bg-[#2a2a32]"
+          >
             <BarChart3 className="mr-2 size-4" />
             Analyze
           </Button>
@@ -431,16 +457,21 @@ export function DatasetPage() {
 
       {/* Version History Panel (collapsible) */}
       {showHistory && isAdmin && (
-        <Card className="border-[#002C5F]">
+        <Card className="rounded-2xl border border-[#d9d9dd] bg-white shadow-none">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-[#002C5F] flex items-center gap-2">
-                <History className="size-5" />
+              <CardTitle
+                className="flex items-center gap-2 font-normal tracking-tight text-[#17171c]"
+                style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+              >
+                <History className="size-5 text-[#003c33]" />
                 Riwayat Versi Dataset
               </CardTitle>
-              <Badge variant="secondary">{versions.length} versi</Badge>
+              <Badge className="rounded-full bg-[#eeece7] px-2.5 py-0.5 text-xs text-[#212121]">
+                {versions.length} versi
+              </Badge>
             </div>
-            <CardDescription>
+            <CardDescription className="text-[#616161]">
               Setiap upload CSV membuat versi baru. Data lama tetap tersimpan untuk audit dan
               rollback.
             </CardDescription>
@@ -453,7 +484,7 @@ export function DatasetPage() {
                 <Skeleton className="h-8 w-full" />
               </div>
             ) : versions.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-2">Belum ada riwayat versi.</p>
+              <p className="py-2 text-sm text-[#93939f]">Belum ada riwayat versi.</p>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
@@ -471,15 +502,17 @@ export function DatasetPage() {
                   </TableHeader>
                   <TableBody>
                     {versions.map((v) => (
-                      <TableRow key={v.id} className={v.isActive ? 'bg-green-50' : ''}>
-                        <TableCell className="font-mono font-bold">v{v.version}</TableCell>
+                      <TableRow key={v.id} className={v.isActive ? 'bg-[#edfce9]' : ''}>
+                        <TableCell className="font-mono font-medium text-[#17171c]">
+                          v{v.version}
+                        </TableCell>
                         <TableCell>{v.year}</TableCell>
                         <TableCell>{v.rowCount}</TableCell>
                         <TableCell>
                           {v.uploadedBy ? (
                             v.uploadedBy.fullName
                           ) : (
-                            <span className="text-muted-foreground">System</span>
+                            <span className="text-[#93939f]">System</span>
                           )}
                         </TableCell>
                         <TableCell className="text-sm">
@@ -491,14 +524,18 @@ export function DatasetPage() {
                             minute: '2-digit',
                           })}
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground truncate max-w-30">
+                        <TableCell className="text-sm text-[#616161] truncate max-w-30">
                           {v.originalFilename || '-'}
                         </TableCell>
                         <TableCell>
                           {v.isActive ? (
-                            <Badge className="bg-green-500">Aktif</Badge>
+                            <Badge className="rounded-full bg-[#003c33] px-2.5 py-0.5 text-xs text-white">
+                              Aktif
+                            </Badge>
                           ) : (
-                            <Badge variant="secondary">Arsip</Badge>
+                            <Badge className="rounded-full bg-[#eeece7] px-2.5 py-0.5 text-xs text-[#212121]">
+                              Arsip
+                            </Badge>
                           )}
                         </TableCell>
                         {isSuperadmin && (
@@ -509,7 +546,7 @@ export function DatasetPage() {
                                 variant="outline"
                                 onClick={() => handleActivate(v.id)}
                                 disabled={activating === v.id}
-                                className="text-xs"
+                                className="rounded-full border-[#d9d9dd] text-xs text-[#17171c] hover:border-[#93939f] hover:bg-[#f7f6f3]"
                               >
                                 {activating === v.id ? (
                                   <Skeleton className="size-3 rounded-sm" />
@@ -535,40 +572,53 @@ export function DatasetPage() {
 
       {/* Dataset Info Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="rounded-2xl border border-[#d9d9dd] bg-white shadow-none transition-colors hover:border-[#93939f]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Provinsi</CardTitle>
-            <Database className="size-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-[#616161]">Total Provinsi</CardTitle>
+            <Database className="size-4 text-[#003c33]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{datasetInfo.rowCount}</div>
-            <p className="text-xs text-muted-foreground">Provinsi di Indonesia</p>
+            <div
+              className="text-2xl font-normal text-[#17171c]"
+              style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+            >
+              {datasetInfo.rowCount}
+            </div>
+            <p className="text-xs text-[#93939f]">Provinsi di Indonesia</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-2xl border border-[#d9d9dd] bg-white shadow-none transition-colors hover:border-[#93939f]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Indikator</CardTitle>
-            <BarChart3 className="size-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-[#616161]">Indikator</CardTitle>
+            <BarChart3 className="size-4 text-[#003c33]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{datasetInfo.columnCount}</div>
-            <p className="text-xs text-muted-foreground">Kolom data</p>
+            <div
+              className="text-2xl font-normal text-[#17171c]"
+              style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+            >
+              {datasetInfo.columnCount}
+            </div>
+            <p className="text-xs text-[#93939f]">Kolom data</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-2xl border border-[#d9d9dd] bg-white shadow-none transition-colors hover:border-[#93939f]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Versi & Tahun</CardTitle>
-            <Badge variant="secondary">
+            <CardTitle className="text-sm font-medium text-[#616161]">Versi & Tahun</CardTitle>
+            <Badge className="rounded-full bg-[#eeece7] px-2.5 py-0.5 text-xs text-[#212121]">
               {datasetInfo.version > 0 ? `v${datasetInfo.version}` : 'Belum Ada'}
             </Badge>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div
+              className="text-2xl font-normal text-[#17171c]"
+              style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+            >
               {datasetInfo.version > 0 ? datasetInfo.year : '-'}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-[#93939f]">
               {datasetInfo.version > 0
                 ? `Dataset versi ${datasetInfo.version}`
                 : 'Menunggu dataset pertama'}
@@ -576,18 +626,27 @@ export function DatasetPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-2xl border border-[#d9d9dd] bg-white shadow-none transition-colors hover:border-[#93939f]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Status</CardTitle>
+            <CardTitle className="text-sm font-medium text-[#616161]">Status</CardTitle>
             {datasetInfo.isActive ? (
-              <Badge className="bg-green-500">Aktif</Badge>
+              <Badge className="rounded-full bg-[#003c33] px-2.5 py-0.5 text-xs text-white">
+                Aktif
+              </Badge>
             ) : (
-              <Badge className="bg-amber-500">Belum Aktif</Badge>
+              <Badge className="rounded-full bg-[#ff7759] px-2.5 py-0.5 text-xs text-white">
+                Belum Aktif
+              </Badge>
             )}
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{datasetInfo.isActive ? 'Ready' : 'Pending'}</div>
-            <p className="text-xs text-muted-foreground">
+            <div
+              className="text-2xl font-normal text-[#17171c]"
+              style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+            >
+              {datasetInfo.isActive ? 'Ready' : 'Pending'}
+            </div>
+            <p className="text-xs text-[#93939f]">
               {datasetInfo.uploadedBy
                 ? `Diupload oleh ${datasetInfo.uploadedBy.fullName}`
                 : 'Belum ada uploader'}
@@ -597,19 +656,27 @@ export function DatasetPage() {
       </div>
 
       {/* Dataset Description */}
-      <Card>
+      <Card className="rounded-2xl border border-[#d9d9dd] bg-white shadow-none">
         <CardHeader>
-          <CardTitle>Deskripsi Dataset</CardTitle>
-          <CardDescription>
+          <CardTitle
+            className="font-normal tracking-tight text-[#17171c]"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+          >
+            Deskripsi Dataset
+          </CardTitle>
+          <CardDescription className="text-[#616161]">
             {datasetInfo.description || 'Belum ada deskripsi dataset.'}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <h4 className="font-semibold">Kolom Data:</h4>
+            <h4 className="font-medium text-[#17171c]">Kolom Data:</h4>
             <div className="flex flex-wrap gap-2">
               {datasetInfo.columns.map((column) => (
-                <Badge key={column} variant="outline">
+                <Badge
+                  key={column}
+                  className="rounded-full bg-[#eeece7] px-2.5 py-0.5 text-xs text-[#212121]"
+                >
                   {column}
                 </Badge>
               ))}
@@ -619,10 +686,15 @@ export function DatasetPage() {
       </Card>
 
       {/* Sample Data Table */}
-      <Card>
+      <Card className="rounded-2xl border border-[#d9d9dd] bg-white shadow-none">
         <CardHeader>
-          <CardTitle>Sample Data</CardTitle>
-          <CardDescription>
+          <CardTitle
+            className="font-normal tracking-tight text-[#17171c]"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+          >
+            Sample Data
+          </CardTitle>
+          <CardDescription className="text-[#616161]">
             {datasetInfo.version > 0
               ? `Pratinjau 10 baris pertama dari dataset (v${datasetInfo.version})`
               : 'Belum ada data untuk ditampilkan'}
@@ -671,7 +743,7 @@ export function DatasetPage() {
                   <TableRow>
                     <TableCell
                       colSpan={Math.max(datasetData.columns.length, 1)}
-                      className="text-muted-foreground"
+                      className="text-[#93939f]"
                     >
                       Belum ada data sampel.
                     </TableCell>

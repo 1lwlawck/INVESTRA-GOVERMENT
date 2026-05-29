@@ -137,22 +137,44 @@ export function VisualizationPage() {
   return (
     <div className="space-y-6">
       {error && (
-        <Alert className={noActiveDataset ? 'border-amber-500 bg-amber-50' : undefined}>
+        <Alert
+          className={
+            noActiveDataset
+              ? 'rounded-xl border border-[#ff7759] bg-[#fff1ec] text-[#212121]'
+              : 'rounded-xl border border-[#d9d9dd] bg-white text-[#212121]'
+          }
+        >
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
-      <div className="rounded-lg border-l-4 border-[#F9B233] bg-white p-6 shadow-sm">
-        <h2 className="text-[#002C5F]">Visualisasi Data Regional</h2>
-        <p className="mt-2 text-gray-600">
+      <div className="rounded-2xl border border-[#d9d9dd] bg-white p-6">
+        <p
+          className="text-xs uppercase tracking-[0.18em] text-[#ff7759]"
+          style={{ fontFamily: "'Space Grotesk', 'Inter', monospace" }}
+        >
+          Visualisasi
+        </p>
+        <h2
+          className="mt-2 font-normal tracking-tight text-[#17171c]"
+          style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+        >
+          Visualisasi Data Regional
+        </h2>
+        <p className="mt-2 text-[#616161]">
           Representasi visual hasil analisis ketimpangan investasi antar provinsi (Rata-rata
           2022-2024)
         </p>
       </div>
 
-      <Card className="border-2 border-[#002C5F]/20 shadow-md">
-        <CardHeader className="border-b border-gray-200 bg-linear-to-r from-gray-50 to-blue-50">
-          <CardTitle className="text-[#002C5F]">Peta Distribusi Klaster</CardTitle>
+      <Card className="rounded-2xl border border-[#d9d9dd] bg-white transition-colors hover:border-[#93939f]">
+        <CardHeader className="border-b border-[#f2f2f2] bg-[#f7f6f3]">
+          <CardTitle
+            className="font-normal tracking-tight text-[#17171c]"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+          >
+            Peta Distribusi Klaster
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-3 sm:p-6">
           <InteractiveMap />
@@ -160,31 +182,36 @@ export function VisualizationPage() {
       </Card>
 
       <Tabs defaultValue="investment" className="space-y-4">
-        <TabsList className="flex w-full gap-1 overflow-x-auto bg-gray-100 p-1">
+        <TabsList className="flex w-full gap-1 overflow-x-auto rounded-full bg-[#eeece7] p-1">
           <TabsTrigger
             value="investment"
-            className="min-w-30 flex-1 text-xs data-[state=active]:bg-[#002C5F] data-[state=active]:text-white sm:text-sm"
+            className="min-w-30 flex-1 rounded-full text-xs text-[#616161] data-[state=active]:bg-white data-[state=active]:text-[#17171c] sm:text-sm"
           >
             Investasi
           </TabsTrigger>
           <TabsTrigger
             value="distribution"
-            className="min-w-30 flex-1 text-xs data-[state=active]:bg-[#002C5F] data-[state=active]:text-white sm:text-sm"
+            className="min-w-30 flex-1 rounded-full text-xs text-[#616161] data-[state=active]:bg-white data-[state=active]:text-[#17171c] sm:text-sm"
           >
             Distribusi
           </TabsTrigger>
           <TabsTrigger
             value="scatter"
-            className="min-w-25 flex-1 text-xs data-[state=active]:bg-[#002C5F] data-[state=active]:text-white sm:text-sm"
+            className="min-w-25 flex-1 rounded-full text-xs text-[#616161] data-[state=active]:bg-white data-[state=active]:text-[#17171c] sm:text-sm"
           >
             Scatter
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="investment">
-          <Card className="bg-white shadow-md">
+          <Card className="rounded-2xl border border-[#d9d9dd] bg-white transition-colors hover:border-[#93939f]">
             <CardHeader>
-              <CardTitle className="text-[#002C5F]">Rata-rata Investasi per Klaster</CardTitle>
+              <CardTitle
+                className="font-normal tracking-tight text-[#17171c]"
+                style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+              >
+                Rata-rata Investasi per Klaster
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {investmentByCluster.length > 0 ? (
@@ -203,8 +230,8 @@ export function VisualizationPage() {
                     <Tooltip
                       contentStyle={{
                         backgroundColor: 'white',
-                        border: '2px solid #002C5F',
-                        borderRadius: '8px',
+                        border: '1px solid #d9d9dd',
+                        borderRadius: '12px',
                       }}
                     />
                     <Bar dataKey="value" name="Rata-rata Investasi" radius={[8, 8, 0, 0]}>
@@ -215,16 +242,19 @@ export function VisualizationPage() {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="py-8 text-center text-gray-500">Data belum tersedia.</p>
+                <p className="py-8 text-center text-[#93939f]">Data belum tersedia.</p>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="distribution">
-          <Card className="bg-white shadow-md">
+          <Card className="rounded-2xl border border-[#d9d9dd] bg-white transition-colors hover:border-[#93939f]">
             <CardHeader>
-              <CardTitle className="text-[#002C5F]">
+              <CardTitle
+                className="font-normal tracking-tight text-[#17171c]"
+                style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+              >
                 Distribusi Jumlah Provinsi per Klaster
               </CardTitle>
             </CardHeader>
@@ -251,16 +281,21 @@ export function VisualizationPage() {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="py-8 text-center text-gray-500">Data belum tersedia.</p>
+                <p className="py-8 text-center text-[#93939f]">Data belum tersedia.</p>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="scatter">
-          <Card className="bg-white shadow-md">
+          <Card className="rounded-2xl border border-[#d9d9dd] bg-white transition-colors hover:border-[#93939f]">
             <CardHeader>
-              <CardTitle className="text-[#002C5F]">Scatter Plot: PDRB per Kapita vs IPM</CardTitle>
+              <CardTitle
+                className="font-normal tracking-tight text-[#17171c]"
+                style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+              >
+                Scatter Plot: PDRB per Kapita vs IPM
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {scatterData.length > 0 ? (
@@ -294,7 +329,7 @@ export function VisualizationPage() {
                   </ScatterChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="py-8 text-center text-gray-500">Data belum tersedia.</p>
+                <p className="py-8 text-center text-[#93939f]">Data belum tersedia.</p>
               )}
             </CardContent>
           </Card>

@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -48,8 +47,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { TablePageSkeleton } from '@/components/organisms/loading/PageSkeleton';
 
 const ROLE_CONFIG: Record<UserRole, { label: string; color: string; icon: typeof ShieldCheck }> = {
-  superadmin: { label: 'Super Admin', color: '#DC2626', icon: ShieldCheck },
-  admin: { label: 'Admin', color: '#002C5F', icon: Shield },
+  superadmin: { label: 'Super Admin', color: '#ff7759', icon: ShieldCheck },
+  admin: { label: 'Admin', color: '#003c33', icon: Shield },
   user: { label: 'User', color: '#059669', icon: UserIcon },
 };
 
@@ -177,14 +176,26 @@ export function UserManagementPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-[#002C5F]">Manajemen Pengguna</h1>
-          <p className="text-muted-foreground mt-1">
-            Kelola akun pengguna dan hak akses sistem INVESTRA
+          <p
+            className="text-xs uppercase tracking-[0.18em] text-[#ff7759]"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', monospace" }}
+          >
+            Administrasi
           </p>
+          <h1
+            className="mt-2 text-3xl font-normal tracking-tight text-[#17171c]"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+          >
+            Manajemen Pengguna
+          </h1>
+          <p className="mt-1 text-[#616161]">Kelola akun pengguna dan hak akses sistem INVESTRA</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openAdd} className="bg-[#002C5F] hover:bg-[#003D7A]">
+            <Button
+              onClick={openAdd}
+              className="rounded-full bg-[#17171c] text-white hover:bg-[#2a2a32]"
+            >
               <Plus className="mr-2 size-4" />
               Tambah Pengguna
             </Button>
@@ -280,7 +291,7 @@ export function UserManagementPage() {
               </Button>
               <Button
                 onClick={handleSave}
-                className="bg-[#002C5F] hover:bg-[#003D7A]"
+                className="rounded-full bg-[#17171c] text-white hover:bg-[#2a2a32]"
                 disabled={
                   !formName ||
                   !formUsername ||
@@ -310,13 +321,30 @@ export function UserManagementPage() {
           ([role, cfg]) => {
             const Icon = cfg.icon;
             return (
-              <Card key={role} className="border-l-4" style={{ borderLeftColor: cfg.color }}>
+              <Card
+                key={role}
+                className="rounded-2xl border border-[#d9d9dd] bg-white shadow-none transition-colors hover:border-[#93939f]"
+              >
+                <div
+                  className="h-1.5 w-full rounded-t-2xl"
+                  style={{ backgroundColor: cfg.color }}
+                />
                 <CardContent className="p-5 flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-500">{cfg.label}</p>
-                    <p className="text-3xl font-bold text-[#002C5F]">{roleStats[role]}</p>
+                    <p
+                      className="text-xs uppercase tracking-[0.18em] text-[#ff7759]"
+                      style={{ fontFamily: "'Space Grotesk', 'Inter', monospace" }}
+                    >
+                      {cfg.label}
+                    </p>
+                    <p
+                      className="mt-2 text-3xl font-normal tracking-tight text-[#17171c]"
+                      style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                    >
+                      {roleStats[role]}
+                    </p>
                   </div>
-                  <div className="p-3 rounded-lg bg-gray-50">
+                  <div className="p-3 rounded-xl bg-[#eeece7]">
                     <Icon className="size-6" style={{ color: cfg.color }} />
                   </div>
                 </CardContent>
@@ -327,61 +355,72 @@ export function UserManagementPage() {
       </div>
 
       {/* Users Table */}
-      <Card>
+      <Card className="rounded-2xl border border-[#d9d9dd] bg-white shadow-none">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="size-5 text-[#002C5F]" />
+          <CardTitle
+            className="flex items-center gap-2 font-normal tracking-tight text-[#17171c]"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+          >
+            <Users className="size-5 text-[#003c33]" />
             Daftar Pengguna
           </CardTitle>
-          <CardDescription>Total {users.length} pengguna terdaftar dalam sistem</CardDescription>
+          <CardDescription className="text-[#93939f]">
+            Total {users.length} pengguna terdaftar dalam sistem
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>No</TableHead>
-                  <TableHead>Nama</TableHead>
-                  <TableHead>Username</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Terakhir Diperbarui</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
+                <TableRow className="border-b border-[#d9d9dd]">
+                  <TableHead className="text-[#93939f]">No</TableHead>
+                  <TableHead className="text-[#93939f]">Nama</TableHead>
+                  <TableHead className="text-[#93939f]">Username</TableHead>
+                  <TableHead className="text-[#93939f]">Email</TableHead>
+                  <TableHead className="text-[#93939f]">Role</TableHead>
+                  <TableHead className="text-[#93939f]">Status</TableHead>
+                  <TableHead className="text-[#93939f]">Terakhir Diperbarui</TableHead>
+                  <TableHead className="text-right text-[#93939f]">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {users.map((user, idx) => {
                   const roleCfg = ROLE_CONFIG[user.role];
                   return (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{idx + 1}</TableCell>
-                      <TableCell className="font-medium">{user.fullName}</TableCell>
-                      <TableCell className="text-gray-600">{user.username}</TableCell>
-                      <TableCell className="text-gray-600">{user.email}</TableCell>
+                    <TableRow
+                      key={user.id}
+                      className="border-b border-[#f2f2f2] hover:bg-[#f7f6f3]"
+                    >
+                      <TableCell className="font-medium text-[#17171c]">{idx + 1}</TableCell>
+                      <TableCell className="font-medium text-[#17171c]">{user.fullName}</TableCell>
+                      <TableCell className="text-[#616161]">{user.username}</TableCell>
+                      <TableCell className="text-[#616161]">{user.email}</TableCell>
                       <TableCell>
-                        <Badge
-                          className="text-white text-xs"
+                        <span
+                          className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs text-white"
                           style={{ backgroundColor: roleCfg.color }}
                         >
                           {roleCfg.label}
-                        </Badge>
+                        </span>
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant={user.isActive ? 'default' : 'secondary'}
-                          className={user.isActive ? 'bg-green-500 text-white' : ''}
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs ${
+                            user.isActive
+                              ? 'bg-[#edfce9] text-[#003c33]'
+                              : 'bg-[#eeece7] text-[#616161]'
+                          }`}
                         >
                           {user.isActive ? 'Aktif' : 'Nonaktif'}
-                        </Badge>
+                        </span>
                       </TableCell>
-                      <TableCell className="text-gray-500 text-sm">
+                      <TableCell className="text-[#93939f] text-sm">
                         {new Date(user.updatedAt).toLocaleString('id-ID')}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Button variant="ghost" size="icon" onClick={() => openEdit(user)}>
-                            <Pencil className="size-4 text-[#002C5F]" />
+                            <Pencil className="size-4 text-[#003c33]" />
                           </Button>
 
                           <AlertDialog>
@@ -422,25 +461,32 @@ export function UserManagementPage() {
       </Card>
 
       {/* Permission Matrix */}
-      <Card>
+      <Card className="rounded-2xl border border-[#d9d9dd] bg-white shadow-none">
         <CardHeader>
-          <CardTitle className="text-[#002C5F]">Matriks Hak Akses</CardTitle>
-          <CardDescription>Pemetaan akses fitur berdasarkan role pengguna</CardDescription>
+          <CardTitle
+            className="font-normal tracking-tight text-[#17171c]"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+          >
+            Matriks Hak Akses
+          </CardTitle>
+          <CardDescription className="text-[#93939f]">
+            Pemetaan akses fitur berdasarkan role pengguna
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Fitur</TableHead>
+                <TableRow className="border-b border-[#d9d9dd]">
+                  <TableHead className="text-[#93939f]">Fitur</TableHead>
                   <TableHead className="text-center">
-                    <span className="text-investra-green">User</span>
+                    <span className="text-[#059669]">User</span>
                   </TableHead>
                   <TableHead className="text-center">
-                    <span className="text-[#002C5F]">Admin</span>
+                    <span className="text-[#003c33]">Admin</span>
                   </TableHead>
                   <TableHead className="text-center">
-                    <span className="text-[#DC2626]">Super Admin</span>
+                    <span className="text-[#ff7759]">Super Admin</span>
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -456,8 +502,11 @@ export function UserManagementPage() {
                   { fitur: 'Tentang Sistem', user: false, admin: true, superadmin: true },
                   { fitur: 'Manajemen Pengguna', user: false, admin: false, superadmin: true },
                 ].map((row) => (
-                  <TableRow key={row.fitur}>
-                    <TableCell className="font-medium">{row.fitur}</TableCell>
+                  <TableRow
+                    key={row.fitur}
+                    className="border-b border-[#f2f2f2] hover:bg-[#f7f6f3]"
+                  >
+                    <TableCell className="font-medium text-[#17171c]">{row.fitur}</TableCell>
                     <TableCell className="text-center text-lg">{row.user ? '✅' : '❌'}</TableCell>
                     <TableCell className="text-center text-lg">{row.admin ? '✅' : '❌'}</TableCell>
                     <TableCell className="text-center text-lg">

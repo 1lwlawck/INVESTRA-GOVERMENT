@@ -96,22 +96,38 @@ export function PCAAnalysisPage() {
   if (!pcaData) {
     return (
       <div className="space-y-6">
-        <div className="border-l-4 border-[#F9B233] pl-6 bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-[#002C5F]">Analisis Principal Component Analysis (PCA)</h2>
-          <p className="text-gray-600 mt-2">Reduksi dimensi dan identifikasi faktor dominan</p>
+        <div>
+          <p
+            className="mb-2 text-xs uppercase tracking-[0.18em] text-[#ff7759]"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', monospace" }}
+          >
+            Analisis
+          </p>
+          <h2
+            className="text-2xl font-normal tracking-tight text-[#17171c]"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+          >
+            Analisis Principal Component Analysis (PCA)
+          </h2>
+          <p className="mt-2 text-[#616161]">Reduksi dimensi dan identifikasi faktor dominan</p>
         </div>
-        <Card className="border border-gray-200">
+        <Card className="rounded-2xl border border-[#d9d9dd] bg-white">
           <CardContent className="p-12 text-center">
-            <TrendingUp className="size-16 mx-auto mb-4 text-gray-300" />
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">Belum Ada Analisis</h3>
-            <p className="text-gray-500 mb-6">
+            <TrendingUp className="size-16 mx-auto mb-4 text-[#93939f]" />
+            <h3
+              className="text-lg font-normal tracking-tight text-[#17171c] mb-2"
+              style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+            >
+              Belum Ada Analisis
+            </h3>
+            <p className="text-[#616161] mb-6">
               Jalankan analisis PCA & K-Means terlebih dahulu untuk melihat hasil.
             </p>
-            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+            {error && <p className="text-[#ff7759] text-sm mb-4">{error}</p>}
             <Button
               onClick={handleRunAnalysis}
               disabled={runningAnalysis}
-              className="bg-[#002C5F] hover:bg-[#003D7A]"
+              className="rounded-full bg-[#17171c] text-white hover:bg-[#2a2a32]"
             >
               {runningAnalysis ? (
                 <Skeleton className="size-4 mr-2 rounded-sm" />
@@ -147,9 +163,20 @@ export function PCAAnalysisPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="border-l-4 border-[#F9B233] pl-6 bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-[#002C5F]">Analisis Principal Component Analysis (PCA)</h2>
-        <p className="text-gray-600 mt-2">
+      <div>
+        <p
+          className="mb-2 text-xs uppercase tracking-[0.18em] text-[#ff7759]"
+          style={{ fontFamily: "'Space Grotesk', 'Inter', monospace" }}
+        >
+          Analisis
+        </p>
+        <h2
+          className="text-2xl font-normal tracking-tight text-[#17171c]"
+          style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+        >
+          Analisis Principal Component Analysis (PCA)
+        </h2>
+        <p className="mt-2 text-[#616161]">
           Reduksi dimensi dan identifikasi faktor dominan yang mempengaruhi ketimpangan investasi
         </p>
       </div>
@@ -159,27 +186,37 @@ export function PCAAnalysisPage() {
         {pcaSummary.slice(0, 4).map((item) => (
           <Card
             key={item.component}
-            className="border-l-4 hover:shadow-lg transition-all bg-white"
-            style={{ borderLeftColor: item.color }}
+            className="flex h-full flex-col overflow-hidden rounded-2xl border border-[#d9d9dd] bg-white transition-colors hover:border-[#93939f]"
           >
+            <div className="h-1.5 w-full" style={{ backgroundColor: item.color }} />
             <CardHeader className="pb-3">
-              <CardTitle className="text-[#002C5F] text-lg">{item.component}</CardTitle>
-              <CardDescription>
+              <CardTitle
+                className="text-lg font-normal tracking-tight text-[#17171c]"
+                style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+              >
+                {item.component}
+              </CardTitle>
+              <CardDescription className="text-[#616161]">
                 Varians: {item.variance} (Kumulatif: {item.cumulative})
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-700 leading-relaxed">{item.description}</p>
+            <CardContent className="mt-auto">
+              <p className="text-sm text-[#616161] leading-relaxed">{item.description}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
       {/* Info Alert */}
-      <Alert className="bg-blue-50 border-[#002C5F]">
-        <Info className="size-4 text-[#002C5F]" />
-        <AlertTitle className="text-[#002C5F]">Tentang PCA</AlertTitle>
-        <AlertDescription className="text-gray-700">
+      <Alert className="rounded-2xl border border-[#d9d9dd] bg-[#edfce9]">
+        <Info className="size-4 text-[#003c33]" />
+        <AlertTitle
+          className="font-normal tracking-tight text-[#003c33]"
+          style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+        >
+          Tentang PCA
+        </AlertTitle>
+        <AlertDescription className="text-[#003c33]">
           Principal Component Analysis (PCA) adalah metode statistik untuk mereduksi dimensionalitas
           data dengan mempertahankan sebanyak mungkin variasi. Dalam analisis ini,{' '}
           {pcaSummary.length} komponen utama menjelaskan 100% varians total dari{' '}
@@ -188,10 +225,17 @@ export function PCAAnalysisPage() {
       </Alert>
 
       {/* PCA Visualization */}
-      <Card className="border-2 border-[#002C5F]/20 shadow-md">
-        <CardHeader className="bg-linear-to-r from-gray-50 to-blue-50 border-b border-gray-200">
-          <CardTitle className="text-[#002C5F]">Visualisasi Hasil PCA</CardTitle>
-          <CardDescription>Grafik loading faktor dan explained variance</CardDescription>
+      <Card className="rounded-2xl border border-[#d9d9dd] bg-white">
+        <CardHeader className="border-b border-[#d9d9dd] bg-[#f7f6f3] rounded-t-2xl">
+          <CardTitle
+            className="font-normal tracking-tight text-[#17171c]"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+          >
+            Visualisasi Hasil PCA
+          </CardTitle>
+          <CardDescription className="text-[#616161]">
+            Grafik loading faktor dan explained variance
+          </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <PCAChart />
@@ -199,10 +243,13 @@ export function PCAAnalysisPage() {
       </Card>
 
       {/* Interpretation */}
-      <Card className="bg-linear-to-br from-blue-50 to-gray-50 border-2 border-gray-200 shadow-md">
+      <Card className="rounded-2xl border border-[#d9d9dd] bg-white">
         <CardHeader>
-          <CardTitle className="text-[#002C5F] flex items-center gap-2">
-            <TrendingUp className="size-5 text-[#F9B233]" />
+          <CardTitle
+            className="flex items-center gap-2 font-normal tracking-tight text-[#17171c]"
+            style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+          >
+            <TrendingUp className="size-5 text-[#ff7759]" />
             Interpretasi Hasil
           </CardTitle>
         </CardHeader>
@@ -210,13 +257,18 @@ export function PCAAnalysisPage() {
           {interpretations.map((item) => (
             <div
               key={item.component}
-              className="p-5 bg-white rounded-lg border-l-4"
-              style={{ borderLeftColor: item.color }}
+              className="overflow-hidden rounded-xl border border-[#f2f2f2] bg-[#f7f6f3]"
             >
-              <h4 className="text-[#002C5F] mb-2">
-                {item.component} - {item.variance}
-              </h4>
-              <p className="text-sm text-gray-700 leading-relaxed">{item.loadingDescription}</p>
+              <div className="h-1.5 w-full" style={{ backgroundColor: item.color }} />
+              <div className="p-5">
+                <h4
+                  className="mb-2 font-normal tracking-tight text-[#17171c]"
+                  style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                >
+                  {item.component} - {item.variance}
+                </h4>
+                <p className="text-sm text-[#616161] leading-relaxed">{item.loadingDescription}</p>
+              </div>
             </div>
           ))}
         </CardContent>
