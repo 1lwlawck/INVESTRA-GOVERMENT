@@ -46,6 +46,73 @@ function snakeToCamelKey(value: string): string {
   return value.replace(/_([a-z0-9])/g, (_match, group: string) => group.toUpperCase());
 }
 
+/** Human-readable column labels for the dataset preview table. */
+const COLUMN_LABELS: Record<string, string> = {
+  provinsi: 'Provinsi',
+  year: 'Tahun',
+  pmdn_rp: 'PMDN (Rp)',
+  pmdnRp: 'PMDN (Rp)',
+  fdi_rp: 'FDI (Rp)',
+  fdiRp: 'FDI (Rp)',
+  pdrb_per_kapita: 'PDRB per Kapita',
+  pdrbPerKapita: 'PDRB per Kapita',
+  ipm: 'IPM',
+  kemiskinan: 'Kemiskinan (%)',
+  akses_listrik: 'Akses Listrik (%)',
+  aksesListrik: 'Akses Listrik (%)',
+  tpt: 'TPT (%)',
+};
+
+/** Numeric columns that should NOT be locale-formatted (year is an identifier). */
+const RAW_NUMBER_COLUMNS = new Set(['year', 'tahun']);
+
+/** Currency columns get compact T/M formatting in the preview. */
+const CURRENCY_COLUMNS = new Set(['pmdn_rp', 'pmdnRp', 'fdi_rp', 'fdiRp']);
+
+/** Percentage columns get a trailing %. */
+const PERCENT_COLUMNS = new Set(['kemiskinan', 'akses_listrik', 'aksesListrik', 'tpt']);
+
+function formatColumnLabel(column: string): string {
+  if (COLUMN_LABELS[column]) return COLUMN_LABELS[column];
+  return column.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+}
+
+function formatCompactCurrency(value: number): string {
+  if (Math.abs(value) >= 1_000_000_000_000) {
+    return `Rp ${(value / 1_000_000_000_000).toLocaleString('id-ID', {
+      maximumFractionDigits: 2,
+    })} T`;
+  }
+  if (Math.abs(value) >= 1_000_000_000) {
+    return `Rp ${(value / 1_000_000_000).toLocaleString('id-ID', {
+      maximumFractionDigits: 2,
+    })} M`;
+  }
+  if (Math.abs(value) >= 1_000_000) {
+    return `Rp ${(value / 1_000_000).toLocaleString('id-ID', {
+      maximumFractionDigits: 2,
+    })} jt`;
+  }
+  return `Rp ${value.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`;
+}
+
+function formatCellValue(column: string, value: unknown): string {
+  if (value === null || value === undefined || value === '') return '-';
+  if (typeof value !== 'number') return String(value);
+  if (RAW_NUMBER_COLUMNS.has(column)) return String(value);
+  if (CURRENCY_COLUMNS.has(column)) return formatCompactCurrency(value);
+  if (PERCENT_COLUMNS.has(column)) {
+    return `${value.toLocaleString('id-ID', { maximumFractionDigits: 2 })}%`;
+  }
+  // Default: locale-format with up to 2 decimals (avoids "...000,002" float drift).
+  return value.toLocaleString('id-ID', { maximumFractionDigits: 2 });
+}
+
+/** Numeric columns are right-aligned for readability; the province name column stays left. */
+function isNumericColumn(column: string): boolean {
+  return column !== 'provinsi' && column !== 'province';
+}
+
 export function DatasetPage() {
   useDocumentTitle('Dataset');
   const [datasetInfo, setDatasetInfo] = useState<DatasetInfo | null>(null);
@@ -700,50 +767,58 @@ export function DatasetPage() {
               : 'Belum ada data untuk ditampilkan'}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="border-b border-[#f2f2f2] bg-[#f7f6f3]">
                   {datasetData.columns.length > 0 ? (
                     datasetData.columns.map((column) => (
-                      <TableHead key={column}>
-                        {column.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
+                      <TableHead
+                        key={column}
+                        className={`py-3 text-[11px] font-medium uppercase tracking-wider text-[#93939f] ${
+                          isNumericColumn(column) ? 'text-right' : 'text-left'
+                        }`}
+                      >
+                        {formatColumnLabel(column)}
                       </TableHead>
                     ))
                   ) : (
-                    <TableHead>Informasi</TableHead>
+                    <TableHead className="text-[#93939f]">Informasi</TableHead>
                   )}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {datasetData.data.length > 0 ? (
                   datasetData.data.map((row, index) => (
-                    <TableRow key={index}>
-                      {datasetData.columns.map((column) => (
-                        <TableCell key={column}>
-                          {(() => {
-                            const directValue = row[column];
-                            const camelValue = row[snakeToCamelKey(column)];
-                            const cellValue = directValue ?? camelValue;
-
-                            if (typeof cellValue === 'number') {
-                              return cellValue.toLocaleString('id-ID');
-                            }
-                            if (cellValue === null || cellValue === undefined || cellValue === '') {
-                              return '-';
-                            }
-                            return String(cellValue);
-                          })()}
-                        </TableCell>
-                      ))}
+                    <TableRow
+                      key={index}
+                      className="border-b border-[#f2f2f2] transition-colors hover:bg-[#f7f6f3]"
+                    >
+                      {datasetData.columns.map((column) => {
+                        const directValue = row[column];
+                        const camelValue = row[snakeToCamelKey(column)];
+                        const cellValue = directValue ?? camelValue;
+                        return (
+                          <TableCell
+                            key={column}
+                            className={`py-3 text-sm text-[#212121] ${
+                              isNumericColumn(column)
+                                ? 'text-right font-mono tabular-nums'
+                                : 'font-medium'
+                            }`}
+                          >
+                            {formatCellValue(column, cellValue)}
+                          </TableCell>
+                        );
+                      })}
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
                     <TableCell
                       colSpan={Math.max(datasetData.columns.length, 1)}
-                      className="text-[#93939f]"
+                      className="py-8 text-center text-[#93939f]"
                     >
                       Belum ada data sampel.
                     </TableCell>
