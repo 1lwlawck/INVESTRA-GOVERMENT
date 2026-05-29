@@ -19,6 +19,6 @@ def provinces():
     return _ctrl_provinces()
 
 
-@public_bp.route("/public/provinces/<path:provinceName>/analysis", methods=["GET"])
+@public_bp.route("/public/provinces/<path:province_name>/analysis", methods=["GET"])
 def province_analysis(province_name):
     return _ctrl_province_analysis(province_name)
