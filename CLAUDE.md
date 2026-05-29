@@ -6,9 +6,14 @@ PCA + K-Means clustering (k=3, panel mode) → choropleth map + policy recommend
 ## Structure
 
 ```
-investra-gov-apps-fe/   React 18 + Vite + TypeScript frontend
-investra-gov-apps-be/   Flask 3 + SQLAlchemy + scikit-learn backend
+investra-gov-apps-fe/         React 18 + Vite + TypeScript frontend
+investra-gov-apps-be/         Flask 3 + SQLAlchemy + scikit-learn backend
+investra-gov-apps-data-prep/  Jupyter notebooks: raw → final dataset CSV
 ```
+
+The data-prep project produces the CSVs uploaded into the backend via the
+Dataset page (superadmin only). Output schema is fixed:
+`provinsi, pmdn_rp, fdi_rp, pdrb_per_kapita, ipm, kemiskinan, akses_listrik, tpt`.
 
 ## Quick Commands
 
@@ -32,6 +37,16 @@ ruff check .                                      # lint
 ruff format .                                     # format
 flask db upgrade                                  # apply migrations
 ```
+
+### Data prep (investra-gov-apps-data-prep/)
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+jupyter lab        # then run notebooks/01_Preprocess_Investra.ipynb
+                   # or notebooks/02_Build_Panel_From_Raw.ipynb for panels
+```
+Final CSVs land in `data/final/` and get uploaded via the Dataset page.
 
 ### Docker
 ```bash
