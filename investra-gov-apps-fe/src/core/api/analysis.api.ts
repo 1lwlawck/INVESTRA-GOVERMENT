@@ -156,10 +156,10 @@ export const CLUSTER_LABELS: Record<number, string> = {
 };
 
 export const CLUSTER_COLORS: Record<number, string> = {
-  0: '#3B82F6', // Blue   – Tinggi
-  1: '#F9B233', // Gold   – Sedang
-  2: '#DC2626', // Red    – Rendah
-  3: '#7C3AED', // Purple – Sangat Rendah (fallback for K=4)
+  0: '#003c33', // Deep green  – Tinggi (Cohere)
+  1: '#1863dc', // Action blue – Sedang (Cohere)
+  2: '#ff7759', // Coral       – Rendah (Cohere)
+  3: '#75758a', // Slate       – Sangat Rendah (fallback for K=4)
 };
 
 /** Human-readable labels for numeric columns */

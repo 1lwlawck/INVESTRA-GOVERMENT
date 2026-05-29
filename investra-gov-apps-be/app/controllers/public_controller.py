@@ -12,10 +12,10 @@ from app.services.policy_service import VARIABLE_LABELS, generate_policy_recomme
 from app.utils.api_response import error_response
 
 CLUSTER_COLORS = {
-    0: "#059669",
-    1: "#3B82F6",
-    2: "#F9B233",
-    3: "#DC2626",
+    0: "#003c33",
+    1: "#1863dc",
+    2: "#ff7759",
+    3: "#75758a",
 }
 
 
