@@ -276,3 +276,26 @@ html {
 .animate-fade-in {
   animation: fade-in 0.3s ease-out;
 }
+
+/* Thin scrollbar for province result card */
+.thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #d9d9dd transparent;
+}
+
+.thin-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #d9d9dd;
+  border-radius: 9999px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #93939f;
+}

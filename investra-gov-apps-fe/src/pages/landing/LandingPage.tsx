@@ -26,6 +26,12 @@ import type {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { GarudaEmblem } from '@/components/atoms/media/GarudaEmblem';
@@ -34,6 +40,9 @@ import { Reveal } from '@/components/atoms/motion/Reveal';
 import { SmoothScroll } from '@/components/atoms/motion/SmoothScroll';
 import { CountUp } from '@/components/atoms/motion/CountUp';
 import { useParallax } from '@/hooks/ui/useParallax';
+import { TermTooltip } from './TermTooltip';
+import { IndicatorRow } from './IndicatorRow';
+import { PublicChoroplethMap } from './PublicChoroplethMap';
 import heroImage from '@/assets/images/premium_photo-1733317260639-6fb8eb703c78.avif';
 
 const indicatorOrder = [
@@ -91,7 +100,16 @@ export function LandingPage() {
   const [error, setError] = useState<string | null>(null);
   const [provinceError, setProvinceError] = useState<string | null>(null);
   const [provinceMenuOpen, setProvinceMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const heroPhotoRef = useParallax<HTMLDivElement>({ range: -50 });
+
+  // Toggle navbar border + backdrop only after the user starts scrolling.
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -166,7 +184,13 @@ export function LandingPage() {
           </p>
         </div>
 
-        <header className="sticky top-0 z-50 border-b border-[#d9d9dd] bg-white/95 backdrop-blur">
+        <header
+          className={`sticky top-0 z-50 transition-all duration-300 ${
+            isScrolled
+              ? 'border-b border-[#d9d9dd] bg-white/95 backdrop-blur'
+              : 'border-b border-transparent bg-white'
+          }`}
+        >
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
             <a href="#beranda" className="flex items-center gap-3">
               <GarudaEmblem size={42} />
@@ -486,7 +510,7 @@ export function LandingPage() {
                         </span>
                       </div>
 
-                      <div className="space-y-6 p-6">
+                      <div className="thin-scrollbar max-h-[28rem] space-y-6 overflow-y-auto p-6">
                         <div className="rounded-lg bg-[#eeece7] p-4">
                           <p className="mb-2 text-[13px] font-medium uppercase tracking-wider text-[#93939f]">
                             Artinya
@@ -500,7 +524,7 @@ export function LandingPage() {
                               Periode {formatYearRange(provinceResult.yearRange)}
                             </Badge>
                             <Badge variant="outline" className="rounded-full border-[#d9d9dd]">
-                              Konsistensi{' '}
+                              <TermTooltip termKey="konsistensi">Konsistensi</TermTooltip>{' '}
                               {(provinceResult.cluster.consistencyRatio * 100).toFixed(1)}%
                             </Badge>
                             {provinceResult.cluster.dominantFactor && (
@@ -520,15 +544,13 @@ export function LandingPage() {
                               const item = provinceResult.indicators[key];
                               if (!item) return null;
                               return (
-                                <div
+                                <IndicatorRow
                                   key={key}
-                                  className="rounded-lg border border-[#f2f2f2] bg-white p-3"
-                                >
-                                  <p className="text-xs text-[#93939f]">{item.label}</p>
-                                  <p className="mt-1 font-medium text-[#17171c]">
-                                    {formatIndicatorValue(key, item.value)}
-                                  </p>
-                                </div>
+                                  indicatorKey={key}
+                                  label={item.label}
+                                  value={item.value}
+                                  formattedValue={formatIndicatorValue(key, item.value)}
+                                />
                               );
                             })}
                           </div>
@@ -631,6 +653,18 @@ export function LandingPage() {
                   </Reveal>
                 ))}
               </div>
+
+              {summary && summary.clusters.length > 0 && (
+                <Reveal className="mt-12">
+                  <h3
+                    className="mb-4 text-xl font-normal tracking-tight text-[#17171c]"
+                    style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                  >
+                    Peta sebaran kelompok
+                  </h3>
+                  <PublicChoroplethMap clusters={summary.clusters} />
+                </Reveal>
+              )}
             </div>
           </section>
 
@@ -683,7 +717,7 @@ export function LandingPage() {
                     className="mb-3 text-xl font-normal tracking-tight text-white"
                     style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
                   >
-                    PCA
+                    <TermTooltip termKey="pca" accent="#ffad9b" />
                   </h3>
                   <p className="text-sm leading-relaxed text-white/80">
                     PCA merangkum banyak indikator menjadi beberapa dimensi utama. Ibarat meringkas
@@ -698,7 +732,9 @@ export function LandingPage() {
                     className="mb-3 text-xl font-normal tracking-tight text-white"
                     style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
                   >
-                    K-Means
+                    <TermTooltip termKey="kmeans" accent="#ffad9b">
+                      K-Means
+                    </TermTooltip>
                   </h3>
                   <p className="text-sm leading-relaxed text-white/80">
                     K-Means mengelompokkan provinsi yang polanya mirip, seperti menyusun provinsi ke
@@ -746,6 +782,68 @@ export function LandingPage() {
                   ))}
                 </div>
               </div>
+            </div>
+          </section>
+
+          {/* FAQ — Cara Membaca Hasil */}
+          <section className="bg-[#eeece7] py-20 sm:py-24">
+            <div className="mx-auto max-w-3xl px-4 sm:px-6">
+              <Reveal>
+                <p
+                  className="mb-4 text-[13px] font-medium uppercase tracking-[0.18em] text-[#ff7759]"
+                  style={{ fontFamily: "'Space Grotesk', 'Inter', monospace" }}
+                >
+                  Cara Membaca Hasil
+                </p>
+                <h2
+                  className="mb-4 text-[clamp(1.75rem,4vw,3rem)] font-normal leading-[1.1] tracking-[-0.02em] text-[#17171c]"
+                  style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                >
+                  Pertanyaan yang sering muncul
+                </h2>
+                <p className="mb-10 text-lg leading-relaxed text-[#616161]">
+                  Hasil analisis ini untuk semua kalangan. Berikut penjelasan singkat agar tidak
+                  salah tafsir.
+                </p>
+              </Reveal>
+
+              <Accordion type="single" collapsible className="space-y-3">
+                {[
+                  {
+                    q: 'Apa bedanya kelompok Investasi Tinggi, Sedang, dan Rendah?',
+                    a: 'Kelompok ini menunjukkan posisi relatif — bukan nilai mutlak. "Investasi Tinggi" artinya provinsi tersebut memiliki pola data yang mirip dengan provinsi-provinsi yang secara keseluruhan lebih tinggi investasinya dibanding kelompok lain. Ini bukan rapor atau peringkat resmi.',
+                  },
+                  {
+                    q: 'Apakah hasil ini menilai kinerja pemerintah daerah?',
+                    a: 'Tidak. Analisis ini hanya membaca pola kemiripan data antar provinsi. Banyak faktor di luar kendali pemerintah daerah yang mempengaruhi angka investasi, seperti kondisi geografis, sejarah industri, dan kebijakan nasional.',
+                  },
+                  {
+                    q: 'Dari mana data ini berasal dan seberapa bisa dipercaya?',
+                    a: 'Data bersumber dari BKPM (realisasi investasi) dan BPS (indikator sosial-ekonomi). Keduanya adalah lembaga resmi pemerintah Indonesia. Data diproses dengan metode statistik standar (PCA dan K-Means) yang umum digunakan dalam penelitian akademik.',
+                  },
+                  {
+                    q: 'Mengapa provinsi saya masuk kelompok yang berbeda dari yang saya bayangkan?',
+                    a: 'Pengelompokan didasarkan pada kombinasi 7 indikator sekaligus, bukan satu angka saja. Sebuah provinsi bisa memiliki investasi tinggi tapi IPM rendah, sehingga secara keseluruhan masuk kelompok yang berbeda dari ekspektasi. Lihat "Ringkasan Indikator" untuk memahami profil lengkapnya.',
+                  },
+                  {
+                    q: 'Apa yang dimaksud dengan "konsistensi" di hasil analisis?',
+                    a: 'Konsistensi menunjukkan seberapa sering provinsi berada di kelompok yang sama sepanjang periode data (2022-2024). Konsistensi 100% berarti provinsi selalu di kelompok yang sama setiap tahun. Konsistensi rendah berarti posisinya berubah-ubah antar tahun.',
+                  },
+                ].map((item, i) => (
+                  <AccordionItem
+                    key={i}
+                    value={`faq-${i}`}
+                    className="rounded-[16px] border border-[#d9d9dd] bg-white px-6"
+                  >
+                    <AccordionTrigger className="py-5 text-left text-base font-medium text-[#17171c] hover:no-underline">
+                      {item.q}
+                    </AccordionTrigger>
+                    <AccordionContent className="pb-5 text-sm leading-relaxed text-[#616161]">
+                      {item.a}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
             </div>
           </section>
         </main>
