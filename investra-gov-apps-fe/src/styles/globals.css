@@ -1,5 +1,7 @@
 /* Import Poppins Font */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+/* Cohere display headline fallback (free) */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 @import 'tailwindcss';
 
@@ -47,6 +49,22 @@
   --sidebar-accent-foreground: #1f2937;
   --sidebar-border: #e5e7eb;
   --sidebar-ring: #002c5f;
+
+  /* Cohere design tokens — landing page only (does not affect dashboard) */
+  --cohere-black: #17171c;
+  --cohere-deep-green: #003c33;
+  --cohere-dark-navy: #071829;
+  --cohere-canvas: #ffffff;
+  --cohere-soft-stone: #eeece7;
+  --cohere-pale-green: #edfce9;
+  --cohere-pale-blue: #f1f5ff;
+  --cohere-coral: #ff7759;
+  --cohere-coral-soft: #ffad9b;
+  --cohere-ink: #212121;
+  --cohere-muted: #93939f;
+  --cohere-slate: #75758a;
+  --cohere-hairline: #d9d9dd;
+  --cohere-action-blue: #1863dc;
 }
 
 .dark {
