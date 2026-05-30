@@ -9,6 +9,7 @@ import {
   FileText,
   GitBranch,
   Info,
+  LogOut,
   Mail,
   MapPin,
   Phone,
@@ -40,6 +41,7 @@ import { Reveal } from '@/components/atoms/motion/Reveal';
 import { SmoothScroll } from '@/components/atoms/motion/SmoothScroll';
 import { CountUp } from '@/components/atoms/motion/CountUp';
 import { useParallax } from '@/hooks/ui/useParallax';
+import { useAuthStore, hasRole } from '@/stores/auth.store';
 import { TermTooltip } from './TermTooltip';
 import { IndicatorRow } from './IndicatorRow';
 import { PublicChoroplethMap } from './PublicChoroplethMap';
@@ -104,6 +106,11 @@ export function LandingPage() {
   const [provinceMenuOpen, setProvinceMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const heroPhotoRef = useParallax<HTMLDivElement>({ range: -50 });
+
+  const authUser = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const logout = useAuthStore((s) => s.logout);
+  const canAccessDashboard = isAuthenticated && hasRole(authUser, 'admin');
 
   // Toggle navbar border + backdrop only after the user starts scrolling.
   useEffect(() => {
@@ -220,14 +227,40 @@ export function LandingPage() {
                 Batasan
               </a>
             </nav>
-            <Button
-              onClick={() => navigate('/login')}
-              className="rounded-full bg-[#17171c] px-6 text-white hover:bg-[#2a2a32]"
-              size="sm"
-            >
-              <User className="mr-2 size-4" />
-              Login Pengelola
-            </Button>
+            {!isAuthenticated ? (
+              <Button
+                onClick={() => navigate('/login')}
+                className="rounded-full bg-[#17171c] px-6 text-white hover:bg-[#2a2a32]"
+                size="sm"
+              >
+                <User className="mr-2 size-4" />
+                Login Pengelola
+              </Button>
+            ) : canAccessDashboard ? (
+              <Button
+                onClick={() => navigate('/dashboard')}
+                className="rounded-full bg-[#17171c] px-6 text-white hover:bg-[#2a2a32]"
+                size="sm"
+              >
+                <User className="mr-2 size-4" />
+                Buka Dashboard
+              </Button>
+            ) : (
+              <div className="flex items-center gap-3">
+                <span className="hidden text-sm text-[#212121] sm:inline">
+                  {authUser?.fullName || 'Pengguna'}
+                </span>
+                <Button
+                  onClick={logout}
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full border-[#d9d9dd] text-[#17171c] hover:border-[#93939f]"
+                >
+                  <LogOut className="mr-2 size-4" />
+                  Keluar
+                </Button>
+              </div>
+            )}
           </div>
         </header>
 
