@@ -44,7 +44,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'investra-auth-v2',
-      storage: createJSONStorage(() => sessionStorage),
+      storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         isAuthenticated: state.isAuthenticated,
         user: state.user,
