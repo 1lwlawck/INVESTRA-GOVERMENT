@@ -9,20 +9,23 @@ interface ProtectedRouteProps {
   minRole?: UserRole;
 }
 
+/** Loading fallback while the persisted auth store is rehydrating. */
+function AuthLoading() {
+  return (
+    <div className="flex min-h-screen items-center justify-center px-6">
+      <div className="w-full max-w-md space-y-3">
+        <Skeleton className="h-7 w-40" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+      </div>
+    </div>
+  );
+}
+
 export function ProtectedRoute({ minRole = 'admin' }: ProtectedRouteProps) {
   const { isHydrated, isAuthenticated, user } = useAuthStore();
 
-  if (!isHydrated) {
-    return (
-      <div className="flex min-h-screen items-center justify-center px-6">
-        <div className="w-full max-w-md space-y-3">
-          <Skeleton className="h-7 w-40" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-5/6" />
-        </div>
-      </div>
-    );
-  }
+  if (!isHydrated) return <AuthLoading />;
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -45,6 +48,24 @@ export function ProtectedRoute({ minRole = 'admin' }: ProtectedRouteProps) {
         </a>
       </div>
     );
+  }
+
+  return <Outlet />;
+}
+
+/**
+ * Inverse of ProtectedRoute. Used to wrap auth-only pages like /login so that
+ * already-authenticated users are redirected away (admins → dashboard,
+ * regular users → landing page) instead of seeing the login form again.
+ */
+export function PublicOnlyRoute() {
+  const { isHydrated, isAuthenticated, user } = useAuthStore();
+
+  if (!isHydrated) return <AuthLoading />;
+
+  if (isAuthenticated) {
+    const target = user && hasRole(user, 'admin') ? '/dashboard' : '/';
+    return <Navigate to={target} replace />;
   }
 
   return <Outlet />;

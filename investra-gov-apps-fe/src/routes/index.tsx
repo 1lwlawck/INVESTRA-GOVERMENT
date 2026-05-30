@@ -7,11 +7,11 @@
 
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { ProtectedRoute } from '@/routes/guards/AuthGuard';
+import { ProtectedRoute, PublicOnlyRoute } from '@/routes/guards/AuthGuard';
 import { RouteErrorView } from '@/routes/guards/RouteErrorView';
 import { Skeleton } from '@/components/ui/skeleton';
 
-function lazyWithRetry<T extends React.ComponentType<any>>(
+function lazyWithRetry<T extends React.ComponentType<Record<string, never>>>(
   importer: () => Promise<{ default: T }>,
 ) {
   return lazy(async () => {
@@ -66,6 +66,7 @@ const UserManagementPage = lazyWithRetry(() =>
 );
 
 // ── Shared loading fallback ──────────────────────────────────
+// eslint-disable-next-line react-refresh/only-export-components
 function PageLoader() {
   return (
     <div className="flex h-screen w-full items-center justify-center">
@@ -95,8 +96,14 @@ export const router = createBrowserRouter([
   },
   {
     path: '/login',
-    element: withSuspense(LoginPage),
+    element: <PublicOnlyRoute />,
     errorElement: <RouteErrorView />,
+    children: [
+      {
+        index: true,
+        element: withSuspense(LoginPage),
+      },
+    ],
   },
   {
     path: '/dashboard',
